@@ -1,9 +1,11 @@
+require "crystaledge"
 require "./lib_sdl"
 require "./pixel"
 require "./controller"
 
 module PF
   abstract class Game
+    include CrystalEdge
     FPS_INTERVAL = 1.0
 
     property width : Int32
@@ -38,7 +40,7 @@ module PF
     end
 
     def clear(r = 0, g = 0, b = 0)
-      @screen.fill(0, 0, 0)
+      @screen.fill(r, g, b)
     end
 
     def pixel_pointer(x : Int32, y : Int32, surface = @screen)
@@ -46,15 +48,24 @@ module PF
       target.as(Pointer(UInt32))
     end
 
-    def draw_point(x : Int32, y : Int32, pixel : Pixel, surface = @screen)
-      pixel_pointer(x, y, surface).value = pixel.format(surface.format)
+    # =================
+    # Drawing functions
+    # =================
+
+    # Draw a single point
+    def draw_point(x : Int32, y : Int32, pixel : Pixel = Pixel.new, surface = @screen)
+      if x > 0 && x < @width && y > 0 && y < @height
+        pixel_pointer(x, y, surface).value = pixel.format(surface.format)
+      end
+    end
+
+    # Draw a single point
+    def draw_point(vector : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
+      draw_point(vector.x.to_i32, vector.y.to_i32, pixel, surface)
     end
 
     # Draw a line using Bresenham’s Algorithm
-    def draw_line(p1 : Vector2, p2 : Vector2, pixel : Pixel, surface = @screen)
-      return draw_line(p2, p1, pixel, surface) if p1.x > p2.x
-      x1, y1, x2, y2 = p1.x.to_i, p1.y.to_i, p2.x.to_i, p2.y.to_i
-
+    def draw_line(x1 : Int, y1 : Int, x2 : Int, y2 : Int, pixel : Pixel = Pixel.new, surface = @screen)
       dx = (x2 - x1).abs
       dy = -(y2 - y1).abs
 
@@ -81,6 +92,146 @@ module PF
         end
       end
     end
+
+    # Draw a line using Bresenham’s Algorithm
+    def draw_line(p1 : Vector2, p2 : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
+      draw_line(p1.x.to_i, p1.y.to_i, p2.x.to_i, p2.y.to_i, pixel, surface)
+    end
+
+    # Draw the outline of a square rect
+    def draw_rect(x1 : Int, y1 : Int, x2 : Int, y2 : Int, pixel : Pixel = Pixel.new, surface = @screen)
+      # draw from top left to bottom right
+      y1, y2 = y2, y1 if y1 > y2
+      x1, x2 = x2, x1 if x1 > x2
+
+      x1.upto(x2) do |x|
+        draw_point(x, y1, pixel, surface)
+        draw_point(x, y2, pixel, surface)
+      end
+
+      y1.upto(y2) do |y|
+        draw_point(x1, y, pixel, surface)
+        draw_point(x2, y, pixel, surface)
+      end
+    end
+
+    # Draw lines enclosing a shape
+    def draw_shape(frame : Array(Vector2), pixel : Pixel = Pixel.new, surface = @screen)
+      0.upto(frame.size - 1) do |n|
+        draw_line(frame[n], frame[(n + 1) % frame.size], pixel, surface)
+      end
+    end
+
+    # Draw a circle using Bresenham’s Algorithm
+    def draw_circle(cx : Int, cy : Int, r : Int, pixel : Pixel = Pixel.new, surface = @screen)
+      x, y = 0, r
+      d = 3 - 2 * r
+
+      loop do
+        draw_point(cx + x, cy + y, pixel)
+        draw_point(cx - x, cy + y, pixel)
+        draw_point(cx + x, cy - y, pixel)
+        draw_point(cx - x, cy - y, pixel)
+        draw_point(cx + y, cy + x, pixel)
+        draw_point(cx - y, cy + x, pixel)
+        draw_point(cx + y, cy - x, pixel)
+        draw_point(cx - y, cy - x, pixel)
+
+        break if x > y
+
+        x += 1
+
+        if d > 0
+          y -= 1
+          d = d + 4 * (x - y) + 10
+        else
+          d = d + 4 * x + 6
+        end
+      end
+    end
+
+    # Fill a rect
+    def fill_rect(x1 : Int, y1 : Int, x2 : Int, y2 : Int, pixel : Pixel = Pixel.new, surface = @screen)
+      # draw from top left to bottom right
+      y1, y2 = y2, y1 if y1 > y2
+      x1, x2 = x2, x1 if x1 > x2
+
+      y1.upto(y2) do |y|
+        x1.upto(x2) do |x|
+          draw_point(x, y, pixel, surface)
+        end
+      end
+    end
+
+    def fill_triangle(p1 : Vector2, p2 : Vector2, p3 : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
+      p1, p2, p3 = {x: p1.x.to_i, y: p1.y.to_i}, {x: p2.x.to_i, y: p2.y.to_i}, {x: p3.x.to_i, y: p3.y.to_i}
+      # sort from top to bottom
+      p_top, p2, p3 = [p1, p2, p3].sort { |a, b| a[:y] <=> b[:y] }
+
+      y_step = 0
+
+      # find the lower left and right points
+      p_left, p_right = p2[:x] < p3[:x] ? [p2, p3] : [p3, p2]
+
+      edge_left = get_tri_edge(p_top[:x], p_top[:y], p_left[:x], p_left[:y])
+      edge_right = get_tri_edge(p_top[:x], p_top[:y], p_right[:x], p_right[:y])
+
+      if edge_left.size < edge_right.size
+        rest = get_tri_edge(p_left[:x], p_left[:y], p_right[:x], p_right[:y])
+        rest.shift
+        edge_left.concat(rest)
+      end
+
+      if edge_left.size > edge_right.size
+        rest = get_tri_edge(p_right[:x], p_right[:y], p_left[:x], p_left[:y])
+        rest.shift
+        edge_right.concat(rest)
+      end
+
+      0.upto(edge_left.size - 1) do |i|
+        pl = edge_left[i]
+        pr = edge_right[i]
+
+        (pl[0] + 1).upto(pr[0] - 1) do |x|
+          draw_point(x, pl[1], pixel, surface)
+        end
+      end
+    end
+
+    private def get_tri_edge(x1 : Int, y1 : Int, x2 : Int, y2 : Int)
+      line = [] of Tuple(Int32, Int32)
+      dx = (x2 - x1).abs
+      dy = -(y2 - y1).abs
+
+      sx = x1 < x2 ? 1 : -1
+      sy = y1 < y2 ? 1 : -1
+
+      d = dx + dy
+      x, y = x1, y1
+      xp = x
+
+      line << {x, y}
+
+      loop do
+        break if x == x2 && y == y2
+        d2 = d + d
+
+        if d2 >= dy
+          d += dy
+          x += sx
+        end
+
+        if d2 <= dx
+          d += dx
+          line << {x, y}
+          y += sy
+        end
+      end
+
+      line
+    end
+
+    # END drawing functions ========================
 
     private def engine_update
       @fps_frames += 1

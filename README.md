@@ -1,5 +1,7 @@
 # PixelFaucet Game
 
+[![GitHub release](https://img.shields.io/github/release/sleepinginsomniac/pixelfaucet.svg)](https://github.com/sleepinginsomniac/pixelfaucet/releases)
+
 An SDL2 based game engine
 
 ## Installation
@@ -10,11 +12,11 @@ homebrew: `brew install sdl2`
 
 2. Add the dependency to your `shard.yml`:
 
-   ```yaml
-   dependencies:
-     pixelfaucet:
-       github: sleepinginsomniac/pixelfaucet
-   ```
+```yaml
+dependencies:
+  pixelfaucet:
+    github: sleepinginsomniac/pixelfaucet
+```
 
 3. Run `shards install`
 

@@ -1,5 +1,7 @@
 module PF
   module CircleCollision
+    include CrystalEdge
+
     property radius : Float64 = 1.0
 
     # Check if two circles are colliding

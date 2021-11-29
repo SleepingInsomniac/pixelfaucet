@@ -6,6 +6,13 @@ module PF
 
     property r, g, b, a
 
+    def initialize(rgba : UInt32)
+      @r = ((rgba & 0xFF000000_u32) >> (8 * 3)).to_u8
+      @g = ((rgba & 0x00FF0000_u32) >> (8 * 2)).to_u8
+      @b = ((rgba & 0x0000FF00_u32) >> 8).to_u8
+      @a = ((rgba & 0x000000FF_u32)).to_u8
+    end
+
     def initialize(@r : UInt8 = 255, @g : UInt8 = 255, @b : UInt8 = 255, @a : UInt8 = 255)
     end
 

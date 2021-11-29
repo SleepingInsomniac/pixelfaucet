@@ -1,5 +1,9 @@
+require "crystaledge"
+
 module PF
   abstract class Sprite
+    include CrystalEdge
+
     def self.build
       sprite = new
       yield sprite
