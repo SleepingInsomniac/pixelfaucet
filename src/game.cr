@@ -67,29 +67,35 @@ module PF
 
     # Draw a line using Bresenham’s Algorithm
     def draw_line(x1 : Int, y1 : Int, x2 : Int, y2 : Int, pixel : Pixel = Pixel.new, surface = @screen)
-      dx = (x2 - x1).abs
-      dy = -(y2 - y1).abs
+      # The sloap for each axis
+      slope = Point.new((x2 - x1).abs, -(y2 - y1).abs)
 
-      sx = x1 < x2 ? 1 : -1
-      sy = y1 < y2 ? 1 : -1
+      # The step direction in both axis
+      step = Point.new(x1 < x2 ? 1 : -1, y1 < y2 ? 1 : -1)
 
-      d = dx + dy
-      x, y = x1, y1
+      # The final decision accumulation
+      # Initialized to the height of x and y
+      decision = slope.x + slope.y
+
+      point = Point.new(x1, y1)
 
       loop do
-        draw_point(x, y, pixel, surface)
-        break if x == x2 && y == y2
+        draw_point(point.x, point.y, pixel, surface)
+        # Break if we've reached the ending point
+        break if point.x == x2 && point.y == y2
 
-        d2 = d + d
+        # Square the decision to avoid floating point calculations
+        decision_squared = decision + decision
 
-        if d2 >= dy
-          d += dy
-          x += sx
+        # if decision_squared is greater than
+        if decision_squared >= slope.y
+          decision += slope.y
+          point.x += step.x
         end
 
-        if d2 <= dx
-          d += dx
-          y += sy
+        if decision_squared <= slope.x
+          decision += slope.x
+          point.y += step.y
         end
       end
     end
@@ -176,17 +182,17 @@ module PF
       # find the lower left and right points
       p_left, p_right = p2.x < p3.x ? [p2, p3] : [p3, p2]
 
-      edge_left = get_tri_edge(p_top.x, p_top.y, p_left.x, p_left.y)
-      edge_right = get_tri_edge(p_top.x, p_top.y, p_right.x, p_right.y)
+      edge_left = pixel_edge(p_top.x, p_top.y, p_left.x, p_left.y)
+      edge_right = pixel_edge(p_top.x, p_top.y, p_right.x, p_right.y)
 
       if edge_left.size < edge_right.size
-        rest = get_tri_edge(p_left.x, p_left.y, p_right.x, p_right.y)
+        rest = pixel_edge(p_left.x, p_left.y, p_right.x, p_right.y)
         rest.shift
         edge_left.concat(rest)
       end
 
       if edge_left.size > edge_right.size
-        rest = get_tri_edge(p_right.x, p_right.y, p_left.x, p_left.y)
+        rest = pixel_edge(p_right.x, p_right.y, p_left.x, p_left.y)
         rest.shift
         edge_right.concat(rest)
       end
@@ -195,39 +201,46 @@ module PF
         pl = edge_left[i]
         pr = edge_right[i]
 
-        (pl.x + 1).upto(pr.x - 1) do |x|
+        (pl.x).upto(pr.x) do |x|
           draw_point(x, pl.y, pixel, surface)
         end
       end
     end
 
-    private def get_tri_edge(x1 : Int, y1 : Int, x2 : Int, y2 : Int)
+    private def pixel_edge(x1 : Int, y1 : Int, x2 : Int, y2 : Int)
       line = [] of Point(Int32)
-      dx = (x2 - x1).abs
-      dy = -(y2 - y1).abs
 
-      sx = x1 < x2 ? 1 : -1
-      sy = y1 < y2 ? 1 : -1
+      # The sloap for each axis
+      slope = Point.new((x2 - x1).abs, -(y2 - y1).abs)
 
-      d = dx + dy
-      x, y = x1, y1
-      xp = x
+      # The step direction in both axis
+      step = Point.new(x1 < x2 ? 1 : -1, y1 < y2 ? 1 : -1)
 
-      line << Point.new(x, y)
+      # The final decision accumulation
+      # Initialized to the height of x and y
+      decision = slope.x + slope.y
+
+      pixel = Point.new(x1, y1)
+
+      line << pixel
 
       loop do
-        break if x == x2 && y == y2
-        d2 = d + d
+        # Break if we've reached the ending point
+        break if pixel.x == x2 && pixel.y == y2
 
-        if d2 >= dy
-          d += dy
-          x += sx
+        # Square the decision to avoid floating point calculations
+        decision_squared = decision + decision
+
+        # if decision_squared is greater than
+        if decision_squared >= slope.y
+          decision += slope.y
+          pixel.x += step.x
         end
 
-        if d2 <= dx
-          d += dx
-          line << Point.new(x, y)
-          y += sy
+        if decision_squared <= slope.x
+          decision += slope.x
+          line << pixel
+          pixel.y += step.y
         end
       end
 

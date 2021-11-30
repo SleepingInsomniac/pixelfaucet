@@ -12,14 +12,13 @@ class Triangle < PF::Sprite
   include PF::VectorSprite
 
   def update(dt)
-    # @rotation += 0.5 * dt
   end
 
   def draw(engine)
     frame = project_points(@frame)
     engine.fill_triangle(frame[0], frame[1], frame[2], PF::Pixel.new(255, 255, 0))
-    # engine.draw_shape(frame, PF::Pixel.new(0, 0, 255))
-    # engine.draw_line(@position, frame[0], PF::Pixel.new(255, 255, 0))
+    engine.draw_shape(frame, PF::Pixel.new(0, 255, 255))
+    engine.draw_line(@position, frame[0], PF::Pixel.new(0, 255, 0))
   end
 end
 
@@ -57,10 +56,8 @@ class TriangleThing < PF::Game
 
   def draw
     clear(0, 0, 200)
-    # fill_rect(25, 25, 10, 15)
-    # draw_rect(15, 15, 30, 30)
     @tri.draw(self)
-    # draw_circle((@width / 2).to_i32, (@height / 2).to_i32, 45)
+    draw_circle((@width / 2).to_i32, (@height / 2).to_i32, (@width / 3).to_i32)
   end
 end
 
