@@ -4,13 +4,12 @@ require "../src/game"
 require "../src/controller"
 require "../src/sprite"
 require "../src/sprite/vector_sprite"
+require "../src/pixel"
 
 # include CrystalEdge
 
 class Triangle < PF::Sprite
   include PF::VectorSprite
-
-  @frame = PF::VectorSprite.generate_circle(3, size = 25.0)
 
   def update(dt)
     # @rotation += 0.5 * dt
@@ -33,6 +32,7 @@ class TriangleThing < PF::Game
 
     @tri = Triangle.build do |t|
       t.position = Vector2.new(@width / 2, @height / 2)
+      t.frame = PF::VectorSprite.generate_circle(3, size = @width / 3)
     end
 
     @controller = PF::Controller(LibSDL::Keycode).new({
@@ -56,7 +56,7 @@ class TriangleThing < PF::Game
   end
 
   def draw
-    clear(0, 0, 255)
+    clear(0, 0, 200)
     # fill_rect(25, 25, 10, 15)
     # draw_rect(15, 15, 30, 30)
     @tri.draw(self)

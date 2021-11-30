@@ -4,7 +4,7 @@ version: 0.0.2
 authors:
   - Alex Clink <alexclink@gmail.com>
 
-crystal: 1.2.2
+crystal: 1.2.1
 
 license: MIT
 

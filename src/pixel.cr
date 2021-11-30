@@ -4,7 +4,7 @@ module PF
       new(rand(0_u8..0xFF_u8), rand(0_u8..0xFF_u8), rand(0_u8..0xFF_u8), 0xFF_u8)
     end
 
-    property r, g, b, a
+    property r : UInt8, g : UInt8, b : UInt8, a : UInt8
 
     def initialize(rgba : UInt32)
       @r = ((rgba & 0xFF000000_u32) >> (8 * 3)).to_u8

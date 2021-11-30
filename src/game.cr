@@ -1,6 +1,7 @@
 require "crystaledge"
 require "./lib_sdl"
 require "./pixel"
+require "./point"
 require "./controller"
 
 module PF
@@ -20,10 +21,10 @@ module PF
     @last_time : Float64 = Time.monotonic.total_milliseconds
     @controller : Controller(LibSDL::Keycode)
 
-    def initialize(@width, @height, @scale = 1, @title = self.class.name)
+    def initialize(@width, @height, @scale = 1, @title = self.class.name, flags = SDL::Renderer::Flags::PRESENTVSYNC)
       SDL.init(SDL::Init::VIDEO)
       @window = SDL::Window.new(@title, @width * @scale, @height * @scale)
-      @renderer = SDL::Renderer.new(@window, flags: SDL::Renderer::Flags::PRESENTVSYNC) # , flags: SDL::Renderer::Flags::SOFTWARE)
+      @renderer = SDL::Renderer.new(@window, flags: flags) # , flags: SDL::Renderer::Flags::SOFTWARE)
       @renderer.scale = {@scale, @scale}
       @screen = SDL::Surface.new(LibSDL.create_rgb_surface(
         flags: 0, width: @width, height: @height, depth: 32,
@@ -54,7 +55,7 @@ module PF
 
     # Draw a single point
     def draw_point(x : Int32, y : Int32, pixel : Pixel = Pixel.new, surface = @screen)
-      if x > 0 && x < @width && y > 0 && y < @height
+      if x >= 0 && x <= @width && y >= 0 && y <= @height
         pixel_pointer(x, y, surface).value = pixel.format(surface.format)
       end
     end
@@ -164,26 +165,28 @@ module PF
     end
 
     def fill_triangle(p1 : Vector2, p2 : Vector2, p3 : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
-      p1, p2, p3 = {x: p1.x.to_i, y: p1.y.to_i}, {x: p2.x.to_i, y: p2.y.to_i}, {x: p3.x.to_i, y: p3.y.to_i}
+      p1 = Point(Int32).new(x: p1.x.to_i, y: p1.y.to_i)
+      p2 = Point(Int32).new(x: p2.x.to_i, y: p2.y.to_i)
+      p3 = Point(Int32).new(x: p3.x.to_i, y: p3.y.to_i)
       # sort from top to bottom
-      p_top, p2, p3 = [p1, p2, p3].sort { |a, b| a[:y] <=> b[:y] }
+      p_top, p2, p3 = [p1, p2, p3].sort { |a, b| a.y <=> b.y }
 
       y_step = 0
 
       # find the lower left and right points
-      p_left, p_right = p2[:x] < p3[:x] ? [p2, p3] : [p3, p2]
+      p_left, p_right = p2.x < p3.x ? [p2, p3] : [p3, p2]
 
-      edge_left = get_tri_edge(p_top[:x], p_top[:y], p_left[:x], p_left[:y])
-      edge_right = get_tri_edge(p_top[:x], p_top[:y], p_right[:x], p_right[:y])
+      edge_left = get_tri_edge(p_top.x, p_top.y, p_left.x, p_left.y)
+      edge_right = get_tri_edge(p_top.x, p_top.y, p_right.x, p_right.y)
 
       if edge_left.size < edge_right.size
-        rest = get_tri_edge(p_left[:x], p_left[:y], p_right[:x], p_right[:y])
+        rest = get_tri_edge(p_left.x, p_left.y, p_right.x, p_right.y)
         rest.shift
         edge_left.concat(rest)
       end
 
       if edge_left.size > edge_right.size
-        rest = get_tri_edge(p_right[:x], p_right[:y], p_left[:x], p_left[:y])
+        rest = get_tri_edge(p_right.x, p_right.y, p_left.x, p_left.y)
         rest.shift
         edge_right.concat(rest)
       end
@@ -192,14 +195,14 @@ module PF
         pl = edge_left[i]
         pr = edge_right[i]
 
-        (pl[0] + 1).upto(pr[0] - 1) do |x|
-          draw_point(x, pl[1], pixel, surface)
+        (pl.x + 1).upto(pr.x - 1) do |x|
+          draw_point(x, pl.y, pixel, surface)
         end
       end
     end
 
     private def get_tri_edge(x1 : Int, y1 : Int, x2 : Int, y2 : Int)
-      line = [] of Tuple(Int32, Int32)
+      line = [] of Point(Int32)
       dx = (x2 - x1).abs
       dy = -(y2 - y1).abs
 
@@ -210,7 +213,7 @@ module PF
       x, y = x1, y1
       xp = x
 
-      line << {x, y}
+      line << Point.new(x, y)
 
       loop do
         break if x == x2 && y == y2
@@ -223,7 +226,7 @@ module PF
 
         if d2 <= dx
           d += dx
-          line << {x, y}
+          line << Point.new(x, y)
           y += sy
         end
       end
@@ -253,7 +256,7 @@ module PF
         draw
       end
 
-      @renderer.copy(SDL::Texture.from(@screen, @renderer))
+      @renderer.copy(@screen)
       @renderer.present
     end
 
