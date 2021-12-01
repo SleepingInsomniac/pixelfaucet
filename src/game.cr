@@ -55,7 +55,7 @@ module PF
 
     # Draw a single point
     def draw_point(x : Int32, y : Int32, pixel : Pixel = Pixel.new, surface = @screen)
-      if x >= 0 && x <= @width && y >= 0 && y <= @height
+      if x >= 0 && x < @width && y >= 0 && y < @height
         pixel_pointer(x, y, surface).value = pixel.format(surface.format)
       end
     end
@@ -63,6 +63,11 @@ module PF
     # Draw a single point
     def draw_point(vector : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
       draw_point(vector.x.to_i32, vector.y.to_i32, pixel, surface)
+    end
+
+    # Draw a single point
+    def draw_point(point, pixel : Pixel = Pixel.new, surface = @screen)
+      draw_point(point.x, point.y, pixel, surface)
     end
 
     # Draw a line using Bresenham’s Algorithm
@@ -103,6 +108,10 @@ module PF
     # Draw a line using Bresenham’s Algorithm
     def draw_line(p1 : Vector2, p2 : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
       draw_line(p1.x.to_i, p1.y.to_i, p2.x.to_i, p2.y.to_i, pixel, surface)
+    end
+
+    def draw_line(p1 : Point, p2 : Point, pixel : Pixel = Pixel.new, surface = @screen)
+      draw_line(p1.x, p1.y, p2.x, p2.y, pixel, surface)
     end
 
     # Draw the outline of a square rect
@@ -157,6 +166,10 @@ module PF
       end
     end
 
+    def draw_circle(c : Point(Int), r : Int, pixel : Pixel = Pixel.new, surface = @screen)
+      draw_circle(c.x, c.y, r, pixel, surface)
+    end
+
     # Fill a rect
     def fill_rect(x1 : Int, y1 : Int, x2 : Int, y2 : Int, pixel : Pixel = Pixel.new, surface = @screen)
       # draw from top left to bottom right
@@ -170,81 +183,112 @@ module PF
       end
     end
 
-    def fill_triangle(p1 : Vector2, p2 : Vector2, p3 : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
-      p1 = Point(Int32).new(x: p1.x.to_i, y: p1.y.to_i)
-      p2 = Point(Int32).new(x: p2.x.to_i, y: p2.y.to_i)
-      p3 = Point(Int32).new(x: p3.x.to_i, y: p3.y.to_i)
-      # sort from top to bottom
-      p_top, p2, p3 = [p1, p2, p3].sort { |a, b| a.y <=> b.y }
+    # Fills a triangle shape by drawing two edges from the top vertex and scanning across left to right
+    def fill_triangle(p1 : Point, p2 : Point, p3 : Point, pixel : Pixel = Pixel.new, surface = @screen)
+      # Sort points from top to bottom
+      p_top, p_mid, p_bot = [p1, p2, p3].sort { |a, b| a.y <=> b.y }
 
-      y_step = 0
-
-      # find the lower left and right points
-      p_left, p_right = p2.x < p3.x ? [p2, p3] : [p3, p2]
-
-      edge_left = pixel_edge(p_top.x, p_top.y, p_left.x, p_left.y)
-      edge_right = pixel_edge(p_top.x, p_top.y, p_right.x, p_right.y)
-
-      if edge_left.size < edge_right.size
-        rest = pixel_edge(p_left.x, p_left.y, p_right.x, p_right.y)
-        rest.shift
-        edge_left.concat(rest)
+      # Find the left and right points
+      if p_mid.x <= p_bot.x
+        p_left, p_right = p_mid, p_bot
+      else
+        p_left, p_right = p_bot, p_mid
       end
 
-      if edge_left.size > edge_right.size
-        rest = pixel_edge(p_right.x, p_right.y, p_left.x, p_left.y)
-        rest.shift
-        edge_right.concat(rest)
-      end
+      # Derive the 'slopes' in integers
+      slope_left = Point.new((p_left.x - p_top.x).abs, -(p_left.y - p_top.y).abs)
+      slope_right = Point.new((p_right.x - p_top.x).abs, -(p_right.y - p_top.y).abs)
 
-      0.upto(edge_left.size - 1) do |i|
-        pl = edge_left[i]
-        pr = edge_right[i]
+      # Determine which direction to step in pixeles along the line when a decision is made
+      step_left = Point.new(p_top.x < p_left.x ? 1 : -1, p_top.y < p_left.y ? 1 : -1)
+      step_right = Point.new(p_top.x < p_right.x ? 1 : -1, p_top.y < p_right.y ? 1 : -1)
 
-        (pl.x).upto(pr.x) do |x|
-          draw_point(x, pl.y, pixel, surface)
+      # Calculate the decision parameter for each line
+      decision_left = slope_left.x + slope_left.y
+      decision_right = slope_right.x + slope_right.y
+
+      # Initialize each line to the top starting point
+      edge_left = p_top
+      edge_right = p_top
+
+      # Begin creating scanlines for the triangle
+      p_top.y.upto(p_bot.y) do |line|
+        # Begin left edge search
+        loop do
+          # draw_point(edge_left, pixel, surface)
+          break if line == p_mid.y && edge_left.x == p_mid.x
+          # Square the decision left for integer slope test
+          decision_left_squared = decision_left + decision_left
+
+          # If the decision left squared is greater than the slope y threshold, step in the x direction
+          if decision_left_squared >= slope_left.y
+            # Add the slope y to the decision_left accumulator
+            decision_left += slope_left.y
+            # Step in the x direction
+            edge_left.x += step_left.x
+          end
+
+          break if edge_left == p_mid
+
+          # If decision left has passed the x threshold, step in the y direction
+          if decision_left_squared <= slope_left.x
+            # Increment decision left with slope calculation for x
+            decision_left += slope_left.x
+            # Step in the Y direction with left edge
+            edge_left.y += step_left.y
+
+            break
+          end
+        end
+
+        # Begin our right edge search
+        loop do
+          # draw_point(edge_right, pixel, surface)
+          break if line == p_mid.y && edge_right.x == p_mid.x
+          decision_right_squared = decision_right + decision_right
+
+          if decision_right_squared >= slope_right.y
+            decision_right += slope_right.y
+            edge_right.x += step_right.x
+          end
+
+          break if edge_right == p_mid
+
+          if decision_right_squared <= slope_right.x
+            decision_right += slope_right.x
+            edge_right.y += step_right.y
+
+            break
+          end
+        end
+
+        # Draw the scanline
+        edge_left.x.upto(edge_right.x) do |x|
+          draw_point(x, line, pixel, surface)
+        end
+
+        # Change line direction
+        # Our current line is at the mid point y level
+        if line == p_mid.y
+          # determine which line needs to change direction
+          if p_left.y == line
+            slope_left = Point.new((p_left.x - p_bot.x).abs, -(p_left.y - p_bot.y).abs)
+            step_left = Point.new(p_left.x < p_bot.x ? 1 : -1, p_left.y < p_bot.y ? 1 : -1)
+            decision_left = slope_left.x + slope_left.y
+          else
+            slope_right = Point.new((p_right.x - p_bot.x).abs, -(p_right.y - p_bot.y).abs)
+            step_right = Point.new(p_right.x < p_bot.x ? 1 : -1, p_right.y < p_bot.y ? 1 : -1)
+            decision_right = slope_right.x + slope_right.y
+          end
         end
       end
     end
 
-    private def pixel_edge(x1 : Int, y1 : Int, x2 : Int, y2 : Int)
-      line = [] of Point(Int32)
-
-      # The sloap for each axis
-      slope = Point.new((x2 - x1).abs, -(y2 - y1).abs)
-
-      # The step direction in both axis
-      step = Point.new(x1 < x2 ? 1 : -1, y1 < y2 ? 1 : -1)
-
-      # The final decision accumulation
-      # Initialized to the height of x and y
-      decision = slope.x + slope.y
-
-      pixel = Point.new(x1, y1)
-
-      line << pixel
-
-      loop do
-        # Break if we've reached the ending point
-        break if pixel.x == x2 && pixel.y == y2
-
-        # Square the decision to avoid floating point calculations
-        decision_squared = decision + decision
-
-        # if decision_squared is greater than
-        if decision_squared >= slope.y
-          decision += slope.y
-          pixel.x += step.x
-        end
-
-        if decision_squared <= slope.x
-          decision += slope.x
-          line << pixel
-          pixel.y += step.y
-        end
-      end
-
-      line
+    def fill_triangle(p1 : Vector2, p2 : Vector2, p3 : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
+      p1 = Point(Int32).new(x: p1.x.to_i, y: p1.y.to_i)
+      p2 = Point(Int32).new(x: p2.x.to_i, y: p2.y.to_i)
+      p3 = Point(Int32).new(x: p3.x.to_i, y: p3.y.to_i)
+      fill_triangle(p1, p2, p3, pixel, surface)
     end
 
     # END drawing functions ========================

@@ -4,6 +4,30 @@ module PF
       new(rand(0_u8..0xFF_u8), rand(0_u8..0xFF_u8), rand(0_u8..0xFF_u8), 0xFF_u8)
     end
 
+    def self.red
+      new(255, 0, 0)
+    end
+
+    def self.green
+      new(0, 255, 0)
+    end
+
+    def self.blue
+      new(0, 0, 255)
+    end
+
+    def self.yellow
+      new(255, 255, 0)
+    end
+
+    def self.magenta
+      new(255, 0, 255)
+    end
+
+    def self.cyan
+      new(0, 255, 255)
+    end
+
     property r : UInt8, g : UInt8, b : UInt8, a : UInt8
 
     def initialize(rgba : UInt32)

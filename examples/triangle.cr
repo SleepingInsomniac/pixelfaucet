@@ -17,8 +17,6 @@ class Triangle < PF::Sprite
   def draw(engine)
     frame = project_points(@frame)
     engine.fill_triangle(frame[0], frame[1], frame[2], PF::Pixel.new(255, 255, 0))
-    engine.draw_shape(frame, PF::Pixel.new(0, 255, 255))
-    engine.draw_line(@position, frame[0], PF::Pixel.new(0, 255, 0))
   end
 end
 
@@ -44,8 +42,8 @@ class TriangleThing < PF::Game
   def update(dt)
     @paused = !@paused if @controller.pressed?("Pause")
 
-    @tri.rotation += 1.0 * dt if @controller.action?("Rotate Right")
-    @tri.rotation -= 1.0 * dt if @controller.action?("Rotate Left")
+    @tri.rotation += 0.5 * dt if @controller.action?("Rotate Right")
+    @tri.rotation -= 0.5 * dt if @controller.action?("Rotate Left")
 
     unless @paused
       @tri.rotation += 1.0 * dt
@@ -55,9 +53,8 @@ class TriangleThing < PF::Game
   end
 
   def draw
-    clear(0, 0, 200)
+    clear(0, 0, 100)
     @tri.draw(self)
-    draw_circle((@width / 2).to_i32, (@height / 2).to_i32, (@width / 3).to_i32)
   end
 end
 
