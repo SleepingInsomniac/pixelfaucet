@@ -16,7 +16,8 @@ class Triangle < PF::Sprite
 
   def draw(engine)
     frame = project_points(@frame)
-    engine.fill_triangle(frame[0], frame[1], frame[2], PF::Pixel.new(255, 255, 0))
+    engine.fill_triangle(frame[0], frame[1], frame[2], PF::Pixel.yellow)
+    engine.draw_triangle(frame[0], frame[1], frame[2], PF::Pixel.green)
   end
 end
 
@@ -58,5 +59,5 @@ class TriangleThing < PF::Game
   end
 end
 
-engine = TriangleThing.new(100, 100, 5)
+engine = TriangleThing.new(100, 100, 6)
 engine.run!

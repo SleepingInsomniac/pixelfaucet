@@ -170,6 +170,19 @@ module PF
       draw_circle(c.x, c.y, r, pixel, surface)
     end
 
+    def draw_triangle(p1 : Point, p2 : Point, p3 : Point, pixel : Pixel = Pixel.new, surface = @screen)
+      draw_line(p1, p2, pixel, surface)
+      draw_line(p2, p3, pixel, surface)
+      draw_line(p3, p1, pixel, surface)
+    end
+
+    def draw_triangle(p1 : Vector2, p2 : Vector2, p3 : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
+      p1 = Point(Int32).new(x: p1.x.to_i, y: p1.y.to_i)
+      p2 = Point(Int32).new(x: p2.x.to_i, y: p2.y.to_i)
+      p3 = Point(Int32).new(x: p3.x.to_i, y: p3.y.to_i)
+      draw_triangle(p1, p2, p3, pixel, surface)
+    end
+
     # Fill a rect
     def fill_rect(x1 : Int, y1 : Int, x2 : Int, y2 : Int, pixel : Pixel = Pixel.new, surface = @screen)
       # draw from top left to bottom right
@@ -228,8 +241,6 @@ module PF
             edge_left.x += step_left.x
           end
 
-          break if edge_left == p_mid
-
           # If decision left has passed the x threshold, step in the y direction
           if decision_left_squared <= slope_left.x
             # Increment decision left with slope calculation for x
@@ -251,8 +262,6 @@ module PF
             decision_right += slope_right.y
             edge_right.x += step_right.x
           end
-
-          break if edge_right == p_mid
 
           if decision_right_squared <= slope_right.x
             decision_right += slope_right.x
