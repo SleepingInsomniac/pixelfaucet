@@ -199,12 +199,18 @@ module PF
     # Fills a triangle shape by drawing two edges from the top vertex and scanning across left to right
     def fill_triangle(p1 : Point, p2 : Point, p3 : Point, pixel : Pixel = Pixel.new, surface = @screen)
       # Sort points from top to bottom
-      p_top, p_mid, p_bot = [p1, p2, p3].sort { |a, b| a.y <=> b.y }
+      p1, p2 = p2, p1 if p2.y < p1.y
+      p1, p3 = p3, p1 if p3.y < p1.y
+      p2, p3 = p3, p2 if p3.y < p2.y
+
+      p_top, p_mid, p_bot = p1, p2, p3
 
       # Find the left and right points
       if p_mid.x <= p_bot.x
+        # trangle is pointing left
         p_left, p_right = p_mid, p_bot
       else
+        # triangle is pointing right
         p_left, p_right = p_bot, p_mid
       end
 
@@ -213,8 +219,9 @@ module PF
       slope_right = Point.new((p_right.x - p_top.x).abs, -(p_right.y - p_top.y).abs)
 
       # Determine which direction to step in pixeles along the line when a decision is made
-      step_left = Point.new(p_top.x < p_left.x ? 1 : -1, p_top.y < p_left.y ? 1 : -1)
-      step_right = Point.new(p_top.x < p_right.x ? 1 : -1, p_top.y < p_right.y ? 1 : -1)
+      # the y step for both sides is known, will go down => 1
+      step_left = Point.new(p_top.x < p_left.x ? 1 : -1, 1)
+      step_right = Point.new(p_top.x < p_right.x ? 1 : -1, 1)
 
       # Calculate the decision parameter for each line
       decision_left = slope_left.x + slope_left.y
