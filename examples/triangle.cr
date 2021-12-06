@@ -17,13 +17,12 @@ class Triangle < PF::Sprite
   def draw(engine)
     frame = project_points(@frame)
     engine.fill_triangle(frame[0], frame[1], frame[2], PF::Pixel.yellow)
-    engine.draw_triangle(frame[0], frame[1], frame[2], PF::Pixel.green)
   end
 end
 
 class TriangleThing < PF::Game
   @tri : Triangle
-  @paused = false
+  @paused = true
 
   def initialize(@width, @height, @scale)
     super(@width, @height, @scale)
@@ -37,6 +36,10 @@ class TriangleThing < PF::Game
       LibSDL::Keycode::RIGHT => "Rotate Right",
       LibSDL::Keycode::LEFT  => "Rotate Left",
       LibSDL::Keycode::SPACE => "Pause",
+      LibSDL::Keycode::A     => "Move Left",
+      LibSDL::Keycode::E     => "Move Right",
+      LibSDL::Keycode::COMMA => "Move Up",
+      LibSDL::Keycode::O     => "Move Down",
     })
   end
 
@@ -45,6 +48,22 @@ class TriangleThing < PF::Game
 
     @tri.rotation += 0.5 * dt if @controller.action?("Rotate Right")
     @tri.rotation -= 0.5 * dt if @controller.action?("Rotate Left")
+
+    if @controller.action?("Move Up")
+      @tri.frame[1] = @tri.frame[1] + Vector2.new(0.0, -10.0) * dt
+    end
+
+    if @controller.action?("Move Down")
+      @tri.frame[1] = @tri.frame[1] + Vector2.new(0.0, 10.0) * dt
+    end
+
+    if @controller.action?("Move Left")
+      @tri.frame[1] = @tri.frame[1] + Vector2.new(-10.0, 0.0) * dt
+    end
+
+    if @controller.action?("Move Right")
+      @tri.frame[1] = @tri.frame[1] + Vector2.new(10.0, 0.0) * dt
+    end
 
     unless @paused
       @tri.rotation += 1.0 * dt
@@ -59,5 +78,5 @@ class TriangleThing < PF::Game
   end
 end
 
-engine = TriangleThing.new(100, 100, 6)
+engine = TriangleThing.new(50, 50, 10)
 engine.run!

@@ -3,6 +3,7 @@ require "./lib_sdl"
 require "./pixel"
 require "./point"
 require "./controller"
+require "./game/fill_triangle"
 
 module PF
   abstract class Game
@@ -72,7 +73,7 @@ module PF
 
     # Draw a line using Bresenham’s Algorithm
     def draw_line(x1 : Int, y1 : Int, x2 : Int, y2 : Int, pixel : Pixel = Pixel.new, surface = @screen)
-      # The sloap for each axis
+      # The slope for each axis
       slope = Point.new((x2 - x1).abs, -(y2 - y1).abs)
 
       # The step direction in both axis
@@ -194,117 +195,6 @@ module PF
           draw_point(x, y, pixel, surface)
         end
       end
-    end
-
-    # Fills a triangle shape by drawing two edges from the top vertex and scanning across left to right
-    def fill_triangle(p1 : Point, p2 : Point, p3 : Point, pixel : Pixel = Pixel.new, surface = @screen)
-      # Sort points from top to bottom
-      p1, p2 = p2, p1 if p2.y < p1.y
-      p1, p3 = p3, p1 if p3.y < p1.y
-      p2, p3 = p3, p2 if p3.y < p2.y
-
-      p_top, p_mid, p_bot = p1, p2, p3
-
-      # Find the left and right points
-      if p_mid.x <= p_bot.x
-        # trangle is pointing left
-        p_left, p_right = p_mid, p_bot
-      else
-        # triangle is pointing right
-        p_left, p_right = p_bot, p_mid
-      end
-
-      # Derive the 'slopes' in integers
-      slope_left = Point.new((p_left.x - p_top.x).abs, -(p_left.y - p_top.y).abs)
-      slope_right = Point.new((p_right.x - p_top.x).abs, -(p_right.y - p_top.y).abs)
-
-      # Determine which direction to step in pixeles along the line when a decision is made
-      # the y step for both sides is known, will go down => 1
-      step_left = Point.new(p_top.x < p_left.x ? 1 : -1, 1)
-      step_right = Point.new(p_top.x < p_right.x ? 1 : -1, 1)
-
-      # Calculate the decision parameter for each line
-      decision_left = slope_left.x + slope_left.y
-      decision_right = slope_right.x + slope_right.y
-
-      # Initialize each line to the top starting point
-      edge_left = p_top
-      edge_right = p_top
-
-      # Begin creating scanlines for the triangle
-      p_top.y.upto(p_bot.y) do |line|
-        # Begin left edge search
-        loop do
-          # draw_point(edge_left, pixel, surface)
-          break if line == p_mid.y && edge_left.x == p_mid.x
-          # Square the decision left for integer slope test
-          decision_left_squared = decision_left + decision_left
-
-          # If the decision left squared is greater than the slope y threshold, step in the x direction
-          if decision_left_squared >= slope_left.y
-            # Add the slope y to the decision_left accumulator
-            decision_left += slope_left.y
-            # Step in the x direction
-            edge_left.x += step_left.x
-          end
-
-          # If decision left has passed the x threshold, step in the y direction
-          if decision_left_squared <= slope_left.x
-            # Increment decision left with slope calculation for x
-            decision_left += slope_left.x
-            # Step in the Y direction with left edge
-            edge_left.y += step_left.y
-
-            break
-          end
-        end
-
-        # Begin our right edge search
-        loop do
-          # draw_point(edge_right, pixel, surface)
-          break if line == p_mid.y && edge_right.x == p_mid.x
-          decision_right_squared = decision_right + decision_right
-
-          if decision_right_squared >= slope_right.y
-            decision_right += slope_right.y
-            edge_right.x += step_right.x
-          end
-
-          if decision_right_squared <= slope_right.x
-            decision_right += slope_right.x
-            edge_right.y += step_right.y
-
-            break
-          end
-        end
-
-        # Draw the scanline
-        edge_left.x.upto(edge_right.x) do |x|
-          draw_point(x, line, pixel, surface)
-        end
-
-        # Change line direction
-        # Our current line is at the mid point y level
-        if line == p_mid.y
-          # determine which line needs to change direction
-          if p_left.y == line
-            slope_left = Point.new((p_left.x - p_bot.x).abs, -(p_left.y - p_bot.y).abs)
-            step_left = Point.new(p_left.x < p_bot.x ? 1 : -1, p_left.y < p_bot.y ? 1 : -1)
-            decision_left = slope_left.x + slope_left.y
-          else
-            slope_right = Point.new((p_right.x - p_bot.x).abs, -(p_right.y - p_bot.y).abs)
-            step_right = Point.new(p_right.x < p_bot.x ? 1 : -1, p_right.y < p_bot.y ? 1 : -1)
-            decision_right = slope_right.x + slope_right.y
-          end
-        end
-      end
-    end
-
-    def fill_triangle(p1 : Vector2, p2 : Vector2, p3 : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
-      p1 = Point(Int32).new(x: p1.x.to_i, y: p1.y.to_i)
-      p2 = Point(Int32).new(x: p2.x.to_i, y: p2.y.to_i)
-      p3 = Point(Int32).new(x: p3.x.to_i, y: p3.y.to_i)
-      fill_triangle(p1, p2, p3, pixel, surface)
     end
 
     # END drawing functions ========================
