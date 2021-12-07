@@ -77,10 +77,21 @@ struct Vec3d(T)
 end
 
 struct Mat4
-  property matrix = Slice(Float64).new(4*4, 0.0)
+  alias T = Float64
+  alias RowT = Tuple(T, T, T, T)
+
+  property matrix = Slice(T).new(4*4, 0.0)
 
   def index(x : Int, y : Int)
     y * 4 + x
+  end
+
+  def set(value : Tuple(RowT, RowT, RowT, RowT))
+    {% for y in (0..4) %}
+      {% for x in (0..4) %}
+        self[x,y] = value[x][y]
+      {% end %}
+    {% end %}
   end
 
   def [](x : Int, y : Int)
@@ -122,77 +133,151 @@ struct Tri
     line2 = @p3 - @p1
     @normal ||= line1.cross_product(line2).normalized
   end
+
+  def z
+    (@p1.z + @p2.z + @p3.z) / 3.0
+  end
+end
+
+class Mesh
+  property tris = [] of Tri
+
+  def initialize(@tris)
+  end
+
+  def self.load(path)
+    verticies = [] of Vec3d(Float64)
+    tris = [] of Tri
+
+    File.open(path) do |file|
+      file.each_line do |line|
+        case line[0]
+        when 'v'
+          parts = line.split(/\s+/)
+          verticies << Vec3d.new(parts[1].to_f64, parts[2].to_f64, parts[3].to_f64)
+        when 'f'
+          parts = line.split(/\s+/)
+          tris << Tri.new(verticies[parts[1].to_i - 1], verticies[parts[2].to_i - 1], verticies[parts[3].to_i - 1])
+        end
+      end
+    end
+
+    new(tris)
+  end
 end
 
 class Cube
-  property mesh : Array(Tri)
+  property mesh : Mesh
   property position = Vec3d(Float64).new(0.0, 0.0, 0.0)
   property rotation = Vec3d(Float64).new(0.0, 0.0, 0.0)
 
+  @mat_rx = Mat4.new
+  @mat_ry = Mat4.new
+  @mat_rz = Mat4.new
+
   def initialize
-    @mesh = [
-      # south
-      Tri.new(0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0),
-      Tri.new(0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0),
-
-      # east
-      Tri.new(1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0),
-      Tri.new(1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0),
-
-      # north
-      Tri.new(1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0),
-      Tri.new(1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0),
-
-      # west
-      Tri.new(0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0),
-      Tri.new(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0),
-
-      # top
-      Tri.new(0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0),
-      Tri.new(0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0),
-
-      # bottom
-      Tri.new(1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0),
-      Tri.new(1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0),
-    ]
+    @mesh = Mesh.load("/Users/alex/Desktop/ship.obj")
+    # @mesh = Mesh.new([
+    #   # south
+    #   Tri.new(0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0),
+    #   Tri.new(0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0),
+    #
+    #   # east
+    #   Tri.new(1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0),
+    #   Tri.new(1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0),
+    #
+    #   # north
+    #   Tri.new(1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0),
+    #   Tri.new(1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0),
+    #
+    #   # west
+    #   Tri.new(0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0),
+    #   Tri.new(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0),
+    #
+    #   # top
+    #   Tri.new(0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0),
+    #   Tri.new(0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0),
+    #
+    #   # bottom
+    #   Tri.new(1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0),
+    #   Tri.new(1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0),
+    # ])
   end
 
   def update(dt : Float64)
+    @mat_rz[0, 0] = Math.cos(@rotation.z)
+    @mat_rz[0, 1] = Math.sin(@rotation.z)
+    @mat_rz[1, 0] = -Math.sin(@rotation.z)
+    @mat_rz[1, 1] = Math.cos(@rotation.z)
+    @mat_rz[2, 2] = 1.0
+    @mat_rz[3, 3] = 1.0
+
+    @mat_rx[0, 0] = 1.0
+    @mat_rx[1, 1] = Math.cos(@rotation.x)
+    @mat_rx[1, 2] = Math.sin(@rotation.x)
+    @mat_rx[2, 1] = -Math.sin(@rotation.x)
+    @mat_rx[2, 2] = Math.cos(@rotation.x)
+    @mat_rx[3, 3] = 1.0
+
+    @mat_ry[0, 0] = Math.cos(@rotation.y)
+    @mat_ry[0, 2] = Math.sin(@rotation.y)
+    @mat_ry[1, 1] = 1.0
+    @mat_ry[2, 0] = -Math.sin(@rotation.y)
+    @mat_ry[2, 2] = Math.cos(@rotation.y)
+    @mat_ry[3, 3] = 1.0
   end
 
-  def draw(engine : PF::Game, mat_proj, mat_rz, mat_rx, camera)
-    @mesh.each do |tri|
-      tri.p1 *= mat_rx
-      tri.p2 *= mat_rx
-      tri.p3 *= mat_rx
+  def draw(engine : PF::Game, mat_proj, camera, light)
+    # Translation and rotation
+    tris = @mesh.tris.map do |tri|
+      tri.p1 *= @mat_rx
+      tri.p2 *= @mat_rx
+      tri.p3 *= @mat_rx
 
-      tri.p1 *= mat_rz
-      tri.p2 *= mat_rz
-      tri.p3 *= mat_rz
+      tri.p1 *= @mat_ry
+      tri.p2 *= @mat_ry
+      tri.p3 *= @mat_ry
 
-      tri.p1.z = tri.p1.z + 3.0
-      tri.p2.z = tri.p2.z + 3.0
-      tri.p3.z = tri.p3.z + 3.0
+      tri.p1 *= @mat_rz
+      tri.p2 *= @mat_rz
+      tri.p3 *= @mat_rz
 
-      if tri.normal.dot(tri.p1 - camera) < 0
-        tri.p1 *= mat_proj
-        tri.p2 *= mat_proj
-        tri.p3 *= mat_proj
+      tri.p1.z = tri.p1.z + 8.0
+      tri.p2.z = tri.p2.z + 8.0
+      tri.p3.z = tri.p3.z + 8.0
 
-        tri.p1 += 1.0
-        tri.p2 += 1.0
-        tri.p3 += 1.0
+      tri
+    end
 
-        tri.p1 *= 0.5 * engine.width
-        tri.p2 *= 0.5 * engine.width
-        tri.p3 *= 0.5 * engine.width
+    # only draw triangles facing the camera
+    tris = tris.select do |tri|
+      tri.normal.dot(tri.p1 - camera) < 0
+    end
 
-        engine.draw_triangle(
-          PF::Point.new(tri.p1.x.to_i, tri.p1.y.to_i),
-          PF::Point.new(tri.p2.x.to_i, tri.p2.y.to_i),
-          PF::Point.new(tri.p3.x.to_i, tri.p3.y.to_i)
-        )
-      end
+    # sort triangles
+    tris = tris.sort { |a, b| b.z <=> a.z }
+
+    tris.each do |tri|
+      shade : UInt8 = (tri.normal.dot(light) * 255.0).clamp(0.0..255.0).to_u8
+
+      tri.p1 *= mat_proj
+      tri.p2 *= mat_proj
+      tri.p3 *= mat_proj
+
+      tri.p1 += 1.0
+      tri.p2 += 1.0
+      tri.p3 += 1.0
+
+      tri.p1 *= 0.5 * engine.width
+      tri.p2 *= 0.5 * engine.width
+      tri.p3 *= 0.5 * engine.width
+
+      engine.fill_triangle(
+        PF::Point.new(tri.p1.x.to_i, tri.p1.y.to_i),
+        PF::Point.new(tri.p2.x.to_i, tri.p2.y.to_i),
+        PF::Point.new(tri.p3.x.to_i, tri.p3.y.to_i),
+        pixel: PF::Pixel.new(shade, shade, shade, 255)
+      )
     end
   end
 end
@@ -207,10 +292,10 @@ class CubeGame < PF::Game
   @near : Float64
   @far : Float64
   @camera : Vec3d(Float64)
+  @light : Vec3d(Float64) = Vec3d.new(0.0, 0.0, -1.0).normalized
 
   @mat_proj : Mat4
-  @mat_rx : Mat4
-  @mat_rz : Mat4
+  @speed = 3.0
 
   def initialize(@width, @height, @scale)
     super(@width, @height, @scale)
@@ -220,6 +305,8 @@ class CubeGame < PF::Game
     @controller = PF::Controller(LibSDL::Keycode).new({
       LibSDL::Keycode::RIGHT => "Rotate Right",
       LibSDL::Keycode::LEFT  => "Rotate Left",
+      LibSDL::Keycode::UP    => "Rotate Up",
+      LibSDL::Keycode::DOWN  => "Rotate Down",
       LibSDL::Keycode::SPACE => "Pause",
     })
 
@@ -238,41 +325,41 @@ class CubeGame < PF::Game
     @mat_proj[2, 3] = 1.0
     @mat_proj[3, 3] = 0.0
 
-    @mat_rx = Mat4.new
-    @mat_rz = Mat4.new
-
     @theta = 0.0
   end
 
   def update(dt)
     @paused = !@paused if @controller.pressed?("Pause")
 
+    if @controller.action?("Rotate Right")
+      @cube.rotation = Vec3d.new(@cube.rotation.x + @speed * dt, @cube.rotation.y, @cube.rotation.z)
+    end
+
+    if @controller.action?("Rotate Left")
+      @cube.rotation = Vec3d.new(@cube.rotation.x - @speed * dt, @cube.rotation.y, @cube.rotation.z)
+    end
+
+    if @controller.action?("Rotate Up")
+      @cube.rotation = Vec3d.new(@cube.rotation.x, @cube.rotation.y, @cube.rotation.z - @speed * dt)
+    end
+
+    if @controller.action?("Rotate Down")
+      @cube.rotation = Vec3d.new(@cube.rotation.x, @cube.rotation.y, @cube.rotation.z + @speed * dt)
+    end
+
     unless @paused
       @theta += dt
-
-      @mat_rz[0, 0] = Math.cos(@theta)
-      @mat_rz[0, 1] = Math.sin(@theta)
-      @mat_rz[1, 0] = -Math.sin(@theta)
-      @mat_rz[1, 1] = Math.cos(@theta)
-      @mat_rz[2, 2] = 1.0
-      @mat_rz[3, 3] = 1.0
-
-      @mat_rx[0, 0] = 1.0
-      @mat_rx[1, 1] = Math.cos(@theta * 0.3)
-      @mat_rx[1, 2] = Math.sin(@theta * 0.3)
-      @mat_rx[2, 1] = -Math.sin(@theta * 0.3)
-      @mat_rx[2, 2] = Math.cos(@theta * 0.3)
-      @mat_rx[3, 3] = 1.0
-
-      @cube.update(dt)
+      @cube.rotation = Vec3d.new(@cube.rotation.x, @cube.rotation.y + 1.0 * dt, @cube.rotation.z)
     end
+
+    @cube.update(dt)
   end
 
   def draw
     clear(0, 0, 100)
-    @cube.draw(self, @mat_proj, @mat_rz, @mat_rx, @camera)
+    @cube.draw(self, @mat_proj, @camera, @light)
   end
 end
 
-engine = CubeGame.new(400, 400, 2)
+engine = CubeGame.new(200, 200, 3)
 engine.run!
