@@ -87,9 +87,9 @@ struct Mat4
   end
 
   def set(value : Tuple(RowT, RowT, RowT, RowT))
-    {% for y in (0..4) %}
-      {% for x in (0..4) %}
-        self[x,y] = value[x][y]
+    {% for y in (0..3) %}
+      {% for x in (0..3) %}
+        self[{{x}},{{y}}] = value[{{x}}][{{y}}]
       {% end %}
     {% end %}
   end
@@ -127,15 +127,31 @@ struct Tri
     @p3 = Vec3d(Float64).new(p3x, p3y, p3z)
   end
 
+  # Return the normal assuming clockwise pointing winding
   def normal
-    # line 1 is p2 - p1, line2 is p3 - p1
     line1 = @p2 - @p1
     line2 = @p3 - @p1
     @normal ||= line1.cross_product(line2).normalized
   end
 
+  # Get the average x value
+  def x
+    (@p1.x + @p2.x + @p3.x) / 3.0
+  end
+
+  # Get the average y value
+  def y
+    (@p1.y + @p2.y + @p3.y) / 3.0
+  end
+
+  # Get the average z value
   def z
     (@p1.z + @p2.z + @p3.z) / 3.0
+  end
+
+  # Multiply all points by a Mat4, returning a new Tri
+  def *(mat : Mat4)
+    Tri.new(@p1 * mat, @p2 * mat, @p3 * mat)
   end
 end
 
@@ -149,15 +165,22 @@ class Mesh
     verticies = [] of Vec3d(Float64)
     tris = [] of Tri
 
+    line_no = 0
     File.open(path) do |file|
       file.each_line do |line|
-        case line[0]
-        when 'v'
-          parts = line.split(/\s+/)
+        line_no += 1
+        next if line =~ /^\s*$/
+        parts = line.split(/\s+/)
+        case parts[0]
+        when "v"
           verticies << Vec3d.new(parts[1].to_f64, parts[2].to_f64, parts[3].to_f64)
-        when 'f'
-          parts = line.split(/\s+/)
-          tris << Tri.new(verticies[parts[1].to_i - 1], verticies[parts[2].to_i - 1], verticies[parts[3].to_i - 1])
+        when "f"
+          face_verts = [] of Vec3d(Float64)
+          parts[1..3].each do |part|
+            face = part.split('/')
+            face_verts << verticies[face[0].to_i - 1]
+          end
+          tris << Tri.new(face_verts[0], face_verts[1], face_verts[2])
         end
       end
     end
@@ -166,7 +189,7 @@ class Mesh
   end
 end
 
-class Cube
+class Model
   property mesh : Mesh
   property position = Vec3d(Float64).new(0.0, 0.0, 0.0)
   property rotation = Vec3d(Float64).new(0.0, 0.0, 0.0)
@@ -175,76 +198,50 @@ class Cube
   @mat_ry = Mat4.new
   @mat_rz = Mat4.new
 
-  def initialize
-    @mesh = Mesh.load("/Users/alex/Desktop/ship.obj")
-    # @mesh = Mesh.new([
-    #   # south
-    #   Tri.new(0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0),
-    #   Tri.new(0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0),
-    #
-    #   # east
-    #   Tri.new(1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0),
-    #   Tri.new(1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0),
-    #
-    #   # north
-    #   Tri.new(1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0),
-    #   Tri.new(1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0),
-    #
-    #   # west
-    #   Tri.new(0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0),
-    #   Tri.new(0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0),
-    #
-    #   # top
-    #   Tri.new(0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0),
-    #   Tri.new(0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0),
-    #
-    #   # bottom
-    #   Tri.new(1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0),
-    #   Tri.new(1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0),
-    # ])
+  def initialize(obj : String)
+    @mesh = Mesh.load(obj)
   end
 
   def update(dt : Float64)
-    @mat_rz[0, 0] = Math.cos(@rotation.z)
-    @mat_rz[0, 1] = Math.sin(@rotation.z)
-    @mat_rz[1, 0] = -Math.sin(@rotation.z)
-    @mat_rz[1, 1] = Math.cos(@rotation.z)
-    @mat_rz[2, 2] = 1.0
-    @mat_rz[3, 3] = 1.0
+    coz = Math.cos(@rotation.z)
+    siz = Math.sin(@rotation.z)
+    cox = Math.cos(@rotation.x)
+    sox = Math.sin(@rotation.x)
+    coy = Math.cos(@rotation.y)
+    soy = Math.sin(@rotation.y)
 
-    @mat_rx[0, 0] = 1.0
-    @mat_rx[1, 1] = Math.cos(@rotation.x)
-    @mat_rx[1, 2] = Math.sin(@rotation.x)
-    @mat_rx[2, 1] = -Math.sin(@rotation.x)
-    @mat_rx[2, 2] = Math.cos(@rotation.x)
-    @mat_rx[3, 3] = 1.0
+    @mat_rz.set({
+      {coz, siz, 0.0, 0.0},
+      {-siz, coz, 0.0, 0.0},
+      {0.0, 0.0, 1.0, 0.0},
+      {0.0, 0.0, 0.0, 1.0},
+    })
 
-    @mat_ry[0, 0] = Math.cos(@rotation.y)
-    @mat_ry[0, 2] = Math.sin(@rotation.y)
-    @mat_ry[1, 1] = 1.0
-    @mat_ry[2, 0] = -Math.sin(@rotation.y)
-    @mat_ry[2, 2] = Math.cos(@rotation.y)
-    @mat_ry[3, 3] = 1.0
+    @mat_rx.set({
+      {1.0, 0.0, 0.0, 0.0},
+      {0.0, cox, sox, 0.0},
+      {0.0, -sox, cox, 0.0},
+      {0.0, 0.0, 0.0, 1.0},
+    })
+
+    @mat_ry.set({
+      {coy, 0.0, soy, 0.0},
+      {0.0, 1.0, 0.0, 0.0},
+      {-soy, 0.0, coy, 0.0},
+      {0.0, 0.0, 0.0, 1.0},
+    })
   end
 
   def draw(engine : PF::Game, mat_proj, camera, light)
     # Translation and rotation
     tris = @mesh.tris.map do |tri|
-      tri.p1 *= @mat_rx
-      tri.p2 *= @mat_rx
-      tri.p3 *= @mat_rx
+      tri *= @mat_rx
+      tri *= @mat_ry
+      tri *= @mat_rz
 
-      tri.p1 *= @mat_ry
-      tri.p2 *= @mat_ry
-      tri.p3 *= @mat_ry
-
-      tri.p1 *= @mat_rz
-      tri.p2 *= @mat_rz
-      tri.p3 *= @mat_rz
-
-      tri.p1.z = tri.p1.z + 8.0
-      tri.p2.z = tri.p2.z + 8.0
-      tri.p3.z = tri.p3.z + 8.0
+      tri.p1.z = tri.p1.z + 6.0
+      tri.p2.z = tri.p2.z + 6.0
+      tri.p3.z = tri.p3.z + 6.0
 
       tri
     end
@@ -283,7 +280,7 @@ class Cube
 end
 
 class CubeGame < PF::Game
-  @cube : Cube
+  @cube : Model
   @paused = false
 
   @aspect_ratio : Float64
@@ -300,7 +297,7 @@ class CubeGame < PF::Game
   def initialize(@width, @height, @scale)
     super(@width, @height, @scale)
 
-    @cube = Cube.new
+    @cube = Model.new("examples/cube.obj")
 
     @controller = PF::Controller(LibSDL::Keycode).new({
       LibSDL::Keycode::RIGHT => "Rotate Right",
