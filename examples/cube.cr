@@ -9,8 +9,9 @@ struct Vec3d(T)
   property x : T
   property y : T
   property z : T
+  property w : T
 
-  def initialize(@x : T, @y : T, @z : T)
+  def initialize(@x : T, @y : T, @z : T, @w = T.new(1))
   end
 
   def +(other : T)
@@ -201,25 +202,19 @@ class Model
   @mat_rx = Mat4.new
   @mat_ry = Mat4.new
   @mat_rz = Mat4.new
+  @mat_translation = Mat4.new
 
   def initialize(obj : String)
     @mesh = Mesh.load(obj)
   end
 
   def update(dt : Float64)
-    coz = Math.cos(@rotation.z)
-    siz = Math.sin(@rotation.z)
     cox = Math.cos(@rotation.x)
     sox = Math.sin(@rotation.x)
     coy = Math.cos(@rotation.y)
     soy = Math.sin(@rotation.y)
-
-    @mat_rz.set({
-      {coz, siz, 0.0, 0.0},
-      {-siz, coz, 0.0, 0.0},
-      {0.0, 0.0, 1.0, 0.0},
-      {0.0, 0.0, 0.0, 1.0},
-    })
+    coz = Math.cos(@rotation.z)
+    siz = Math.sin(@rotation.z)
 
     @mat_rx.set({
       {1.0, 0.0, 0.0, 0.0},
@@ -234,6 +229,20 @@ class Model
       {-soy, 0.0, coy, 0.0},
       {0.0, 0.0, 0.0, 1.0},
     })
+
+    @mat_rz.set({
+      {coz, siz, 0.0, 0.0},
+      {-siz, coz, 0.0, 0.0},
+      {0.0, 0.0, 1.0, 0.0},
+      {0.0, 0.0, 0.0, 1.0},
+    })
+
+    @mat_translation.set({
+      {1.0, 0.0, 0.0, 0.0},
+      {0.0, 1.0, 0.0, 0.0},
+      {0.0, 0.0, 1.0, 0.0},
+      {@position.x, @position.y, @position.z, 1.0},
+    })
   end
 
   def draw(engine : PF::Game, mat_proj, camera, light)
@@ -242,10 +251,7 @@ class Model
       tri *= @mat_rx
       tri *= @mat_ry
       tri *= @mat_rz
-
-      tri.p1.z = tri.p1.z + 6.0
-      tri.p2.z = tri.p2.z + 6.0
-      tri.p3.z = tri.p3.z + 6.0
+      tri *= @mat_translation
 
       tri
     end
@@ -256,10 +262,10 @@ class Model
     end
 
     # sort triangles
-    tris = tris.sort { |a, b| b.z <=> a.z }
+    tris = tris.sort { |a, b| a.z <=> b.z }
 
     tris.each do |tri|
-      shade : UInt8 = (tri.normal.dot(light) * 255.0).clamp(0.0..255.0).to_u8
+      shade : UInt8 = (tri.normal.dot(light).abs * 255.0).clamp(0.0..255.0).to_u8
 
       tri.p1 *= mat_proj
       tri.p2 *= mat_proj
@@ -302,6 +308,7 @@ class CubeGame < PF::Game
     super(@width, @height, @scale)
 
     @cube = Model.new("examples/cube.obj")
+    @cube.position.z = @cube.position.z - 3.0
 
     @controller = PF::Controller(LibSDL::Keycode).new({
       LibSDL::Keycode::RIGHT => "Rotate Right",
@@ -349,7 +356,6 @@ class CubeGame < PF::Game
     end
 
     unless @paused
-      @theta += dt
       @cube.rotation.y = @cube.rotation.y + 1.0 * dt
     end
 
