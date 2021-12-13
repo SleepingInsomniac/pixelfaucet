@@ -64,10 +64,14 @@ struct Vec3d(T)
     )
   end
 
+  # Geth the length using pythagorean
+  def length
+    Math.sqrt(@x * @x + @y * @y + @z * @z)
+  end
+
   def normalized
-    # pythag
-    length = Math.sqrt(@x * @x + @y * @y + @z * @z)
-    Vec3d.new(@x / length, @y / length, @z / length)
+    l = length
+    Vec3d.new(@x / l, @y / l, @z / l)
   end
 
   # Returns the dot product
@@ -329,24 +333,24 @@ class CubeGame < PF::Game
     @paused = !@paused if @controller.pressed?("Pause")
 
     if @controller.action?("Rotate Right")
-      @cube.rotation = Vec3d.new(@cube.rotation.x + @speed * dt, @cube.rotation.y, @cube.rotation.z)
+      @cube.rotation.x = @cube.rotation.x + @speed * dt
     end
 
     if @controller.action?("Rotate Left")
-      @cube.rotation = Vec3d.new(@cube.rotation.x - @speed * dt, @cube.rotation.y, @cube.rotation.z)
+      @cube.rotation.x = @cube.rotation.x - @speed * dt
     end
 
     if @controller.action?("Rotate Up")
-      @cube.rotation = Vec3d.new(@cube.rotation.x, @cube.rotation.y, @cube.rotation.z - @speed * dt)
+      @cube.rotation.z = @cube.rotation.z - @speed * dt
     end
 
     if @controller.action?("Rotate Down")
-      @cube.rotation = Vec3d.new(@cube.rotation.x, @cube.rotation.y, @cube.rotation.z + @speed * dt)
+      @cube.rotation.z = @cube.rotation.z + @speed * dt
     end
 
     unless @paused
       @theta += dt
-      @cube.rotation = Vec3d.new(@cube.rotation.x, @cube.rotation.y + 1.0 * dt, @cube.rotation.z)
+      @cube.rotation.y = @cube.rotation.y + 1.0 * dt
     end
 
     @cube.update(dt)
@@ -358,5 +362,5 @@ class CubeGame < PF::Game
   end
 end
 
-engine = CubeGame.new(200, 200, 3)
+engine = CubeGame.new(400, 300, 2)
 engine.run!
