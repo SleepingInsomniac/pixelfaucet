@@ -114,6 +114,19 @@ struct Mat4
   def []=(index, value)
     @matrix[index] = value
   end
+
+  # Does not work for scaling, only for rotation / translation
+  def quick_inverse
+    matrix = Mat4.new
+    matrix[0, 0] = self[0, 0]; matrix[0, 1] = self[1, 0]; matrix[0, 2] = self[2, 0]; matrix[0, 3] = 0.0
+    matrix[1, 0] = self[0, 1]; matrix[1, 1] = self[1, 1]; matrix[1, 2] = self[2, 1]; matrix[1, 3] = 0.0
+    matrix[2, 0] = self[0, 2]; matrix[2, 1] = self[1, 2]; matrix[2, 2] = self[2, 2]; matrix[2, 3] = 0.0
+    matrix[3, 0] = -(self[3, 0] * matrix[0, 0] + self[3, 1] * matrix[1, 0] + self[3, 2] * matrix[2, 0])
+    matrix[3, 1] = -(self[3, 0] * matrix[0, 1] + self[3, 1] * matrix[1, 1] + self[3, 2] * matrix[2, 1])
+    matrix[3, 2] = -(self[3, 0] * matrix[0, 2] + self[3, 1] * matrix[1, 2] + self[3, 2] * matrix[2, 2])
+    matrix[3, 3] = 1.0
+    matrix
+  end
 end
 
 struct Tri
@@ -245,7 +258,11 @@ class Model
     })
   end
 
-  def draw(engine : PF::Game, mat_proj, camera, light)
+  def draw(engine : PF::Game, mat_proj, camera, light, look_direction)
+    target = camera + look_direction
+    mat_camera = engine.point_at(camera, target, Vec3d.new(0.0, 1.0, 0.0))
+    mat_view = mat_camera.quick_inverse
+
     # Translation and rotation
     tris = @mesh.tris.map do |tri|
       tri *= @mat_rx
@@ -258,14 +275,18 @@ class Model
 
     # only draw triangles facing the camera
     tris = tris.select do |tri|
-      tri.normal.dot(tri.p1 - camera) < 0
+      tri.normal.dot(tri.p1 - camera) < 0.0
     end
 
     # sort triangles
-    tris = tris.sort { |a, b| a.z <=> b.z }
+    tris = tris.sort { |a, b| b.z <=> a.z }
 
     tris.each do |tri|
-      shade : UInt8 = (tri.normal.dot(light).abs * 255.0).clamp(0.0..255.0).to_u8
+      shade : UInt8 = (tri.normal.dot(light.normalized) * 255.0).clamp(0.0..255.0).to_u8
+
+      tri.p1 *= mat_view
+      tri.p2 *= mat_view
+      tri.p3 *= mat_view
 
       tri.p1 *= mat_proj
       tri.p2 *= mat_proj
@@ -275,9 +296,12 @@ class Model
       tri.p2 += 1.0
       tri.p3 += 1.0
 
-      tri.p1 *= 0.5 * engine.width
-      tri.p2 *= 0.5 * engine.width
-      tri.p3 *= 0.5 * engine.width
+      tri.p1.x = tri.p1.x * 0.5 * engine.width
+      tri.p1.y = tri.p1.y * 0.5 * engine.height
+      tri.p2.x = tri.p2.x * 0.5 * engine.width
+      tri.p2.y = tri.p2.y * 0.5 * engine.height
+      tri.p3.x = tri.p3.x * 0.5 * engine.width
+      tri.p3.y = tri.p3.y * 0.5 * engine.height
 
       engine.fill_triangle(
         PF::Point.new(tri.p1.x.to_i, tri.p1.y.to_i),
@@ -300,6 +324,7 @@ class CubeGame < PF::Game
   @far : Float64
   @camera : Vec3d(Float64)
   @light : Vec3d(Float64) = Vec3d.new(0.0, 0.0, -1.0).normalized
+  @look_direction : Vec3d(Float64)
 
   @mat_proj : Mat4
   @speed = 3.0
@@ -307,14 +332,15 @@ class CubeGame < PF::Game
   def initialize(@width, @height, @scale)
     super(@width, @height, @scale)
 
-    @cube = Model.new("examples/cube.obj")
-    @cube.position.z = @cube.position.z - 3.0
+    # @cube = Model.new("examples/cube.obj")
+    @cube = Model.new("/Users/alex/Desktop/axis.obj")
+    @cube.position.z = @cube.position.z + 20.0
 
     @controller = PF::Controller(LibSDL::Keycode).new({
-      LibSDL::Keycode::RIGHT => "Rotate Right",
-      LibSDL::Keycode::LEFT  => "Rotate Left",
-      LibSDL::Keycode::UP    => "Rotate Up",
-      LibSDL::Keycode::DOWN  => "Rotate Down",
+      LibSDL::Keycode::RIGHT => "Right",
+      LibSDL::Keycode::LEFT  => "Left",
+      LibSDL::Keycode::UP    => "Up",
+      LibSDL::Keycode::DOWN  => "Down",
       LibSDL::Keycode::SPACE => "Pause",
     })
 
@@ -324,6 +350,7 @@ class CubeGame < PF::Game
     @aspect_ratio = @height / @width
     @fov_rad = 1.0 / Math.tan(@fov * 0.5 / 180.0 * Math::PI)
     @camera = Vec3d.new(0.0, 0.0, 0.0)
+    @look_direction = Vec3d.new(0.0, 0.0, 1.0)
 
     @mat_proj = Mat4.new
     @mat_proj[0, 0] = @aspect_ratio * @fov_rad
@@ -336,27 +363,40 @@ class CubeGame < PF::Game
     @theta = 0.0
   end
 
+  def point_at(position : Vec3d, target : Vec3d, up : Vec3d = Vec3d.new(0.0, 1.0, 0.0))
+    new_forward = (target - position).normalized
+    new_up = (up - new_forward * up.dot(new_forward)).normalized
+    new_right = new_up.cross_product(new_forward)
+
+    matrix = Mat4.new
+    matrix[0, 0] = new_right.x; matrix[0, 1] = new_right.y; matrix[0, 2] = new_right.z; matrix[0, 3] = 0.0
+    matrix[1, 0] = new_up.x; matrix[1, 1] = new_up.y; matrix[1, 2] = new_up.z; matrix[1, 3] = 0.0
+    matrix[2, 0] = new_forward.x; matrix[2, 1] = new_forward.y; matrix[2, 2] = new_forward.z; matrix[2, 3] = 0.0
+    matrix[3, 0] = position.x; matrix[3, 1] = position.y; matrix[3, 2] = position.z; matrix[3, 3] = 1.0
+    matrix
+  end
+
   def update(dt)
     @paused = !@paused if @controller.pressed?("Pause")
 
-    if @controller.action?("Rotate Right")
-      @cube.rotation.x = @cube.rotation.x + @speed * dt
+    if @controller.action?("Right")
+      @camera.x = @camera.x + @speed * dt
     end
 
-    if @controller.action?("Rotate Left")
-      @cube.rotation.x = @cube.rotation.x - @speed * dt
+    if @controller.action?("Left")
+      @camera.x = @camera.x - @speed * dt
     end
 
-    if @controller.action?("Rotate Up")
-      @cube.rotation.z = @cube.rotation.z - @speed * dt
+    if @controller.action?("Up")
+      @camera.y = @camera.y - @speed * dt
     end
 
-    if @controller.action?("Rotate Down")
-      @cube.rotation.z = @cube.rotation.z + @speed * dt
+    if @controller.action?("Down")
+      @camera.y = @camera.y + @speed * dt
     end
 
     unless @paused
-      @cube.rotation.y = @cube.rotation.y + 1.0 * dt
+      # @cube.rotation.y = @cube.rotation.y + 1.0 * dt
     end
 
     @cube.update(dt)
@@ -364,7 +404,7 @@ class CubeGame < PF::Game
 
   def draw
     clear(0, 0, 100)
-    @cube.draw(self, @mat_proj, @camera, @light)
+    @cube.draw(self, @mat_proj, @camera, @light, @look_direction)
   end
 end
 
