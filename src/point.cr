@@ -20,5 +20,9 @@ module PF
       self.y - other.y
       self
     end
+
+    def inspect
+      "(#{@x}, #{@y})"
+    end
   end
 end
