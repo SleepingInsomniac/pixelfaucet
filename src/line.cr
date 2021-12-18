@@ -15,7 +15,7 @@ module PF
 
     def slope
       return 0.0 if run == 0
-      rise.to_f / run.to_f
+      rise / run
     end
 
     def length

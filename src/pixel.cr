@@ -4,6 +4,10 @@ module PF
       new(rand(0_u8..0xFF_u8), rand(0_u8..0xFF_u8), rand(0_u8..0xFF_u8), 0xFF_u8)
     end
 
+    def self.white
+      new(255, 255, 255)
+    end
+
     def self.red
       new(255, 0, 0)
     end

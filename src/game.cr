@@ -132,6 +132,10 @@ module PF
       end
     end
 
+    def draw_rect(p1 : PF::Point(Int), p2 : PF::Point(Int), pixel : Pixel = Pixel.new, surface = @screen)
+      draw_rect(p1.x, p1.y, p2.x, p2.y, pixel, surface)
+    end
+
     # Draw lines enclosing a shape
     def draw_shape(frame : Array(Vector2), pixel : Pixel = Pixel.new, surface = @screen)
       0.upto(frame.size - 1) do |n|

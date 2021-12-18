@@ -18,6 +18,7 @@ module PF
       # sort left and right edges by run / rise
       line_left = PF::Line.new(p1, p2)
       line_right = PF::Line.new(p1, p3)
+
       if line_left.run / line_left.rise > line_right.run / line_right.rise
         line_left, line_right = line_right, line_left
       end
@@ -72,11 +73,12 @@ module PF
       edge1 = calculate_edge(p1, p2)
       edge2 = calculate_edge(p1, p3)
       edge3 = calculate_edge(p2, p3)
-      edge3.pop
 
       if edge1.size > edge2.size
+        edge2.pop
         edge2.concat edge3
       else
+        edge1.pop
         edge1.concat edge3
       end
 
