@@ -23,10 +23,10 @@ module PF
     @last_time : Float64 = Time.monotonic.total_milliseconds
     @controller : Controller(LibSDL::Keycode)
 
-    def initialize(@width, @height, @scale = 1, @title = self.class.name, flags = SDL::Renderer::Flags::PRESENTVSYNC)
+    def initialize(@width, @height, @scale = 1, @title = self.class.name, flags = SDL::Renderer::Flags::ACCELERATED)
       SDL.init(SDL::Init::VIDEO)
       @window = SDL::Window.new(@title, @width * @scale, @height * @scale)
-      @renderer = SDL::Renderer.new(@window, flags: flags) # , flags: SDL::Renderer::Flags::SOFTWARE)
+      @renderer = SDL::Renderer.new(@window, flags: flags)
       @renderer.scale = {@scale, @scale}
       @screen = SDL::Surface.new(LibSDL.create_rgb_surface(
         flags: 0, width: @width, height: @height, depth: 32,

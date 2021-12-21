@@ -10,18 +10,17 @@ require "../src/3d/*"
 
 class ThreeDee < PF::Game
   @projector : PF::Projector
-  @paused = false
-  @light : PF::Vec3d(Float64) = PF::Vec3d.new(0.0, 0.0, -1.0).normalized
-  @speed = 5.0
   @camera : PF::Camera
-  @text = PF::PixelText.new("assets/pf-font.png")
+  @paused = false
+  @speed = 5.0
+  @text = PF::PixelText.new("./assets/pf-font.png")
 
-  def initialize(@width, @height, @scale)
-    super(@width, @height, @scale)
+  def initialize(*args, **kwargs)
+    super
 
     @projector = PF::Projector.new(@width, @height)
     @camera = @projector.camera
-    @model = PF::Mesh.load_obj("examples/pixelfaucet.obj")
+    @model = PF::Mesh.load_obj("./assets/pixelfaucet.obj")
     @model.position.z = @model.position.z + 2.0
 
     @controller = PF::Controller(LibSDL::Keycode).new({
@@ -112,5 +111,5 @@ class ThreeDee < PF::Game
   end
 end
 
-engine = ThreeDee.new(200, 160, 4)
+engine = ThreeDee.new(320, 200, 4)
 engine.run!
