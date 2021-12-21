@@ -15,6 +15,7 @@ module PF
     property scale : Int32
     property title : String
     property running = true
+    property screen : SDL::Surface
 
     @fps_lasttime : Float64 = Time.monotonic.total_milliseconds # the last recorded time.
     @fps_current : UInt32 = 0                                   # the current FPS.

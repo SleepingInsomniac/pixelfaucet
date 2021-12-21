@@ -4,57 +4,25 @@ require "../src/sprite"
 require "../src/sprite/vector_sprite"
 require "../src/pixel"
 require "../src/point"
+require "../src/pixel_text"
 
 require "../src/3d/*"
 
-class Model
-  property mesh : PF::Mesh
-  property position = PF::Vec3d(Float64).new(0.0, 0.0, 0.0)
-  property rotation = PF::Vec3d(Float64).new(0.0, 0.0, 0.0)
-
-  def initialize(obj_path : String)
-    @mesh = PF::Mesh.load_obj(obj_path)
-  end
-
-  def update(dt : Float64)
-    @rotation.x += 0.33 * dt
-    @rotation.y += 0.66 * dt
-  end
-
-  def draw(engine : PF::Game, projector : PF::Projector)
-    projector.project(@mesh.tris, rotation: @rotation, position: @position).each do |tri|
-      # Rasterize all triangles
-      engine.fill_triangle(
-        PF::Point.new(tri.p1.x.to_i, tri.p1.y.to_i),
-        PF::Point.new(tri.p2.x.to_i, tri.p2.y.to_i),
-        PF::Point.new(tri.p3.x.to_i, tri.p3.y.to_i),
-        pixel: tri.color
-      )
-
-      engine.draw_triangle(
-        PF::Point.new(tri.p1.x.to_i, tri.p1.y.to_i),
-        PF::Point.new(tri.p2.x.to_i, tri.p2.y.to_i),
-        PF::Point.new(tri.p3.x.to_i, tri.p3.y.to_i),
-        pixel: PF::Pixel.green
-      )
-    end
-  end
-end
-
-class CubeGame < PF::Game
+class ThreeDee < PF::Game
   @projector : PF::Projector
   @paused = false
   @light : PF::Vec3d(Float64) = PF::Vec3d.new(0.0, 0.0, -1.0).normalized
   @speed = 5.0
   @camera : PF::Camera
+  @text = PF::PixelText.new("assets/pf-font.png")
 
   def initialize(@width, @height, @scale)
     super(@width, @height, @scale)
 
     @projector = PF::Projector.new(@width, @height)
     @camera = @projector.camera
-    @cube = Model.new("examples/cube.obj")
-    @cube.position.z = @cube.position.z + 3.0
+    @model = PF::Mesh.load_obj("examples/pixelfaucet.obj")
+    @model.position.z = @model.position.z + 2.0
 
     @controller = PF::Controller(LibSDL::Keycode).new({
       LibSDL::Keycode::RIGHT => "Rotate Right",
@@ -76,11 +44,11 @@ class CubeGame < PF::Game
     strafe = @camera.strafe_vector
 
     if @controller.action?("Right")
-      @camera.position = @camera.position - (strafe * @speed * dt)
+      @camera.position = @camera.position + (strafe * @speed * dt)
     end
 
     if @controller.action?("Left")
-      @camera.position = @camera.position + (strafe * @speed * dt)
+      @camera.position = @camera.position - (strafe * @speed * dt)
     end
 
     if @controller.action?("Up")
@@ -91,12 +59,22 @@ class CubeGame < PF::Game
       @camera.position.y = @camera.position.y - @speed * dt
     end
 
+    # Controll the camera pitch instead of aft -
+
+    # if @controller.action?("Up")
+    #   @camera.pitch = @camera.pitch + (@speed / 2) * dt
+    # end
+
+    # if @controller.action?("Down")
+    #   @camera.pitch = @camera.pitch - (@speed / 2) * dt
+    # end
+
     if @controller.action?("Rotate Left")
-      @camera.yaw = @camera.yaw + (@speed / 2) * dt
+      @camera.yaw = @camera.yaw - (@speed / 2) * dt
     end
 
     if @controller.action?("Rotate Right")
-      @camera.yaw = @camera.yaw - (@speed / 2) * dt
+      @camera.yaw = @camera.yaw + (@speed / 2) * dt
     end
 
     if @controller.action?("Forward")
@@ -107,14 +85,32 @@ class CubeGame < PF::Game
       @camera.position = @camera.position - (forward * @speed * dt)
     end
 
-    @cube.update(dt)
+    @model.rotation.x = @model.rotation.x + 3.0 * dt
   end
 
   def draw
-    clear(0, 0, 100)
-    @cube.draw(self, @projector)
+    clear(25, 50, 25)
+    tris = @projector.project(@model.tris)
+    @text.draw(@screen, "Triangles: #{tris.size}")
+
+    tris.each do |tri|
+      # Rasterize all triangles
+      fill_triangle(
+        PF::Point.new(tri.p1.x.to_i, tri.p1.y.to_i),
+        PF::Point.new(tri.p2.x.to_i, tri.p2.y.to_i),
+        PF::Point.new(tri.p3.x.to_i, tri.p3.y.to_i),
+        pixel: tri.color
+      )
+
+      # engine.draw_triangle(
+      #   PF::Point.new(tri.p1.x.to_i, tri.p1.y.to_i),
+      #   PF::Point.new(tri.p2.x.to_i, tri.p2.y.to_i),
+      #   PF::Point.new(tri.p3.x.to_i, tri.p3.y.to_i),
+      #   pixel: PF::Pixel.blue
+      # )
+    end
   end
 end
 
-engine = CubeGame.new(400, 300, 2)
+engine = ThreeDee.new(200, 160, 4)
 engine.run!

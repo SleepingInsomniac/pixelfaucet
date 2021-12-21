@@ -19,7 +19,8 @@ module PF
       line_start + line_to_intersect
     end
 
-    def initialize(@x : T, @y : T, @z : T, @w = T.new(1))
+    def initialize(@x : T, @y : T, @z : T, w = nil)
+      @w = w || T.new(1)
     end
 
     def +(other : T)

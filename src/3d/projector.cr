@@ -38,28 +38,18 @@ module PF
       @fov_rad ||= 1.0 / Math.tan(@fov * 0.5 / 180.0 * Math::PI)
     end
 
-    def project(tris : Array(Tri), rotation : Vec3d(Float64), position : Vec3d(Float64), camera = @camera)
+    def project(tris : Array(Tri), camera = @camera)
       mat_view = camera.view_matrix
-
-      # Translation and rotation
-      tris = tris.map do |tri|
-        tri *= Mat4.rotation(rotation)
-        tri *= Mat4.translation(position)
-        tri
-      end
 
       # only draw triangles facing the camera
       tris = tris.select do |tri|
         tri.normal.dot(tri.p1 - camera.position) < 0.0
       end
 
-      # sort triangles
-      tris = tris.sort { |a, b| b.z <=> a.z }
-
       0.upto(tris.size - 1) do
         tri = tris.pop
-        shade : UInt8 = (tri.normal.dot(light.normalized) * 255.0).clamp(0.0..255.0).to_u8
-        tri.color = Pixel.new(shade, shade, shade, 255)
+        shade = (tri.normal.dot(light) + 1.0) / 2 # light should be normalized
+        tri.color = tri.color * shade.clamp(0.0..1.0)
 
         tri.p1 *= mat_view
         tri.p2 *= mat_view
@@ -70,10 +60,7 @@ module PF
           tri.p2 *= mat_proj
           tri.p3 *= mat_proj
 
-          tri.p1.x = tri.p1.x * -1.0
-          tri.p2.x = tri.p2.x * -1.0
-          tri.p3.x = tri.p3.x * -1.0
-
+          # Invert the y axis
           tri.p1.y = tri.p1.y * -1.0
           tri.p2.y = tri.p2.y * -1.0
           tri.p3.y = tri.p3.y * -1.0
@@ -92,6 +79,9 @@ module PF
           tris.unshift(tri)
         end
       end
+
+      # sort triangles
+      tris = tris.sort { |a, b| b.z <=> a.z }
 
       # Clip against the edges of the screen
       {

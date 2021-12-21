@@ -7,9 +7,9 @@ module PF
     property p3 : Vec3d(Float64)
     property color : PF::Pixel
 
-    @normal : Vec3d(Float64)?
+    setter normal : Vec3d(Float64)?
 
-    def initialize(@p1 : Vec3d(Float64), @p2 : Vec3d(Float64), @p3 : Vec3d(Float64), @color = PF::Pixel.white)
+    def initialize(@p1 : Vec3d(Float64), @p2 : Vec3d(Float64), @p3 : Vec3d(Float64), @color = PF::Pixel.white, @normal = nil)
     end
 
     def initialize(p1x : Float64, p1y : Float64, p1z : Float64, p2x : Float64, p2y : Float64, p2z : Float64, p3x : Float64, p3y : Float64, p3z : Float64, @color = PF::Pixel.white)
@@ -20,9 +20,11 @@ module PF
 
     # Return the normal assuming clockwise pointing winding
     def normal
-      line1 = @p2 - @p1
-      line2 = @p3 - @p1
-      @normal ||= line1.cross_product(line2).normalized
+      @normal ||= begin
+        line1 = @p2 - @p1
+        line2 = @p3 - @p1
+        line1.cross_product(line2).normalized
+      end
     end
 
     # Get the average x value

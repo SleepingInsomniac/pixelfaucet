@@ -5,7 +5,34 @@ module PF
   class Camera
     property position : Vec3d(Float64) = Vec3d.new(0.0, 0.0, 0.0)
     property up : Vec3d(Float64) = Vec3d.new(0.0, 1.0, 0.0)
-    property yaw : Float64 = 0.0
+    property rotation : Vec3d(Float64) = Vec3d.new(0.0, 0.0, 0.0)
+
+    # Rotation about the X axis
+    def pitch
+      @rotation.x
+    end
+
+    def pitch=(value)
+      @rotation.x = value
+    end
+
+    # Rotation about the Z axis
+    def roll
+      @rotation.z
+    end
+
+    def roll=(value)
+      @rotation.z = value
+    end
+
+    # Rotation about the Y axis
+    def yaw
+      @rotation.y
+    end
+
+    def yaw=(value)
+      @rotation.y = value
+    end
 
     def forward_vector
       Vec3d.new(0.0, 0.0, 1.0) * rotation_matrix
@@ -15,8 +42,12 @@ module PF
       Vec3d.new(1.0, 0.0, 0.0) * rotation_matrix
     end
 
+    def up_vector
+      Vec3d.new(0.0, 1.0, 0.0) * rotation_matrix
+    end
+
     def matrix
-      Mat4.point_at(@position, @position + forward_vector, @up)
+      Mat4.point_at(@position, @position + forward_vector, up_vector)
     end
 
     def view_matrix
@@ -24,7 +55,7 @@ module PF
     end
 
     def rotation_matrix
-      Mat4.rot_y(@yaw)
+      Mat4.rot_x(pitch) * Mat4.rot_y(yaw) * Mat4.rot_z(roll)
     end
 
     def move_right(delta : Float64)
@@ -44,11 +75,11 @@ module PF
     end
 
     def rotate_left(delta : Float64)
-      @yaw = @yaw + delta
+      self.yaw += delta
     end
 
     def rotate_right(delta : Float64)
-      @yaw = @yaw - delta
+      self.yaw -= delta
     end
 
     def move_forward(delta : Float64)

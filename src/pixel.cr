@@ -47,5 +47,21 @@ module PF
     def format(format)
       LibSDL.map_rgba(format, @r, @g, @b, @a)
     end
+
+    def *(n : Float64)
+      PF::Pixel.new((@r * n).to_u8, (@g * n).to_u8, (@b * n).to_u8, @a)
+    end
+
+    def /(n : Float64)
+      PF::Pixel.new((@r / n).to_u8, (@g / n).to_u8, (@b / n).to_u8, @a)
+    end
+
+    def +(n : Float64)
+      PF::Pixel.new((@r + n).to_u8, (@g + n).to_u8, (@b + n).to_u8, @a)
+    end
+
+    def -(n : Float64)
+      PF::Pixel.new((@r - n).to_u8, (@g - n).to_u8, (@b - n).to_u8, @a)
+    end
   end
 end
