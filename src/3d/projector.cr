@@ -3,20 +3,21 @@ require "./camera"
 
 module PF
   class Projector
-    property width : Int32 | Float64
-    property height : Int32 | Float64
+    getter width : Int32 | Float64
+    getter height : Int32 | Float64
     property near = 0.1
     property far = 1000.0
-    property fov = 90.0
+    getter fov = 90.0
     property aspect_ratio : Float64?
-    property fov_rad : Float64?
-    property camera : Camera = Camera.new
+    property camera : Camera
     property light : Vec3d(Float64) = Vec3d.new(0.0, 0.0, -1.0).normalized
     property mat_proj : Mat4?
-    property clipping_plane_near : Vec3d(Float64) = Vec3d.new(0.0, 0.0, 0.1)
+    property clipping_plane_near : Vec3d(Float64)
     property near_plane_normal : Vec3d(Float64) = Vec3d.new(0.0, 0.0, 1.0)
+    @fov_rad : Float64?
 
-    def initialize(@width, @height)
+    def initialize(@width, @height, @camera = Camera.new)
+      @clipping_plane_near = Vec3d.new(0.0, 0.0, @near)
     end
 
     def mat_proj
@@ -30,8 +31,23 @@ module PF
       end
     end
 
+    def width=(value)
+      @aspect_ratio = nil
+      @width = value
+    end
+
+    def height=(value)
+      @aspect_ratio = nil
+      @height = value
+    end
+
     def aspect_ratio
       @aspect_ratio ||= height / width
+    end
+
+    def fov=(value)
+      @fov_rad = nil # remove memoized value
+      @fov = value
     end
 
     def fov_rad

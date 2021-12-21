@@ -101,7 +101,7 @@ class ThreeDee < PF::Game
         pixel: tri.color
       )
 
-      # engine.draw_triangle(
+      # draw_triangle(
       #   PF::Point.new(tri.p1.x.to_i, tri.p1.y.to_i),
       #   PF::Point.new(tri.p2.x.to_i, tri.p2.y.to_i),
       #   PF::Point.new(tri.p3.x.to_i, tri.p3.y.to_i),
@@ -111,5 +111,5 @@ class ThreeDee < PF::Game
   end
 end
 
-engine = ThreeDee.new(320, 200, 4)
+engine = ThreeDee.new(256, 240, 4)
 engine.run!

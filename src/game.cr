@@ -9,6 +9,7 @@ module PF
   abstract class Game
     include CrystalEdge
     FPS_INTERVAL = 1.0
+    SHOW_FPS     = true
 
     property width : Int32
     property height : Int32
@@ -205,18 +206,21 @@ module PF
     # END drawing functions ========================
 
     private def engine_update
-      @fps_frames += 1
       et = elapsed_time
+      calculate_fps(et)
+      update((et - @last_time) / 1000.0)
+      @last_time = et
+    end
 
+    private def calculate_fps(et)
+      return unless SHOW_FPS
+      @fps_frames += 1
       if @fps_lasttime < et - FPS_INTERVAL * 1000
         @fps_lasttime = et
         @fps_current = @fps_frames
         @fps_frames = 0
         @window.title = String.build { |io| io << @title << " - " << @fps_current << " fps" }
       end
-
-      update((et - @last_time) / 1000.0)
-      @last_time = et
     end
 
     private def engine_draw
