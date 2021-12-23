@@ -19,28 +19,12 @@ module PF
       new_up = (up - new_forward * up.dot(new_forward)).normalized
       new_right = new_up.cross_product(new_forward)
 
-      matrix = Mat4.new
-      matrix[0, 0] = new_right.x
-      matrix[0, 1] = new_right.y
-      matrix[0, 2] = new_right.z
-      matrix[0, 3] = 0.0
-
-      matrix[1, 0] = new_up.x
-      matrix[1, 1] = new_up.y
-      matrix[1, 2] = new_up.z
-      matrix[1, 3] = 0.0
-
-      matrix[2, 0] = new_forward.x
-      matrix[2, 1] = new_forward.y
-      matrix[2, 2] = new_forward.z
-      matrix[2, 3] = 0.0
-
-      matrix[3, 0] = position.x
-      matrix[3, 1] = position.y
-      matrix[3, 2] = position.z
-      matrix[3, 3] = 1.0
-
-      matrix
+      Mat4.new(Slice[
+        new_right.x, new_up.x, new_forward.x, position.x,
+        new_right.y, new_up.y, new_forward.y, position.y,
+        new_right.z, new_up.z, new_forward.z, position.z,
+        0.0, 0.0, 0.0, 1.0,
+      ])
     end
 
     def self.rot_x(theta : T)
