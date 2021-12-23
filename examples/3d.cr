@@ -14,6 +14,7 @@ class ThreeDee < PF::Game
   @paused = false
   @speed = 5.0
   @text = PF::PixelText.new("./assets/pf-font.png")
+  @controller : PF::Controller(LibSDL::Scancode)
 
   def initialize(*args, **kwargs)
     super
@@ -23,20 +24,26 @@ class ThreeDee < PF::Game
     @model = PF::Mesh.load_obj("./assets/pixelfaucet.obj")
     @model.position.z = @model.position.z + 2.0
 
-    @controller = PF::Controller(LibSDL::Keycode).new({
-      LibSDL::Keycode::RIGHT => "Rotate Right",
-      LibSDL::Keycode::LEFT  => "Rotate Left",
-      LibSDL::Keycode::UP    => "Up",
-      LibSDL::Keycode::DOWN  => "Down",
-      LibSDL::Keycode::A     => "Left",
-      LibSDL::Keycode::E     => "Right",
-      LibSDL::Keycode::COMMA => "Forward",
-      LibSDL::Keycode::O     => "Backward",
-      LibSDL::Keycode::SPACE => "Pause",
+    @controller = PF::Controller(LibSDL::Scancode).new({
+      LibSDL::Scancode::RIGHT => "Rotate Right",
+      LibSDL::Scancode::LEFT  => "Rotate Left",
+      LibSDL::Scancode::UP    => "Up",
+      LibSDL::Scancode::DOWN  => "Down",
+      LibSDL::Scancode::A     => "Left",
+      LibSDL::Scancode::D     => "Right",
+      LibSDL::Scancode::W     => "Forward",
+      LibSDL::Scancode::S     => "Backward",
+      LibSDL::Scancode::SPACE => "Pause",
     })
   end
 
-  def update(dt)
+  def update(dt, event)
+    case event
+    when SDL::Event::Keyboard
+      @controller.press(event.scancode) if event.keydown?
+      @controller.release(event.scancode) if event.keyup?
+    end
+
     @paused = !@paused if @controller.pressed?("Pause")
 
     forward = @camera.forward_vector
@@ -111,5 +118,6 @@ class ThreeDee < PF::Game
   end
 end
 
-engine = ThreeDee.new(256, 240, 4)
+# engine = ThreeDee.new(256, 240, 4)
+engine = ThreeDee.new(640, 480, 2)
 engine.run!

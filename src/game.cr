@@ -22,7 +22,6 @@ module PF
     @fps_current : UInt32 = 0                                   # the current FPS.
     @fps_frames : UInt32 = 0                                    # frames passed since the last recorded fps.
     @last_time : Float64 = Time.monotonic.total_milliseconds
-    @controller : Controller(LibSDL::Keycode)
 
     def initialize(@width, @height, @scale = 1, @title = self.class.name, flags = SDL::Renderer::Flags::ACCELERATED)
       SDL.init(SDL::Init::VIDEO)
@@ -33,10 +32,9 @@ module PF
         flags: 0, width: @width, height: @height, depth: 32,
         r_mask: 0xFF000000, g_mask: 0x00FF0000, b_mask: 0x0000FF00, a_mask: 0x000000FF
       ))
-      @controller = Controller(LibSDL::Keycode).new({} of LibSDL::Keycode => String)
     end
 
-    abstract def update(dt : Float64)
+    abstract def update(dt : Float64, event : SDL::Event)
     abstract def draw
 
     def elapsed_time
@@ -205,10 +203,10 @@ module PF
 
     # END drawing functions ========================
 
-    private def engine_update
+    private def engine_update(event)
       et = elapsed_time
       calculate_fps(et)
-      update((et - @last_time) / 1000.0)
+      update((et - @last_time) / 1000.0, event)
       @last_time = et
     end
 
@@ -235,17 +233,11 @@ module PF
     def run!
       loop do
         case event = SDL::Event.poll
-        when SDL::Event::Keyboard
-          if event.keydown?
-            @controller.press(event.sym)
-          elsif event.keyup?
-            @controller.release(event.sym)
-          end
         when SDL::Event::Quit
           break
         end
 
-        engine_update
+        engine_update(event)
         engine_draw
 
         break unless @running

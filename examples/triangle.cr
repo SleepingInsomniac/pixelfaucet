@@ -6,8 +6,6 @@ require "../src/sprite"
 require "../src/sprite/vector_sprite"
 require "../src/pixel"
 
-# include CrystalEdge
-
 class Triangle < PF::Sprite
   include PF::VectorSprite
 
@@ -23,6 +21,7 @@ end
 class TriangleThing < PF::Game
   @tri : Triangle
   @paused = true
+  @controller : PF::Controller(LibSDL::Scancode)
 
   def initialize(@width, @height, @scale)
     super(@width, @height, @scale)
@@ -32,14 +31,14 @@ class TriangleThing < PF::Game
       t.frame = PF::VectorSprite.generate_circle(3, size = @width / 3)
     end
 
-    @controller = PF::Controller(LibSDL::Keycode).new({
-      LibSDL::Keycode::RIGHT => "Rotate Right",
-      LibSDL::Keycode::LEFT  => "Rotate Left",
-      LibSDL::Keycode::SPACE => "Pause",
-      LibSDL::Keycode::A     => "Move Left",
-      LibSDL::Keycode::E     => "Move Right",
-      LibSDL::Keycode::COMMA => "Move Up",
-      LibSDL::Keycode::O     => "Move Down",
+    @controller = PF::Controller(LibSDL::Scancode).new({
+      LibSDL::Scancode::RIGHT => "Rotate Right",
+      LibSDL::Scancode::LEFT  => "Rotate Left",
+      LibSDL::Scancode::SPACE => "Pause",
+      LibSDL::Scancode::A     => "Move Left",
+      LibSDL::Scancode::D     => "Move Right",
+      LibSDL::Scancode::W     => "Move Up",
+      LibSDL::Scancode::S     => "Move Down",
     })
   end
 

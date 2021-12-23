@@ -62,6 +62,7 @@ module PF
         tri.normal.dot(tri.p1 - camera.position) < 0.0
       end
 
+      # Iterate tris to transform into view, project, and clip
       0.upto(tris.size - 1) do
         tri = tris.pop
         shade = (tri.normal.dot(light) + 1.0) / 2 # light should be normalized
@@ -71,6 +72,7 @@ module PF
         tri.p2 *= mat_view
         tri.p3 *= mat_view
 
+        # Clip against the near plane
         tri.clip(plane: clipping_plane_near, plane_normal: near_plane_normal).each do |tri|
           tri.p1 *= mat_proj
           tri.p2 *= mat_proj
@@ -81,6 +83,7 @@ module PF
           tri.p2.y = tri.p2.y * -1.0
           tri.p3.y = tri.p3.y * -1.0
 
+          # scale into screen space
           tri.p1 += 1.0
           tri.p2 += 1.0
           tri.p3 += 1.0
@@ -97,7 +100,7 @@ module PF
       end
 
       # sort triangles
-      tris = tris.sort { |a, b| b.z <=> a.z }
+      tris.sort! { |a, b| b.z <=> a.z }
 
       # Clip against the edges of the screen
       {
