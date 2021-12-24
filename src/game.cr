@@ -175,6 +175,10 @@ module PF
       draw_circle(c.x, c.y, r, pixel, surface)
     end
 
+    def draw_circle(c : Vector2, r : Int, pixel : Pixel = Pixel.new, surface = @screen)
+      draw_circle(c.x.to_i, c.y.to_i, r, pixel, surface)
+    end
+
     def draw_triangle(p1 : Point, p2 : Point, p3 : Point, pixel : Pixel = Pixel.new, surface = @screen)
       draw_line(p1, p2, pixel, surface)
       draw_line(p2, p3, pixel, surface)
