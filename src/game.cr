@@ -3,7 +3,7 @@ require "./lib_sdl"
 require "./pixel"
 require "./point"
 require "./controller"
-require "./game/fill_triangle"
+require "./game/*"
 
 module PF
   abstract class Game

@@ -33,6 +33,7 @@ module PF
 
       0.upto(height) do |y|
         if slope_left == 0
+          # When there is no rise, set the x value directly
           x_left = line_left.p2.x
         else
           x_left = ((y - (line_left.p1.y - p1.y)) / slope_left).round.to_i + line_left.p1.x

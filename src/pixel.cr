@@ -8,6 +8,10 @@ module PF
       new(255, 255, 255)
     end
 
+    def self.black
+      new(0, 0, 0)
+    end
+
     def self.red
       new(255, 0, 0)
     end
