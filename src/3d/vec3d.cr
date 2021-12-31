@@ -76,7 +76,7 @@ module PF
 
     # Geth the length using pythagorean
     def length
-      Math.sqrt(@x * @x + @y * @y + @z * @z)
+      Math.sqrt(@x ** 2 + @y ** 2 + @z ** 2)
     end
 
     def normalized

@@ -70,5 +70,13 @@ module PF
     def to_vector
       Vector2.new(run.to_f64, rise.to_f64)
     end
+
+    def /(n : (Float | Int))
+      Line.new(@p1 / n, @p2 / n)
+    end
+
+    def to_point
+      Point.new(run, rise)
+    end
   end
 end
