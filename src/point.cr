@@ -29,8 +29,24 @@ module PF
       Point.new(x + other.x, y + other.y)
     end
 
+    def +(n : Float | Int)
+      Point.new(x + n, y + n)
+    end
+
     def -(other : Point(Float | Int))
       Point.new(x - other.x, y - other.y)
+    end
+
+    def -(n : Float | Int)
+      Point.new(x - n, y - n)
+    end
+
+    def >(other : Point)
+      @x > other.x && @y > other.y
+    end
+
+    def <(other : Point)
+      @x < other.x && @y < other.y
     end
 
     def abs
@@ -54,6 +70,15 @@ module PF
 
     def cross(other : Point)
       Point.new(x * other.y - y * other.x, y * other.x - x * other.y)
+    end
+
+    # Distance between two points
+    def distance(other : Point)
+      (self - other).length
+    end
+
+    def to_i32
+      Point(Int32).new(@x.to_i32, @y.to_i32)
     end
 
     def inspect
