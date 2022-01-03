@@ -11,6 +11,3 @@ license: MIT
 dependencies:
   sdl:
     github: ysbaddaden/sdl.cr
-  crystaledge:
-    github: unn4m3d/crystaledge
-    version: 0.2.6

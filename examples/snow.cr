@@ -1,5 +1,3 @@
-require "crystaledge"
-
 require "../src/game"
 require "../src/controller"
 require "../src/sprite"

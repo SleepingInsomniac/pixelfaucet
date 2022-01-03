@@ -1,4 +1,3 @@
-require "crystaledge"
 require "./lib_sdl"
 require "./pixel"
 require "./point"
@@ -7,7 +6,6 @@ require "./game/*"
 
 module PF
   abstract class Game
-    include CrystalEdge
     FPS_INTERVAL = 1.0
     SHOW_FPS     = true
 

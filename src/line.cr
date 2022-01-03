@@ -1,8 +1,4 @@
-require "crystaledge/vector2"
-
 module PF
-  include CrystalEdge
-
   struct Line(T)
     property p1 : Point(T), p2 : Point(T)
 
@@ -65,10 +61,6 @@ module PF
 
     def length
       Math.sqrt((run.abs * 2) + (rise.abs * 2))
-    end
-
-    def to_vector
-      Vector2.new(run.to_f64, rise.to_f64)
     end
 
     def /(n : (Float | Int))
