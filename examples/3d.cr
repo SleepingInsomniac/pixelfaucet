@@ -1,7 +1,6 @@
 require "../src/game"
 require "../src/controller"
 require "../src/sprite"
-require "../src/sprite/vector_sprite"
 require "../src/pixel"
 require "../src/point"
 require "../src/pixel_text"

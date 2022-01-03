@@ -49,6 +49,14 @@ module PF
       @x < other.x && @y < other.y
     end
 
+    def %(other : Point)
+      Point.new(x % other.x, y % other.y)
+    end
+
+    def %(n : Float | Int)
+      Point.new(x % n, y % n)
+    end
+
     def abs
       Point.new(x.abs, y.abs)
     end

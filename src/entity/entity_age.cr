@@ -1,5 +1,5 @@
 module PF
-  module SpriteAge
+  module EntityAge
     property lifespan : Float64 = Float64::INFINITY
     property age : Float64 = 0.0
 

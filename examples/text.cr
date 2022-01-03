@@ -15,7 +15,7 @@ class TextGame < PF::Game
     @msg = "Hello, World!"
   end
 
-  def update(dt)
+  def update(dt, event)
     @x += @dx * dt
     @y += @dy * dt
 

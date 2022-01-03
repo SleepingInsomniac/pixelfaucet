@@ -11,8 +11,9 @@ module PF
     FPS_INTERVAL = 1.0
     SHOW_FPS     = true
 
-    property width : Int32
-    property height : Int32
+    getter width : Int32
+    getter height : Int32
+    @viewport : Point(Int32)? = nil
     property scale : Int32
     property title : String
     property running = true
@@ -36,6 +37,22 @@ module PF
 
     abstract def update(dt : Float64, event : SDL::Event)
     abstract def draw
+
+    def width=(value : Int32)
+      @viewport = nil
+      @width = value
+      # TODO: Resize window
+    end
+
+    def height=(value : Int32)
+      @viewport = nil
+      @height = value
+      # TODO: Resize window
+    end
+
+    def viewport
+      @viewport ||= Point.new(@width, @height)
+    end
 
     def elapsed_time
       Time.monotonic.total_milliseconds
@@ -61,14 +78,19 @@ module PF
       end
     end
 
-    # Draw a single point
+    # ditto
     def draw_point(vector : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
       draw_point(vector.x.to_i32, vector.y.to_i32, pixel, surface)
     end
 
-    # Draw a single point
-    def draw_point(point, pixel : Pixel = Pixel.new, surface = @screen)
+    # ditto
+    def draw_point(point : Point(Int), pixel : Pixel = Pixel.new, surface = @screen)
       draw_point(point.x, point.y, pixel, surface)
+    end
+
+    # ditto
+    def draw_point(point : Point(Float64), pixel : Pixel = Pixel.new, surface = @screen)
+      draw_point(point.to_i32, pixel, surface)
     end
 
     # Draw a line using Bresenham’s Algorithm
@@ -106,13 +128,14 @@ module PF
       end
     end
 
-    # Draw a line using Bresenham’s Algorithm
-    def draw_line(p1 : Vector2, p2 : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
-      draw_line(p1.x.to_i, p1.y.to_i, p2.x.to_i, p2.y.to_i, pixel, surface)
+    # ditto
+    def draw_line(p1 : Point(Int), p2 : Point(Int), pixel : Pixel = Pixel.new, surface = @screen)
+      draw_line(p1.x, p1.y, p2.x, p2.y, pixel, surface)
     end
 
-    def draw_line(p1 : Point, p2 : Point, pixel : Pixel = Pixel.new, surface = @screen)
-      draw_line(p1.x, p1.y, p2.x, p2.y, pixel, surface)
+    # ditto
+    def draw_line(p1 : Point(Float), p2 : Point(Float), pixel : Pixel = Pixel.new, surface = @screen)
+      draw_line(p1.to_i32, p2.to_i32, pixel, surface)
     end
 
     # Draw the outline of a square rect

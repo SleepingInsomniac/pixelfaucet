@@ -1,40 +1,39 @@
-require "crystaledge"
+require "sdl/image"
 
 module PF
-  abstract class Sprite
-    include CrystalEdge
+  class Sprite
+    @surface : SDL::Surface
 
-    def self.build
-      sprite = new
-      yield sprite
-      sprite
+    delegate :convert, to: @img
+
+    def initialize(@surface)
     end
 
-    property position : Vector2
-    property velocity : Vector2
-    property scale : Vector2
-    property rotation : Float64
-    property rotation_speed : Float64
-    property mass : Float64 = 10.0
-
-    def initialize
-      @position = Vector2.new(0.0, 0.0)
-      @velocity = Vector2.new(0.0, 0.0)
-      @scale = Vector2.new(1.0, 1.0)
-      @rotation = 0.0
-      @rotation_speed = 0.0
+    def initialize(path : String)
+      @surface = SDL::IMG.load(path)
     end
 
-    def update_position(dt : Float64)
-      @rotation += @rotation_speed * dt
-      @position += @velocity * dt
+    def width
+      @surface.width
     end
 
-    def distance_between(other)
-      self.position.distance(other.position)
+    def height
+      @surface.height
     end
 
-    abstract def update(dt : Float64)
-    abstract def draw(engine : Game)
+    def draw(surface : SDL::Surface, x : Int32, y : Int32)
+      @surface.blit(surface, nil, SDL::Rect.new(x, y, width, height))
+    end
+
+    # Raw access to the pixels as a Slice
+    def pixels
+      Slice.new(@screen.pixels.as(Pointer(UInt32)), width * height)
+    end
+
+    # Get the pointer to a pixel
+    private def pixel_pointer(x : Int32, y : Int32)
+      target = @surface.pixels + (y * @surface.pitch) + (x * 4)
+      target.as(Pointer(UInt32))
+    end
   end
 end

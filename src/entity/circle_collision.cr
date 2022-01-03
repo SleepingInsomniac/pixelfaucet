@@ -1,33 +1,34 @@
-module PF
-  module CircleCollision
-    include CrystalEdge
+require "../entity"
 
+module PF
+  # This module contains methods to handle circle entity collision
+  module CircleCollision
     property radius : Float64 = 1.0
 
     # Check if two circles are colliding
-    def collides_with?(other : Sprite)
-      distance_between(other) < radius + other.radius
+    def collides_with?(other : Entity)
+      distance(other) < radius + other.radius
     end
 
     # Move objects so that they don't overlap
-    def offset_collision(other : Sprite)
-      distance = distance_between(other)
-      overlap = distance - radius - other.radius
-      offset = ((position - other.position) * (overlap / 2)) / distance
+    def offset_collision(other : Entity)
+      d = distance(other)
+      overlap = d - radius - other.radius
+      offset = ((position - other.position) * (overlap / 2)) / d
 
-      self.position -= offset
-      other.position += offset
+      self.position = position - offset
+      other.position = other.position + offset
     end
 
     # Resolve a collision by offsetting the two positions
     # and transfering the momentum
-    def resolve_collision(other : VectorSprite)
+    def resolve_collision(other : Entity)
       offset_collision(other)
-      distance = distance_between(other)
+      d = distance(other)
 
       # Calculate the new velocities
-      normal_vec = (position - other.position) / distance
-      tangental_vec = Vector2.new(-normal_vec.y, normal_vec.x)
+      normal_vec = (position - other.position) / d
+      tangental_vec = Point(Float64).new(-normal_vec.y, normal_vec.x)
 
       # Dot product of velocity with the tangent
       # (the direction in which to bounce towards)
