@@ -109,5 +109,5 @@ class Snow < PF::Game
   end
 end
 
-engine = Snow.new(1200, 800, 1)
+engine = Snow.new(1200, 800, 1, window_flags: SDL::Window::Flags::RESIZABLE | SDL::Window::Flags::SHOWN)
 engine.run!

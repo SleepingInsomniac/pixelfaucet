@@ -27,7 +27,7 @@ module PF
 
     # Raw access to the pixels as a Slice
     def pixels
-      Slice.new(@screen.pixels.as(Pointer(UInt32)), width * height)
+      Slice.new(@surface.pixels.as(Pointer(UInt32)), width * height)
     end
 
     # Get the pointer to a pixel

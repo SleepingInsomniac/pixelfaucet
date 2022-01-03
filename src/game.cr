@@ -24,9 +24,11 @@ module PF
     @fps_frames : UInt32 = 0                                    # frames passed since the last recorded fps.
     @last_time : Float64 = Time.monotonic.total_milliseconds
 
-    def initialize(@width, @height, @scale = 1, @title = self.class.name, flags = SDL::Renderer::Flags::ACCELERATED)
+    def initialize(@width, @height, @scale = 1, @title = self.class.name,
+                   flags = SDL::Renderer::Flags::ACCELERATED,
+                   window_flags : SDL::Window::Flags = SDL::Window::Flags::SHOWN)
       SDL.init(SDL::Init::VIDEO)
-      @window = SDL::Window.new(@title, @width * @scale, @height * @scale)
+      @window = SDL::Window.new(@title, @width * @scale, @height * @scale, flags: window_flags)
       @renderer = SDL::Renderer.new(@window, flags: flags)
       @renderer.scale = {@scale, @scale}
       @screen = SDL::Surface.new(LibSDL.create_rgb_surface(

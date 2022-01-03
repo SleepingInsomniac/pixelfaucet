@@ -3,11 +3,11 @@ require "./sprite"
 
 module PF
   class PixelText < Sprite
-    getter width : Int32
-    getter height : Int32
+    getter char_width : Int32
+    getter char_height : Int32
     @chars : String
 
-    def initialize(path : String, @width : Int32 = 7, @height : Int32 = 8, mapping : String? = nil)
+    def initialize(path : String, @char_width : Int32 = 7, @char_height : Int32 = 8, mapping : String? = nil)
       super(path)
       @chars = mapping || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?().,/\\[]{}$#+-“”‘’'\"@"
     end
@@ -16,14 +16,8 @@ module PF
       color_val = pixel.format(@surface.format)
       alpha_mask = @surface.format.a_mask
 
-      0.upto(@surface.height - 1) do |y|
-        0.upto(@surface.width - 1) do |x|
-          loc = pixel_pointer(x, y)
-
-          if loc.value & alpha_mask != 0
-            loc.value = color_val
-          end
-        end
+      pixels.map! do |p|
+        p & alpha_mask != 0_u32 ? color_val : 0_u32
       end
     end
 
@@ -39,11 +33,14 @@ module PF
 
         if index = @chars.index(char)
           char_y, char_x = index.divmod(26)
-          char_y *= @height
-          char_x *= @width
+          char_y *= @char_height
+          char_x *= @char_width
 
           unless char == ' '
-            @surface.blit(surface, SDL::Rect.new(char_x - 1, char_y, @width, @height), SDL::Rect.new(x + ix * @width, y + iy * @height, @width, @height))
+            @surface.blit(surface,
+              SDL::Rect.new(char_x - 1, char_y, @char_width, @char_height),
+              SDL::Rect.new(x + ix * @char_width, y + iy * @char_height, @char_width, @char_height)
+            )
           end
         end
 
