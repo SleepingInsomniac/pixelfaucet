@@ -14,6 +14,10 @@ module PF
     def initialize(@sprite = nil)
     end
 
+    def initialize(sprite_path : String)
+      @sprite = Sprite.new(sprite_path)
+    end
+
     def update(dt : Float64)
       @rotation += @rotation_speed * dt
       @position += @velocity * dt

@@ -73,6 +73,11 @@ module PF
     # Drawing functions
     # =================
 
+    # Unsafely draw a single point
+    def unsafe_draw_point(x : Int32, y : Int32, color : UInt32, surface = @screen)
+      pixel_pointer(x, y, surface).value = color
+    end
+
     # Draw a single point
     def draw_point(x : Int32, y : Int32, pixel : Pixel = Pixel.new, surface = @screen)
       if x >= 0 && x < @width && y >= 0 && y < @height
@@ -94,6 +99,8 @@ module PF
     def draw_point(point : Point(Float64), pixel : Pixel = Pixel.new, surface = @screen)
       draw_point(point.to_i32, pixel, surface)
     end
+
+    # =================
 
     # Draw a line using Bresenham’s Algorithm
     def draw_line(x1 : Int, y1 : Int, x2 : Int, y2 : Int, pixel : Pixel = Pixel.new, surface = @screen)
@@ -140,6 +147,8 @@ module PF
       draw_line(p1.to_i32, p2.to_i32, pixel, surface)
     end
 
+    # =================
+
     # Draw the outline of a square rect
     def draw_rect(x1 : Int, y1 : Int, x2 : Int, y2 : Int, pixel : Pixel = Pixel.new, surface = @screen)
       # draw from top left to bottom right
@@ -161,12 +170,16 @@ module PF
       draw_rect(p1.x, p1.y, p2.x, p2.y, pixel, surface)
     end
 
+    # =================
+
     # Draw lines enclosing a shape
     def draw_shape(frame : Array(Vector2), pixel : Pixel = Pixel.new, surface = @screen)
       0.upto(frame.size - 1) do |n|
         draw_line(frame[n], frame[(n + 1) % frame.size], pixel, surface)
       end
     end
+
+    # =================
 
     # Draw a circle using Bresenham’s Algorithm
     def draw_circle(cx : Int, cy : Int, r : Int, pixel : Pixel = Pixel.new, surface = @screen)
@@ -204,6 +217,8 @@ module PF
       draw_circle(c.x.to_i, c.y.to_i, r, pixel, surface)
     end
 
+    # =================
+
     def draw_triangle(p1 : Point, p2 : Point, p3 : Point, pixel : Pixel = Pixel.new, surface = @screen)
       draw_line(p1, p2, pixel, surface)
       draw_line(p2, p3, pixel, surface)
@@ -216,6 +231,8 @@ module PF
       p3 = Point(Int32).new(x: p3.x.to_i, y: p3.y.to_i)
       draw_triangle(p1, p2, p3, pixel, surface)
     end
+
+    # =================
 
     # Fill a rect
     def fill_rect(x1 : Int, y1 : Int, x2 : Int, y2 : Int, pixel : Pixel = Pixel.new, surface = @screen)
@@ -230,7 +247,9 @@ module PF
       end
     end
 
-    # END drawing functions ========================
+    # =====================
+    # END drawing functions
+    # =====================
 
     private def engine_update(event)
       et = elapsed_time

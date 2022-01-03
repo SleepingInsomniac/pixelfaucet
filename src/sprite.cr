@@ -2,9 +2,9 @@ require "sdl/image"
 
 module PF
   class Sprite
-    @surface : SDL::Surface
+    property surface : SDL::Surface
 
-    delegate :convert, to: @img
+    delegate :convert, :format, to: @surface
 
     def initialize(@surface)
     end
@@ -21,6 +21,10 @@ module PF
       @surface.height
     end
 
+    def size
+      Point.new(width, height)
+    end
+
     def draw(surface : SDL::Surface, x : Int32, y : Int32)
       @surface.blit(surface, nil, SDL::Rect.new(x, y, width, height))
     end
@@ -28,6 +32,24 @@ module PF
     # Raw access to the pixels as a Slice
     def pixels
       Slice.new(@surface.pixels.as(Pointer(UInt32)), width * height)
+    end
+
+    # Sample a color at an *x* and *y* position
+    def sample(x : Int, y : Int)
+      raw_pixel = pixel_pointer(x, y).value
+
+      r = uninitialized UInt8
+      g = uninitialized UInt8
+      b = uninitialized UInt8
+      a = uninitialized UInt8
+
+      LibSDL.get_rgba(raw_pixel, format, pointerof(r), pointerof(g), pointerof(b), pointerof(a))
+      Pixel.new(r, g, b, a)
+    end
+
+    # ditto
+    def sample(point : Point(Int))
+      sample(point.x, point.y)
     end
 
     # Get the pointer to a pixel
