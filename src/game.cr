@@ -171,7 +171,7 @@ module PF
     # =================
 
     # Draw lines enclosing a shape
-    def draw_shape(frame : Array(Vector2), pixel : Pixel = Pixel.new, surface = @screen)
+    def draw_shape(frame : Array(PF::Point), pixel : Pixel = Pixel.new, surface = @screen)
       0.upto(frame.size - 1) do |n|
         draw_line(frame[n], frame[(n + 1) % frame.size], pixel, surface)
       end

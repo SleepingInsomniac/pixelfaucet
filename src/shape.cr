@@ -38,7 +38,7 @@ module PF
 
     # calculate length from center for all points, and then get the average
     def self.average_radius(points : Enumerable(Point))
-      points.map(&.length).reduce { |t, p| t + p } / frame.size
+      points.map(&.length).reduce { |t, p| t + p } / points.size
     end
   end
 end
