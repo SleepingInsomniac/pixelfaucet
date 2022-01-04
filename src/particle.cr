@@ -1,14 +1,14 @@
-require "./sprite"
-require "./sprite/age"
+require "./entity"
+require "./entity/entity_age"
 
 module PF
-  class Particle < Sprite
-    include SpriteAge
+  class Particle < Entity
+    include EntityAge
 
     def update(dt : Float64)
       update_age(dt)
       return if dead?
-      update_position(dt)
+      super(dt)
     end
 
     def draw(engine)

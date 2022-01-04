@@ -1,8 +1,8 @@
-require "./sprite"
+require "./entity"
 require "./particle"
 
 module PF
-  class Emitter < Sprite
+  class Emitter < Entity
     property emitting : Bool = true
     property particles = [] of Particle
     property max_age : Float64 = 1.0
@@ -12,25 +12,23 @@ module PF
     property emit_angle : Float64 = 2 * Math::PI
     property size : Float64 = 0.0
 
-    # property color : Pixel = Pixel.new
-
     def generate_particle
-      Particle.build do |particle|
-        particle.position = @position
+      particle = Particle.new
+      particle.position = @position
 
-        if @size > 0.0
-          particle.position.x += rand(-@size..@size)
-          particle.position.y += rand(-@size..@size)
-        end
-
-        direction = rand((@rotation - @emit_angle)..(@rotation + @emit_angle))
-        particle.velocity = @velocity + Vector2.new(Math.cos(direction), Math.sin(direction)) * @strength
-        particle.lifespan = @max_age
+      if @size > 0.0
+        particle.position.x += rand(-@size..@size)
+        particle.position.y += rand(-@size..@size)
       end
+
+      direction = rand((@rotation - @emit_angle)..(@rotation + @emit_angle))
+      particle.velocity = @velocity + Point.new(Math.cos(direction), Math.sin(direction)) * @strength
+      particle.lifespan = @max_age
+      particle
     end
 
     def update(dt : Float64)
-      update_position(dt)
+      super(dt)
 
       @last_emitted += dt
 
