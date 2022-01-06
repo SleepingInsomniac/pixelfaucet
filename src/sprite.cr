@@ -1,4 +1,5 @@
 require "sdl/image"
+require "./vector"
 
 module PF
   class Sprite
@@ -22,7 +23,7 @@ module PF
     end
 
     def size
-      Point.new(width, height)
+      Vector[width, height]
     end
 
     def draw(surface : SDL::Surface, x : Int32, y : Int32)
@@ -48,7 +49,7 @@ module PF
     end
 
     # ditto
-    def sample(point : Point(Int))
+    def sample(point : Vector(Int, 2))
       sample(point.x, point.y)
     end
 

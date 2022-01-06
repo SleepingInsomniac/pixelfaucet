@@ -22,7 +22,7 @@ module PF
       end
 
       direction = rand((@rotation - @emit_angle)..(@rotation + @emit_angle))
-      particle.velocity = @velocity + Point.new(Math.cos(direction), Math.sin(direction)) * @strength
+      particle.velocity = @velocity + Vector[Math.cos(direction), Math.sin(direction)] * @strength
       particle.lifespan = @max_age
       particle
     end

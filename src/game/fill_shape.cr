@@ -1,7 +1,7 @@
 module PF
   abstract class Game
     # Fill an abitrary polygon. Expects a clockwise winding of points
-    def fill_shape(points : Enumerable(Point), color : Pixel = Pixel.new, surface = @screen)
+    def fill_shape(points : Enumerable(Vector), color : Pixel = Pixel.new, surface = @screen)
       return if points.empty?
       return draw_point(points[0], color, surface) if points.size == 1
       return draw_line(points[0], points[1], color, surface) if points.size == 2
@@ -61,11 +61,11 @@ module PF
       end
     end
 
-    def fill_shape(*points : Point, color : Pixel = Pixel.new, surface = @screen)
+    def fill_shape(*points : Vector, color : Pixel = Pixel.new, surface = @screen)
       fill_shape(points, color, surface)
     end
 
-    def draw_shape(*points : Point, color : Pixel = Pixel.new, surface = @screen)
+    def draw_shape(*points : Vector, color : Pixel = Pixel.new, surface = @screen)
       0.upto(points.size - 1) do |n|
         draw_line(points[n], points[(n + 1) % points.size], color, surface)
       end

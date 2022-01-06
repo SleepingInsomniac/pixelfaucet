@@ -1,8 +1,10 @@
+require "./vector"
+
 module PF
   struct Line(T)
-    property p1 : Point(T), p2 : Point(T)
+    property p1 : Vector(T, 2), p2 : Vector(T, 2)
 
-    def initialize(@p1 : Point(T), @p2 : Point(T))
+    def initialize(@p1 : Vector(T, 2), @p2 : Vector(T, 2))
     end
 
     def rise
@@ -68,7 +70,7 @@ module PF
     end
 
     def to_point
-      Point.new(run, rise)
+      Vector[run, rise]
     end
   end
 end

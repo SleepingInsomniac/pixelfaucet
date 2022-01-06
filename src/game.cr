@@ -1,6 +1,5 @@
 require "./lib_sdl"
 require "./pixel"
-require "./point"
 require "./controller"
 require "./game/*"
 
@@ -11,7 +10,7 @@ module PF
 
     getter width : Int32
     getter height : Int32
-    @viewport : Point(Int32)? = nil
+    @viewport : Vector(Int32, 2)? = nil
     property scale : Int32
     property title : String
     property running = true
@@ -51,7 +50,7 @@ module PF
     end
 
     def viewport
-      @viewport ||= Point.new(@width, @height)
+      @viewport ||= Vector[@width, @height]
     end
 
     def elapsed_time
@@ -84,17 +83,12 @@ module PF
     end
 
     # ditto
-    def draw_point(vector : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
-      draw_point(vector.x.to_i32, vector.y.to_i32, pixel, surface)
-    end
-
-    # ditto
-    def draw_point(point : Point(Int), pixel : Pixel = Pixel.new, surface = @screen)
+    def draw_point(point : Vector(Int, 2), pixel : Pixel = Pixel.new, surface = @screen)
       draw_point(point.x, point.y, pixel, surface)
     end
 
     # ditto
-    def draw_point(point : Point(Float64), pixel : Pixel = Pixel.new, surface = @screen)
+    def draw_point(point : Vector(Float, 2), pixel : Pixel = Pixel.new, surface = @screen)
       draw_point(point.to_i32, pixel, surface)
     end
 
@@ -103,16 +97,16 @@ module PF
     # Draw a line using Bresenham’s Algorithm
     def draw_line(x1 : Int, y1 : Int, x2 : Int, y2 : Int, pixel : Pixel = Pixel.new, surface = @screen)
       # The slope for each axis
-      slope = Point.new((x2 - x1).abs, -(y2 - y1).abs)
+      slope = Vector[(x2 - x1).abs, -(y2 - y1).abs]
 
       # The step direction in both axis
-      step = Point.new(x1 < x2 ? 1 : -1, y1 < y2 ? 1 : -1)
+      step = Vector[x1 < x2 ? 1 : -1, y1 < y2 ? 1 : -1]
 
       # The final decision accumulation
       # Initialized to the height of x and y
       decision = slope.x + slope.y
 
-      point = Point.new(x1, y1)
+      point = Vector[x1, y1]
 
       loop do
         draw_point(point.x, point.y, pixel, surface)
@@ -136,12 +130,12 @@ module PF
     end
 
     # ditto
-    def draw_line(p1 : Point(Int), p2 : Point(Int), pixel : Pixel = Pixel.new, surface = @screen)
+    def draw_line(p1 : Vector(Int, 2), p2 : Vector(Int, 2), pixel : Pixel = Pixel.new, surface = @screen)
       draw_line(p1.x, p1.y, p2.x, p2.y, pixel, surface)
     end
 
     # ditto
-    def draw_line(p1 : Point(Float), p2 : Point(Float), pixel : Pixel = Pixel.new, surface = @screen)
+    def draw_line(p1 : Vector(Float, 2), p2 : Vector(Float, 2), pixel : Pixel = Pixel.new, surface = @screen)
       draw_line(p1.to_i32, p2.to_i32, pixel, surface)
     end
 
@@ -164,14 +158,14 @@ module PF
       end
     end
 
-    def draw_rect(p1 : PF::Point(Int), p2 : PF::Point(Int), pixel : Pixel = Pixel.new, surface = @screen)
+    def draw_rect(p1 : PF::Vector(Int, 2), p2 : PF::Vector(Int, 2), pixel : Pixel = Pixel.new, surface = @screen)
       draw_rect(p1.x, p1.y, p2.x, p2.y, pixel, surface)
     end
 
     # =================
 
     # Draw lines enclosing a shape
-    def draw_shape(frame : Array(PF::Point), pixel : Pixel = Pixel.new, surface = @screen)
+    def draw_shape(frame : Enumerable(Point), pixel : Pixel = Pixel.new, surface = @screen)
       0.upto(frame.size - 1) do |n|
         draw_line(frame[n], frame[(n + 1) % frame.size], pixel, surface)
       end
@@ -207,27 +201,16 @@ module PF
       end
     end
 
-    def draw_circle(c : Point(Int), r : Int, pixel : Pixel = Pixel.new, surface = @screen)
+    def draw_circle(c : Vector(Int, 2), r : Int, pixel : Pixel = Pixel.new, surface = @screen)
       draw_circle(c.x, c.y, r, pixel, surface)
-    end
-
-    def draw_circle(c : Vector2, r : Int, pixel : Pixel = Pixel.new, surface = @screen)
-      draw_circle(c.x.to_i, c.y.to_i, r, pixel, surface)
     end
 
     # =================
 
-    def draw_triangle(p1 : Point, p2 : Point, p3 : Point, pixel : Pixel = Pixel.new, surface = @screen)
+    def draw_triangle(p1 : Vector, p2 : Vector, p3 : Vector, pixel : Pixel = Pixel.new, surface = @screen)
       draw_line(p1, p2, pixel, surface)
       draw_line(p2, p3, pixel, surface)
       draw_line(p3, p1, pixel, surface)
-    end
-
-    def draw_triangle(p1 : Vector2, p2 : Vector2, p3 : Vector2, pixel : Pixel = Pixel.new, surface = @screen)
-      p1 = Point(Int32).new(x: p1.x.to_i, y: p1.y.to_i)
-      p2 = Point(Int32).new(x: p2.x.to_i, y: p2.y.to_i)
-      p3 = Point(Int32).new(x: p3.x.to_i, y: p3.y.to_i)
-      draw_triangle(p1, p2, p3, pixel, surface)
     end
 
     # =================
