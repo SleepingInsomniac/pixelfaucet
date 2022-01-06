@@ -54,5 +54,22 @@ describe Vector do
       v2 = Vector[3, 3]
       (v1 % v2).should eq(Vector[2, 1])
     end
+
+    it "does division" do
+      v1 = Vector[5, 5]
+      (v1 / 2).should eq(Vector[2.5, 2.5])
+    end
+
+    it "does integer division" do
+      v1 = Vector[5, 5]
+      (v1 // 2).should eq(Vector[2, 2])
+    end
+  end
+
+  describe "type conversion" do
+    it "converts float to int" do
+      v = Vector[1.5, 2.5]
+      v.to_i32.should eq(Vector[1, 2])
+    end
   end
 end

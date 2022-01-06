@@ -17,7 +17,18 @@ module PF
       {% for arg, i in args %}
         %values.to_unsafe[{{i}}] = {{arg}}
       {% end %}
-      Matrix(typeof({{*args}}), {{args.size // 2}}, {{args.size // 2}}).new(%values)
+      # width and height are the isqrt of args.size
+      {% if args.size == 1 %}
+        Matrix(typeof({{*args}}), 1, 1).new(%values)
+      {% elsif args.size == 4 %}
+        Matrix(typeof({{*args}}), 2, 2).new(%values)
+      {% elsif args.size == 9 %}
+        Matrix(typeof({{*args}}), 3, 3).new(%values)
+      {% elsif args.size == 16 %}
+        Matrix(typeof({{*args}}), 4, 4).new(%values)
+      {% else %}
+        raise "Cannot determine width and height of matrix with {{ args.size }} elements"
+      {% end %}
     end
 
     def initialize
@@ -34,6 +45,19 @@ module PF
     # Height of the matrix
     def height
       H
+    end
+
+    def size
+      {% if W == H %}
+        W
+      {% else %}
+        raise "Matrix({{W}}x{{H}}) is not square"
+      {% end %}
+    end
+
+    # Tests the equality of two matricies
+    def ==(other : Matrix)
+      self.values == other.values
     end
 
     # Get the index of an element in the matrix by *x* and *y* coordinates
@@ -59,6 +83,16 @@ module PF
       self[index(x, y)] = value
     end
 
-    # TODO
+    def *(other : Matrix)
+      result = Matrix(T, W, H).new
+      {% for y in (0...H) %}
+        {% for x in (0...W) %}
+          {% for n in (0...W) %}
+            result[{{x}},{{y}}] = result[{{x}},{{y}}] + self[{{n}}, {{y}}] * other[{{x}}, {{n}}]
+          {% end %}
+        {% end %}
+      {% end %}
+      result
+    end
   end
 end

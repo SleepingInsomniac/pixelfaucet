@@ -15,7 +15,7 @@ module PF
       {% for arg, i in args %}
         %array.to_unsafe[{{i}}] = {{arg}}
       {% end %}
-      Vector(typeof({{*args}}), {{args.size}}).new(%array)
+      PF::Vector(typeof({{*args}}), {{args.size}}).new(%array)
     end
 
     # Creates a new unitialized `Vector`
@@ -61,24 +61,34 @@ module PF
     end
 
     # Standard operations
-    {% for op in %w[* / + - %] %}
+    {% for op in %w[* / // + - %] %}
       def {{ op.id }}(other : Vector)
         Vector(T, S).new(values.map_with_index { |v, i| v {{ op.id }} other[i] })
       end
 
-      def {{ op.id }}(other : (Int | Float))
-        Vector(T, S).new(values.map { |v| v {{ op.id }} other })
+      def {{ op.id }}(n : (Int | Float))
+        v = values.map { |v| v {{ op.id }} n }
+        Vector(typeof(v.first), S).new(values.map { |v| v {{ op.id }} n })
       end
     {% end %}
 
-    def >(other : Vector)
-      values.zip(other.values).all? { |a, b| a > b }
+    # Comparison methods
+    {% for op in %w[> < >= <=] %}
+      def {{ op.id }}(other : Vector)
+        values.zip(other.values).all? { |a, b| a {{ op.id }} b }
+      end
+
+      def {{ op.id }}(n : (Int | Float))
+        values.all? { |v| v {{ op.id }} n }
+      end
+    {% end %}
+
+    # Negate
+    def -
+      Vector(T, S).new(values.map(&.-))
     end
 
-    def <(other : Vector)
-      values.zip(other.values).all? { |a, b| a < b }
-    end
-
+    # Return a new vector with all components being positive values
     def abs
       Vector(T, S).new(values.map(&.abs))
     end
@@ -86,6 +96,11 @@ module PF
     # The length or magnitude of the vector calculated by the Pythagorean theorem
     def magnitude
       Math.sqrt(values.reduce(T.new(0)) { |m, v| m + v ** 2 })
+    end
+
+    # ditto
+    def length
+      magnitude
     end
 
     # Returns a new normalized unit `Vector`
@@ -101,6 +116,7 @@ module PF
       (self * other).values.reduce { |m, v| m + v }
     end
 
+    # Calculates the cross product of this vector and another based on the vector size
     def cross(other : Vector)
       {% if S == 2 %}
         Vector[
@@ -125,6 +141,7 @@ module PF
       {% end %}
     end
 
+    # Returns normalized value at a normal to the current vector
     def normal(other : Vector)
       cross(other).normalized
     end
@@ -133,6 +150,29 @@ module PF
     def distance(other : Vector)
       (self - other).magnitude
     end
+
+    def *(matrix : Matrix)
+      # a b c   x   ax + by + cz
+      # d e f * y = dx + ey + fz
+      # g h i   z   gx + hy + iz
+      new_values = matrix.values.each_slice(S)
+        .map { |slice| slice.map_with_index { |v, i| v * values[i] }.reduce { |m, v| m + v } }
+      new_vec = Vector(typeof(new_values.first), S).new
+      new_values.each_with_index { |v, i| new_vec[i] = v }
+      new_vec
+    end
+
+    # Type conversion methods
+    {% for method, type in {
+                             to_i: Int32, to_u: UInt32, to_f: Float64,
+                             to_i8: Int8, to_i16: Int16, to_i32: Int32, to_i64: Int64, to_i128: Int128,
+                             to_u8: UInt8, to_u16: UInt16, to_u32: UInt32, to_u64: UInt64, to_u128: UInt128,
+                             to_f32: Float32, to_f64: Float64,
+                           } %}
+      def {{ method }}
+        Vector({{ type }}, S).new(values.map(&.{{ method }}))
+      end
+    {% end %}
   end
 
   alias Vec2 = Vector(Int32, 2)

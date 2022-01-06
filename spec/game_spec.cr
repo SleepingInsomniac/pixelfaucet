@@ -2,7 +2,7 @@ require "./spec_helper"
 require "../src/game"
 
 class Example < PF::Game
-  def update(dt)
+  def update(dt, event)
   end
 
   def draw
