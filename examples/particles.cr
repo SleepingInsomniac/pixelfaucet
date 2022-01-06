@@ -9,7 +9,7 @@ module PF
       super
 
       @emitter = Emitter.new
-      @emitter.position = Point.new(@width / 2, @height / 2)
+      @emitter.position = viewport / 2
     end
 
     def update(dt, event)

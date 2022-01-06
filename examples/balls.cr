@@ -7,7 +7,7 @@ module PF
   class Ball < Entity
     include CircleCollision
 
-    getter frame : Array(Point(Float64))
+    getter frame : Array(Vector(Float64, 2))
 
     def initialize(size : Float64)
       @frame = Shape.circle(size.to_i32, size.to_i32)
@@ -23,10 +23,10 @@ module PF
       super
 
       15.times do
-        position = Point(Float64).new(rand(0.0_f64..@width.to_f64), rand(0.0_f64..@height.to_f64))
+        position = Vector(Float64, 2).new(rand(0.0_f64..@width.to_f64), rand(0.0_f64..@height.to_f64))
         ball = Ball.new(rand(10.0..30.0))
         ball.position = position
-        ball.velocity = Point(Float64).new(rand(-50.0..50.0), rand(-50.0..50.0))
+        ball.velocity = Vector(Float64, 2).new(rand(-50.0..50.0), rand(-50.0..50.0))
 
         @balls << ball
       end

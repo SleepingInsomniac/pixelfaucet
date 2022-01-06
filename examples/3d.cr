@@ -2,8 +2,8 @@ require "../src/game"
 require "../src/controller"
 require "../src/sprite"
 require "../src/pixel"
-require "../src/point"
 require "../src/pixel_text"
+require "../src/vector"
 
 require "../src/3d/*"
 
@@ -101,16 +101,16 @@ class ThreeDee < PF::Game
     tris.each do |tri|
       # Rasterize all triangles
       fill_triangle(
-        PF::Point.new(tri.p1.x.to_i, tri.p1.y.to_i),
-        PF::Point.new(tri.p2.x.to_i, tri.p2.y.to_i),
-        PF::Point.new(tri.p3.x.to_i, tri.p3.y.to_i),
+        PF::Vector[tri.p1.x.to_i, tri.p1.y.to_i],
+        PF::Vector[tri.p2.x.to_i, tri.p2.y.to_i],
+        PF::Vector[tri.p3.x.to_i, tri.p3.y.to_i],
         pixel: tri.color
       )
 
       # draw_triangle(
-      #   PF::Point.new(tri.p1.x.to_i, tri.p1.y.to_i),
-      #   PF::Point.new(tri.p2.x.to_i, tri.p2.y.to_i),
-      #   PF::Point.new(tri.p3.x.to_i, tri.p3.y.to_i),
+      #   PF::Vector[tri.p1.x.to_i, tri.p1.y.to_i],
+      #   PF::Vector[tri.p2.x.to_i, tri.p2.y.to_i],
+      #   PF::Vector[tri.p3.x.to_i, tri.p3.y.to_i],
       #   pixel: PF::Pixel.blue
       # )
     end

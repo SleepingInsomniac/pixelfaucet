@@ -3,13 +3,13 @@ require "../src/controller"
 require "../src/entity"
 require "../src/pixel"
 require "../src/shape"
-require "../src/point"
+require "../src/vector"
 
 class Triangle < PF::Entity
-  property frame : Array(PF::Point(Float64))
+  property frame : Array(PF::Vector(Float64, 2))
 
   def initialize(*args, **kwargs)
-    @frame = [] of PF::Point(Float64)
+    @frame = [] of PF::Vector(Float64, 2)
   end
 
   def update(dt)
@@ -31,7 +31,7 @@ class TriangleThing < PF::Game
     super(@width, @height, @scale)
 
     @tri = Triangle.new
-    @tri.position = PF::Point.new(@width / 2, @height / 2)
+    @tri.position = viewport / 2
     @tri.frame = PF::Shape.circle(3, size = @width / 3)
 
     @controller = PF::Controller(LibSDL::Scancode).new({

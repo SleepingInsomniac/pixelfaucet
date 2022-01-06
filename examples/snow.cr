@@ -2,7 +2,7 @@ require "../src/game"
 require "../src/controller"
 require "../src/sprite"
 require "../src/pixel"
-require "../src/point"
+require "../src/vector"
 require "../src/pixel_text"
 
 class Wind
@@ -13,8 +13,8 @@ class Wind
   @step : Float64?
 
   struct Gust
-    property position : PF::Point(Float64)
-    property strength : PF::Point(Float64)
+    property position : PF::Vector(Float64, 2)
+    property strength : PF::Vector(Float64, 2)
 
     def initialize(@position, @strength)
     end
@@ -34,7 +34,7 @@ class Wind
     while y < @height
       x = step / 2
       while x < @width
-        @gusts << Gust.new(PF::Point(Float64).new(x, y), PF::Point(Float64).new(rand(-1.0..1.0), rand(-1.0..1.0)))
+        @gusts << Gust.new(PF::Vector(Float64, 2).new(x, y), PF::Vector(Float64, 2).new(rand(-1.0..1.0), rand(-1.0..1.0)))
         x += step
       end
       y += step
@@ -44,12 +44,12 @@ end
 
 class Flake
   property shape : UInt8
-  property position : PF::Point(Float64)
+  property position : PF::Vector(Float64, 2)
   property z_pos : Float64
-  property velocity : PF::Point(Float64)
+  property velocity : PF::Vector(Float64, 2)
 
-  def initialize(@position, @shape = rand(0_u8..2_u8), @z_pos = rand(0.0..1.0), velocity : PF::Point(Float64)? = nil)
-    @velocity = velocity || PF::Point(Float64).new(rand(-2.0..2.0), rand(0.0..20.0))
+  def initialize(@position, @shape = rand(0_u8..2_u8), @z_pos = rand(0.0..1.0), velocity : PF::Vector(Float64, 2)? = nil)
+    @velocity = velocity || PF::Vector(Float64, 2).new(rand(-2.0..2.0), rand(0.0..20.0))
   end
 
   def update(dt)
@@ -77,7 +77,7 @@ class Snow < PF::Game
 
     if @last_flake >= 0.025
       @last_flake = 0.0
-      @flakes << Flake.new(position: PF::Point.new(rand(0.0..@width.to_f64), 0))
+      @flakes << Flake.new(position: PF::Vector[rand(0.0..@width.to_f64), 0.0])
     end
 
     @flakes.reject! do |flake|

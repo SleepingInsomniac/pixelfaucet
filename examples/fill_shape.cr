@@ -11,18 +11,18 @@ class FillShape < PF::Game
 
   def draw
     clear(0, 0, 100)
-    fill_shape(PF::Point.new(15, 15), PF::Point.new(50, 10), PF::Point.new(60, 55), PF::Point.new(10, 60))
-    fill_shape(PF::Point.new(100, 10), PF::Point.new(150, 10), PF::Point.new(150, 60), PF::Point.new(100, 60))
+    fill_shape(PF::Vector[15, 15], PF::Vector[50, 10], PF::Vector[60, 55], PF::Vector[10, 60])
+    fill_shape(PF::Vector[100, 10], PF::Vector[150, 10], PF::Vector[150, 60], PF::Vector[100, 60])
     fill_shape(
-      PF::Point.new(10, 100),
-      PF::Point.new(20, 110),
-      PF::Point.new(30, 100),
-      PF::Point.new(40, 110),
-      PF::Point.new(50, 100),
-      PF::Point.new(50, 150),
-      PF::Point.new(10, 150),
+      PF::Vector[10, 100],
+      PF::Vector[20, 110],
+      PF::Vector[30, 100],
+      PF::Vector[40, 110],
+      PF::Vector[50, 100],
+      PF::Vector[50, 150],
+      PF::Vector[10, 150],
     )
-    fill_shape(PF::Point.new(115, 115), PF::Point.new(150, 120), PF::Point.new(160, 155), PF::Point.new(110, 160))
+    fill_shape(PF::Vector[115, 115], PF::Vector[150, 120], PF::Vector[160, 155], PF::Vector[110, 160])
   end
 end
 
