@@ -15,6 +15,13 @@ module PF
       @surface = SDL::IMG.load(path)
     end
 
+    def initialize(width : Int, height : Int)
+      @surface = SDL::Surface.new(LibSDL.create_rgb_surface(
+        flags: 0, width: width, height: height, depth: 32,
+        r_mask: 0xFF000000, g_mask: 0x00FF0000, b_mask: 0x0000FF00, a_mask: 0x000000FF
+      ))
+    end
+
     def width
       @surface.width
     end
@@ -27,20 +34,29 @@ module PF
       Vector[width, height]
     end
 
+    # Convert the color mode of this sprite to another for optimization
     def convert(other : SDL::Surface)
       @surface = @surface.convert(other)
     end
 
+    # ditto
     def convert(other : Sprite)
       @surface = @surface.convert(other.surface)
     end
 
-    def draw_to(surface : SDL::Surface, x : Int32, y : Int32)
+    # Draw this sprite to another
+    def draw_to(surface : SDL::Surface, x : Int, y : Int)
       @surface.blit(surface, nil, SDL::Rect.new(x, y, width, height))
     end
 
-    def draw_to(sprite : Sprite, x : Int32, y : Int32)
+    # ditto
+    def draw_to(sprite : Sprite, x : Int, y : Int)
       draw_to(sprite.surface, x, y)
+    end
+
+    # ditto
+    def draw_to(dest : SDL::Surface | Sprite, at : Vector(Int, 2))
+      draw_to(dest, at.x, at.y)
     end
 
     # Raw access to the pixels as a Slice
@@ -48,9 +64,19 @@ module PF
       Slice.new(@surface.pixels.as(Pointer(UInt32)), width * height)
     end
 
+    # Peak at a raw pixel value at (*x*, *y*)
+    def peak(x : Int, y : Int)
+      pixel_pointer(x, y).value
+    end
+
+    # ditto
+    def peak(point : Vector(Int, 2))
+      pixel_pointer(point.x, point.y).value
+    end
+
     # Sample a color at an *x* and *y* position
     def sample(x : Int, y : Int)
-      raw_pixel = pixel_pointer(x, y).value
+      raw_pixel = peak(x, y)
 
       r = uninitialized UInt8
       g = uninitialized UInt8
@@ -78,8 +104,13 @@ module PF
       Pixel.new(r, g, b, a)
     end
 
+    # ditto
+    def sample(point : Vector(Int, 2), alpha = true)
+      sample(point.x, point.y, true)
+    end
+
     # Get the pointer to a pixel
-    private def pixel_pointer(x : Int32, y : Int32)
+    def pixel_pointer(x : Int32, y : Int32)
       target = @surface.pixels + (y * @surface.pitch) + (x * 4)
       target.as(Pointer(UInt32))
     end

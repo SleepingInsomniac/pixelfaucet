@@ -7,6 +7,7 @@ module PF
     @bricks : Sprite
     @transform : Transform2d = Transform2d.new
     @angle = 0.0
+    @size = 1.0
 
     def initialize(*args, **kwargs)
       super
@@ -25,6 +26,7 @@ module PF
         .reset
         .translate(-(@bricks.size // 2))
         .rotate(@angle)
+        .scale(@size)
         .translate(viewport // 2)
 
       b1, b2 = @transform.bounding_box(@bricks.size.x, @bricks.size.y).map(&.to_i)
@@ -35,8 +37,7 @@ module PF
         b1.x.upto(b2.x) do |x|
           point = @transform.apply(x, y).to_i
           if point >= Vector[0, 0] && point < @bricks.size
-            color = @bricks.sample(point.x, point.y)
-            draw_point(x.to_i, y.to_i, color)
+            draw_point(x.to_i, y.to_i, @bricks.peak(point))
           end
         end
       end

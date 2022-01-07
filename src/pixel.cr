@@ -39,10 +39,10 @@ module PF
     property r : UInt8, g : UInt8, b : UInt8, a : UInt8
 
     def initialize(rgba : UInt32)
-      @r = ((rgba & 0xFF000000_u32) >> (8 * 3)).to_u8
-      @g = ((rgba & 0x00FF0000_u32) >> (8 * 2)).to_u8
-      @b = ((rgba & 0x0000FF00_u32) >> 8).to_u8
-      @a = ((rgba & 0x000000FF_u32)).to_u8
+      @r = ((rgba >> 24) & 0xFF).to_u8
+      @g = ((rgba >> 16) & 0xFF).to_u8
+      @b = ((rgba >> 8) & 0xFF).to_u8
+      @a = (rgba & 0xFF).to_u8
     end
 
     def initialize(@r : UInt8 = 255, @g : UInt8 = 255, @b : UInt8 = 255, @a : UInt8 = 255)
@@ -66,6 +66,14 @@ module PF
 
     def -(n : Float64)
       PF::Pixel.new((@r - n).to_u8, (@g - n).to_u8, (@b - n).to_u8, @a)
+    end
+
+    def to_u32
+      value = @r.to_u32 << 24
+      value |= @g.to_u32 << 16
+      value |= @b.to_u32 << 8
+      value |= @a.to_u32
+      value
     end
   end
 end

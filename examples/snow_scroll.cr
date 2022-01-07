@@ -8,7 +8,7 @@ class Snow < PF::Game
     super
 
     @pixels = @screen.pixels
-    clear(0, 0, 25)
+    clear(0, 0, 0x25)
   end
 
   def update(dt, event)
@@ -23,10 +23,10 @@ class Snow < PF::Game
 
       0.upto(@width - 1) do |x|
         if rand(0..250) == 0
-          shade = rand(0..255)
-          @pixels[x] = LibSDL.map_rgba(@screen.format, shade, shade, shade, 255)
+          shade = rand(25_u8..255_u8)
+          @pixels[x] = PF::Pixel.new(shade, shade, shade).to_u32
         else
-          @pixels[x] = LibSDL.map_rgba(@screen.format, 0, 0, 25, 255)
+          @pixels[x] = 0x000025FF
         end
       end
     end

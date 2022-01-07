@@ -3,11 +3,11 @@ require "../src/sprite"
 
 module PF
   class SpriteExample < Game
-    @bricks : Sprite
+    @sprite : Sprite
 
     def initialize(*args, **kwargs)
       super
-      @bricks = Sprite.new("./assets/pf-font.png")
+      @sprite = Sprite.new("./assets/pf-font.png")
     end
 
     def update(dt, event)
@@ -15,7 +15,7 @@ module PF
 
     def draw
       clear(255, 255, 255)
-      @bricks.draw_to(@screen, width // 2 - @bricks.width // 2, height // 2 - @bricks.height // 2)
+      @sprite.draw_to(screen, (viewport // 2) - @sprite.size // 2)
     end
   end
 end

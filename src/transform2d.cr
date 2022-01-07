@@ -46,6 +46,10 @@ module PF
       self
     end
 
+    def scale(n : Float | Int)
+      scale(n, n)
+    end
+
     def rotate(angle : Float | Int)
       cos = Math.cos(angle)
       sin = Math.sin(angle)

@@ -7,13 +7,15 @@ module PF
     FPS_INTERVAL = 1.0
     SHOW_FPS     = true
 
-    getter width : Int32
-    getter height : Int32
-    @viewport : Vector(Int32, 2)? = nil
     property scale : Int32
     property title : String
     property running = true
     property screen : Sprite
+
+    getter width : Int32
+    getter height : Int32
+
+    @viewport : Vector(Int32, 2)? = nil
 
     delegate :draw_point, :draw_line, :draw_circle, :draw_triangle, :draw_rect, :draw_shape,
       :fill_triangle, :fill_rect, :fill_shape, to: @screen
@@ -30,13 +32,7 @@ module PF
       @window = SDL::Window.new(@title, @width * @scale, @height * @scale, flags: window_flags)
       @renderer = SDL::Renderer.new(@window, flags: flags)
       @renderer.scale = {@scale, @scale}
-
-      surface = SDL::Surface.new(LibSDL.create_rgb_surface(
-        flags: 0, width: @width, height: @height, depth: 32,
-        r_mask: 0xFF000000, g_mask: 0x00FF0000, b_mask: 0x0000FF00, a_mask: 0x000000FF
-      ))
-
-      @screen = Sprite.new(surface)
+      @screen = Sprite.new(@width, @height)
     end
 
     abstract def update(dt : Float64, event : SDL::Event)
