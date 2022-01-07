@@ -60,7 +60,6 @@ end
 
 class Snow < PF::Game
   @wind : Wind
-  @pixels : Slice(UInt32)
   @last_flake : Float64 = 0.0
   @flakes : Array(Flake) = [] of Flake
 
@@ -68,7 +67,6 @@ class Snow < PF::Game
     super
 
     @wind = Wind.new(@width, @height)
-    @pixels = Slice.new(@screen.pixels.as(Pointer(UInt32)), @width * @height)
     clear(0, 0, 15)
   end
 

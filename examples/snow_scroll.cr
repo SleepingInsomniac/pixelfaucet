@@ -7,7 +7,7 @@ class Snow < PF::Game
   def initialize(*args, **kwargs)
     super
 
-    @pixels = Slice.new(@screen.pixels.as(Pointer(UInt32)), @width * @height)
+    @pixels = @screen.pixels
     clear(0, 0, 25)
   end
 

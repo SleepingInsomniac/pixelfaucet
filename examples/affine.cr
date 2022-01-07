@@ -11,6 +11,7 @@ module PF
     def initialize(*args, **kwargs)
       super
       @bricks = Sprite.new("./assets/bricks.png")
+      @bricks.convert(@screen)
     end
 
     def update(dt, event)

@@ -96,7 +96,7 @@ class ThreeDee < PF::Game
   def draw
     clear(25, 50, 25)
     tris = @projector.project(@model.tris)
-    @text.draw(@screen, "Triangles: #{tris.size}")
+    @text.draw_to(screen, "Triangles: #{tris.size}")
 
     tris.each do |tri|
       # Rasterize all triangles

@@ -46,7 +46,7 @@ class TextGame < PF::Game
 
   def draw
     clear(0, 0, 50)
-    @text.draw(@screen, @msg, @x.to_i, @y.to_i)
+    @text.draw_to(@screen, @msg, @x.to_i, @y.to_i)
   end
 end
 

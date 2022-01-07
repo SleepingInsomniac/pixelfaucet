@@ -1,11 +1,11 @@
 module PF
-  abstract class Game
+  class Sprite
     # Fill an abitrary polygon. Expects a clockwise winding of points
-    def fill_shape(points : Enumerable(Vector), color : Pixel = Pixel.new, surface = @screen)
+    def fill_shape(points : Enumerable(Vector), color : Pixel = Pixel.new)
       return if points.empty?
-      return draw_point(points[0], color, surface) if points.size == 1
-      return draw_line(points[0], points[1], color, surface) if points.size == 2
-      return draw_triangle(points[0], points[1], points[2], color, surface) if points.size == 3
+      return draw_point(points[0], color) if points.size == 1
+      return draw_line(points[0], points[1], color) if points.size == 2
+      return draw_triangle(points[0], points[1], points[2], color) if points.size == 3
 
       # set initial bounding box
       top = points[0].y
@@ -50,7 +50,7 @@ module PF
           # Only draw points within x values of an ascending slope,
           # descending slope indicates that the point is outside of the shape
           if intercepts[n][1] || x == intercepts[n][0] # Always draw the border itself
-            draw_point(x, y, color, surface)
+            draw_point(x, y, color)
           end
 
           # # While condition for overlapping points
@@ -61,13 +61,13 @@ module PF
       end
     end
 
-    def fill_shape(*points : Vector, color : Pixel = Pixel.new, surface = @screen)
-      fill_shape(points, color, surface)
+    def fill_shape(*points : Vector, color : Pixel = Pixel.new)
+      fill_shape(points, color)
     end
 
-    def draw_shape(*points : Vector, color : Pixel = Pixel.new, surface = @screen)
+    def draw_shape(*points : Vector, color : Pixel = Pixel.new)
       0.upto(points.size - 1) do |n|
-        draw_line(points[n], points[(n + 1) % points.size], color, surface)
+        draw_line(points[n], points[(n + 1) % points.size], color)
       end
     end
   end

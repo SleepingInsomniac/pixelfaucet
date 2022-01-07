@@ -21,7 +21,7 @@ module PF
       end
     end
 
-    def draw(surface : SDL::Surface, text : String, x : Int32 = 0, y : Int32 = 0)
+    def draw_to(surface : SDL::Surface, text : String, x : Int32 = 0, y : Int32 = 0)
       ix = 0
       iy = 0
       text.each_char do |char|
@@ -46,6 +46,10 @@ module PF
 
         ix += 1
       end
+    end
+
+    def draw_to(sprite : Sprite, text : String, x : Int32 = 0, y : Int32 = 0)
+      draw_to(sprite.surface, text, x, y)
     end
   end
 end

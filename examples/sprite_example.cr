@@ -15,7 +15,7 @@ module PF
 
     def draw
       clear(255, 255, 255)
-      @bricks.draw(@screen, width // 2 - @bricks.width // 2, height // 2 - @bricks.height // 2)
+      @bricks.draw_to(@screen, width // 2 - @bricks.width // 2, height // 2 - @bricks.height // 2)
     end
   end
 end

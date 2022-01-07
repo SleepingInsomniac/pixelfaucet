@@ -1,8 +1,8 @@
 require "../line"
 
 module PF
-  abstract class Game
-    def fill_triangle(p1 : Vector, p2 : Vector, p3 : Vector, pixel : Pixel = Pixel.new, surface = @screen)
+  class Sprite
+    def fill_triangle(p1 : Vector, p2 : Vector, p3 : Vector, pixel : Pixel = Pixel.new)
       # Sort points from top to bottom
       p1, p2 = p2, p1 if p2.y < p1.y
       p1, p3 = p3, p1 if p3.y < p1.y
@@ -39,7 +39,7 @@ module PF
         end
 
         x_left.upto(x_right) do |x|
-          draw_point(x, y + c, pixel, surface)
+          draw_point(x, y + c, pixel)
         end
 
         if y == mid
@@ -54,8 +54,8 @@ module PF
       end
     end
 
-    def fill_triangle(points : Enumerable(Vector), pixel : Pixel = Pixel.new, surface = @screen)
-      fill_triangle(points[0], points[1], points[2], pixel, surface)
+    def fill_triangle(points : Enumerable(Vector), pixel : Pixel = Pixel.new)
+      fill_triangle(points[0], points[1], points[2], pixel)
     end
   end
 end
