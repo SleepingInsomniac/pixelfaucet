@@ -17,8 +17,14 @@ module PF
       end
     end
 
+    # ditto
     def draw_rect(p1 : PF::Vector(Int, 2), p2 : PF::Vector(Int, 2), pixel : Pixel = Pixel.new)
       draw_rect(p1.x, p1.y, p2.x, p2.y, pixel)
+    end
+
+    # ditto
+    def draw_rect(size : PF::Vector(Int, 2), pixel : Pixel = Pixel.new)
+      draw_rect(0, 0, size.x, size.y, pixel)
     end
   end
 end

@@ -8,6 +8,7 @@ module PF
     @transform : Transform2d = Transform2d.new
     @angle = 0.0
     @size = 1.0
+    @zoom = 0.5
 
     def initialize(*args, **kwargs)
       super
@@ -17,6 +18,8 @@ module PF
 
     def update(dt, event)
       @angle += 1.0 * dt
+      @zoom, @size = -@zoom, @size.clamp(0.5..2.0) if @size > 2.0 || @size < 0.5
+      @size = @size + @zoom * dt
     end
 
     def draw
