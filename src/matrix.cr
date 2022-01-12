@@ -19,22 +19,38 @@ module PF
       {% end %}
       # width and height are the isqrt of args.size
       {% if args.size == 1 %}
-        Matrix(typeof({{*args}}), 1, 1).new(%values)
+        PF::Matrix(typeof({{*args}}), 1, 1).new(%values)
       {% elsif args.size == 4 %}
-        Matrix(typeof({{*args}}), 2, 2).new(%values)
+        PF::Matrix(typeof({{*args}}), 2, 2).new(%values)
       {% elsif args.size == 9 %}
-        Matrix(typeof({{*args}}), 3, 3).new(%values)
+        PF::Matrix(typeof({{*args}}), 3, 3).new(%values)
       {% elsif args.size == 16 %}
-        Matrix(typeof({{*args}}), 4, 4).new(%values)
+        PF::Matrix(typeof({{*args}}), 4, 4).new(%values)
       {% else %}
-        raise "Cannot determine width and height of matrix with {{ args.size }} elements"
+        raise "Cannot determine width and height of matrix with {{ args.size }} elements, " \
+              "please provide them explicitly Matrix(Int32, 4, 4).new(...)"
       {% end %}
+    end
+
+    def self.identity
+      new.tap do |m|
+        m.size.times { |n| m[n, n] = T.new(1) }
+      end
     end
 
     def initialize
     end
 
     def initialize(@values)
+    end
+
+    # Create a new matrix
+    #
+    # ```
+    # PF::Matrix(Int32, 2, 2).new(1, 2, 3, 4)
+    # ```
+    def initialize(*nums : T)
+      nums.each_with_index { |n, i| @values.to_unsafe[i] = n }
     end
 
     # Width of the matrix
@@ -93,6 +109,16 @@ module PF
         {% end %}
       {% end %}
       result
+    end
+
+    def inspect
+      String.build do |io|
+        H.times do |h|
+          io << '['
+          W.times { |w| io << self[w, h] }
+          io << "]\n"
+        end
+      end
     end
   end
 end

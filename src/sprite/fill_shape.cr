@@ -64,11 +64,5 @@ module PF
     def fill_shape(*points : Vector, color : Pixel = Pixel.new)
       fill_shape(points, color)
     end
-
-    def draw_shape(*points : Vector, color : Pixel = Pixel.new)
-      0.upto(points.size - 1) do |n|
-        draw_line(points[n], points[(n + 1) % points.size], color)
-      end
-    end
   end
 end

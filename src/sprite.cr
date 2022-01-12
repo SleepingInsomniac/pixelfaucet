@@ -45,12 +45,12 @@ module PF
     end
 
     # Draw this sprite to another
-    def draw_to(surface : SDL::Surface, x : Int, y : Int)
+    def draw_to(surface : SDL::Surface, x : Int = 0, y : Int = 0)
       @surface.blit(surface, nil, SDL::Rect.new(x, y, width, height))
     end
 
     # ditto
-    def draw_to(sprite : Sprite, x : Int, y : Int)
+    def draw_to(sprite : Sprite, x : Int = 0, y : Int = 0)
       draw_to(sprite.surface, x, y)
     end
 

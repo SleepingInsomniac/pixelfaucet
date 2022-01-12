@@ -44,5 +44,10 @@ module PF
     def draw_line(p1 : Vector(Float, 2), p2 : Vector(Float, 2), pixel : Pixel = Pixel.new)
       draw_line(p1.to_i32, p2.to_i32, pixel)
     end
+
+    # ditto
+    def draw_line(line : Line, pixel : Pixel = Pixel.new)
+      draw_line(line.p1.to_i32, line.p2.to_i32, pixel)
+    end
   end
 end

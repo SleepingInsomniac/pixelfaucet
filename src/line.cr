@@ -72,5 +72,15 @@ module PF
     def to_point
       Vector[run, rise]
     end
+
+    # Find the normal axis to this line
+    def normal
+      Vector[-rise, run].normalized
+    end
+
+    # Normal counter clockwise
+    def normal_cc
+      Vector[rise, -run].normalized
+    end
   end
 end
