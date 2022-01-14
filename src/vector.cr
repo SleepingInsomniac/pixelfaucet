@@ -1,6 +1,8 @@
+require "./matrix"
+
 module PF
   struct Vector(T, S)
-    property values : StaticArray(T, S)
+    property values : Slice(T)
 
     # Creates a new `Vector` with the given *args*
     #
@@ -11,25 +13,41 @@ module PF
     # v.class # => Vector(Int32, 2)
     # ```
     macro [](*args)
-      %array = uninitialized StaticArray(typeof({{*args}}), {{args.size}})
+      %values = Slice(typeof({{*args}})).new({{args.size}}, typeof({{*args}}).new(0))
       {% for arg, i in args %}
-        %array.to_unsafe[{{i}}] = {{arg}}
+        %values.to_unsafe[{{i}}] = {{arg}}
       {% end %}
-      PF::Vector(typeof({{*args}}), {{args.size}}).new(%array)
+      PF::Vector(typeof({{*args}}), {{args.size}}).new(%values)
     end
 
     # Creates a new unitialized `Vector`
     def initialize
-      @values = uninitialized StaticArray(T, S)
+      @values = Slice(T).new(S, T.new(0))
     end
 
-    # Creates a new `Vector` from a `StaticArray`
+    # Creates a new `Vector` from a `Slice`
     def initialize(@values)
     end
 
-    def initialize(*args)
-      @values = uninitialized StaticArray(T, S)
-      args.each_with_index { |v, i| @values[i] = v }
+    # Create a new `Vector` with *x* and *y* values
+    def initialize(x : T, y : T)
+      @values = Slice[x, y]
+    end
+
+    # Create a new `Vector` with *x*, *y*, and *z* values
+    def initialize(x : T, y : T, z : T)
+      @values = Slice[x, y, z]
+    end
+
+    # Create a new `Vector` with *x*, *y*, *z*, and *w* values
+    def initialize(x : T, y : T, z : T, w : T)
+      @values = Slice[x, y, z, w]
+    end
+
+    # Create a new `Vector` with the given values
+    def initialize(*nums : T)
+      @values = Slice(T).new(S, T.new(0))
+      nums.each_with_index { |n, i| @values[i] = n }
     end
 
     def size

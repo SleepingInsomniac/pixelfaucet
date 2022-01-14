@@ -1,6 +1,6 @@
 module PF
   struct Matrix(T, W, H)
-    property values = Slice(T).new(W * H, T.new(0))
+    property values : Slice(T)
 
     # Creates a new square `Matrix` with the given *args*
     #
@@ -39,6 +39,7 @@ module PF
     end
 
     def initialize
+      @values = Slice(T).new(W * H, T.new(0))
     end
 
     def initialize(@values)
@@ -50,7 +51,8 @@ module PF
     # PF::Matrix(Int32, 2, 2).new(1, 2, 3, 4)
     # ```
     def initialize(*nums : T)
-      nums.each_with_index { |n, i| @values.to_unsafe[i] = n }
+      @values = Slice(T).new(W * H, T.new(0))
+      nums.each_with_index { |n, i| @values[i] = n }
     end
 
     # Width of the matrix
