@@ -29,25 +29,9 @@ module PF
     def initialize(@values)
     end
 
-    # Create a new `Vector` with *x* and *y* values
-    def initialize(x : T, y : T)
-      @values = Slice[x, y]
-    end
-
-    # Create a new `Vector` with *x*, *y*, and *z* values
-    def initialize(x : T, y : T, z : T)
-      @values = Slice[x, y, z]
-    end
-
-    # Create a new `Vector` with *x*, *y*, *z*, and *w* values
-    def initialize(x : T, y : T, z : T, w : T)
-      @values = Slice[x, y, z, w]
-    end
-
     # Create a new `Vector` with the given values
     def initialize(*nums : T)
-      @values = Slice(T).new(S, T.new(0))
-      nums.each_with_index { |n, i| @values[i] = n }
+      @values = Slice(T).new(S) { |i| nums[i] }
     end
 
     def size
@@ -101,15 +85,12 @@ module PF
       end
     {% end %}
 
-    # Negate
-    def -
-      Vector(T, S).new(values.map(&.-))
-    end
-
-    # Return a new vector with all components being positive values
-    def abs
-      Vector(T, S).new(values.map(&.abs))
-    end
+    {% for op in %w[- abs] %}
+      # Return a new vector with {{op}} applied to each value
+      def {{op.id}}
+        Vector(T, S).new(values.map(&.{{op.id}}))
+      end
+    {% end %}
 
     # The length or magnitude of the vector calculated by the Pythagorean theorem
     def magnitude

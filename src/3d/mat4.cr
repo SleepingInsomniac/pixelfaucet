@@ -1,7 +1,6 @@
 module PF
   struct Mat4
     alias T = Float64
-    alias RowT = Tuple(T, T, T, T)
 
     property matrix = Slice(T).new(4*4, 0.0)
 
@@ -17,7 +16,7 @@ module PF
     def self.point_at(position : Vec3d, target : Vec3d, up : Vec3d = Vec3d.new(0.0, 1.0, 0.0))
       new_forward = (target - position).normalized
       new_up = (up - new_forward * up.dot(new_forward)).normalized
-      new_right = new_up.cross_product(new_forward)
+      new_right = new_up.cross(new_forward)
 
       Mat4.new(Slice[
         new_right.x, new_up.x, new_forward.x, position.x,
@@ -80,14 +79,6 @@ module PF
       @matrix = values
     end
 
-    def initialize(values : Tuple(RowT, RowT, RowT, RowT))
-      {% for y in (0..3) %}
-        {% for x in (0..3) %}
-          self[{{x}},{{y}}] = values[{{y}}][{{x}}]
-        {% end %}
-      {% end %}
-    end
-
     def index(x : Int, y : Int)
       y * 4 + x
     end
@@ -98,14 +89,6 @@ module PF
 
     def set(values : Slice(T))
       @matrix = values
-    end
-
-    def set(values : Tuple(RowT, RowT, RowT, RowT))
-      {% for y in (0..3) %}
-        {% for x in (0..3) %}
-          self[{{x}},{{y}}] = values[{{y}}][{{x}}]
-        {% end %}
-      {% end %}
     end
 
     def [](x : Int, y : Int)

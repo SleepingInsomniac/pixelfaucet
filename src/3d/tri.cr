@@ -1,4 +1,5 @@
 require "../pixel"
+require "../g3d"
 
 module PF
   struct Tri
@@ -23,7 +24,7 @@ module PF
       @normal ||= begin
         line1 = @p2 - @p1
         line2 = @p3 - @p1
-        line1.cross_product(line2).normalized
+        line1.cross(line2).normalized
       end
     end
 
@@ -84,8 +85,8 @@ module PF
         return {
           Tri.new(
             inside_points[0],
-            Vec3d.line_intersects_plane(plane, plane_normal, inside_points[0], outside_points[0]),
-            Vec3d.line_intersects_plane(plane, plane_normal, inside_points[0], outside_points[1]),
+            G3d.line_intersects_plane(plane, plane_normal, inside_points[0], outside_points[0]),
+            G3d.line_intersects_plane(plane, plane_normal, inside_points[0], outside_points[1]),
             color: @color
           ),
         }
@@ -96,8 +97,8 @@ module PF
         # We must now split the quad into two new triangles
 
         # Calculate the two intersection points
-        intersect_p1 = Vec3d.line_intersects_plane(plane, plane_normal, inside_points[0], outside_points[0])
-        intersect_p2 = Vec3d.line_intersects_plane(plane, plane_normal, inside_points[1], outside_points[0])
+        intersect_p1 = G3d.line_intersects_plane(plane, plane_normal, inside_points[0], outside_points[0])
+        intersect_p2 = G3d.line_intersects_plane(plane, plane_normal, inside_points[1], outside_points[0])
 
         return {
           # The first triangle will have the two inside points, and first intersection point

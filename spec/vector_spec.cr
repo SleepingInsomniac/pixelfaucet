@@ -49,6 +49,12 @@ describe Vector do
       (v1 + v2).should eq(Vector[4, 6])
     end
 
+    it "substracts" do
+      v1 = Vector[4, 5]
+      v2 = Vector[3, 4]
+      (v1 - v2).should eq(Vector[1, 1])
+    end
+
     it "does modulus" do
       v1 = Vector[5, 10]
       v2 = Vector[3, 3]
@@ -63,6 +69,21 @@ describe Vector do
     it "does integer division" do
       v1 = Vector[5, 5]
       (v1 // 2).should eq(Vector[2, 2])
+    end
+  end
+
+  describe "#-" do
+    it "negates" do
+      v = Vector[1, 1]
+      v = -v
+      v.should eq(Vector[-1, -1])
+    end
+  end
+
+  describe "#abs" do
+    it "returns the absolute value" do
+      v = Vector[-1, -1]
+      v.abs.should eq(Vector[1, 1])
     end
   end
 
