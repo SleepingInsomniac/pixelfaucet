@@ -1,6 +1,6 @@
 require "../transform3d"
 require "../vector"
-require "./mat4"
+require "../matrix"
 
 module PF
   class Camera
@@ -48,15 +48,15 @@ module PF
     end
 
     def matrix
-      Mat4.point_at(@position, @position + forward_vector, up_vector)
+      Transform3d.point_at(@position, @position + forward_vector, up_vector)
     end
 
     def view_matrix
-      matrix.quick_inverse
+      Transform3d.quick_inverse(matrix)
     end
 
     def rotation_matrix
-      Mat4.rot_x(pitch) * Mat4.rot_y(yaw) * Mat4.rot_z(roll)
+      Transform3d.rot_x(pitch) * Transform3d.rot_y(yaw) * Transform3d.rot_z(roll)
     end
 
     def move_right(delta : Float64)

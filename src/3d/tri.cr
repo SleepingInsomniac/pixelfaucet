@@ -44,8 +44,8 @@ module PF
       (@p1.z + @p2.z + @p3.z) / 3.0
     end
 
-    # Multiply all points by a Mat4, returning a new Tri
-    def *(mat : Mat4)
+    # Multiply all points by a *Matrix*, returning a new *Tri*
+    def *(mat : Matrix)
       Tri.new(
         Transform3d.apply(@p1, mat),
         Transform3d.apply(@p2, mat),

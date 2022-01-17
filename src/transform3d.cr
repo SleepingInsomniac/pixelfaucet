@@ -93,15 +93,6 @@ module PF
 
     # TODO: Optionally return the result of w in some way (pointer / tuple?)
     def self.apply(point : Vector3(Float64), matrix : Matrix(Float64, 4, 4))
-      vector = Vector[point.x, point.y, point.z, 1.0] * matrix
-      if vector.w == 0.0
-        Vector[vector.x, vector.y, vector.z]
-      else
-        Vector[vector.x, vector.y, vector.z] / vector.w
-      end
-    end
-
-    def self.apply(point : Vector3(Float64), matrix : Mat4)
       vec = Vector3.new(
         point.x * matrix[0, 0] + point.y * matrix[1, 0] + point.z * matrix[2, 0] + matrix[3, 0],
         point.x * matrix[0, 1] + point.y * matrix[1, 1] + point.z * matrix[2, 1] + matrix[3, 1],

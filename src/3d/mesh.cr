@@ -63,9 +63,9 @@ module PF
     def tris
       # Translate and rotate
       @tris.map do |tri|
-        tri *= Mat4.translation(origin)
-        tri *= Mat4.rotation(rotation)
-        tri *= Mat4.translation(position)
+        tri *= Transform3d.translation(origin)
+        tri *= Transform3d.rotation(rotation)
+        tri *= Transform3d.translation(position)
         tri
       end
     end
