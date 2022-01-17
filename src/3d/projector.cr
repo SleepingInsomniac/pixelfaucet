@@ -10,14 +10,14 @@ module PF
     getter fov = 90.0
     property aspect_ratio : Float64?
     property camera : Camera
-    property light : Vec3d(Float64) = Vec3d.new(0.0, 0.0, -1.0).normalized
+    property light : Vector3(Float64) = Vector3.new(0.0, 0.0, -1.0).normalized
     property mat_proj : Mat4?
-    property clipping_plane_near : Vec3d(Float64)
-    property near_plane_normal : Vec3d(Float64) = Vec3d.new(0.0, 0.0, 1.0)
+    property clipping_plane_near : Vector3(Float64)
+    property near_plane_normal : Vector3(Float64) = Vector3.new(0.0, 0.0, 1.0)
     @fov_rad : Float64?
 
     def initialize(@width, @height, @camera = Camera.new)
-      @clipping_plane_near = Vec3d.new(0.0, 0.0, @near)
+      @clipping_plane_near = Vector3.new(0.0, 0.0, @near)
     end
 
     def mat_proj
@@ -68,15 +68,11 @@ module PF
         shade = (tri.normal.dot(light) + 1.0) / 2 # light should be normalized
         tri.color = tri.color * shade.clamp(0.0..1.0)
 
-        tri.p1 *= mat_view
-        tri.p2 *= mat_view
-        tri.p3 *= mat_view
+        tri *= mat_view
 
         # Clip against the near plane
         tri.clip(plane: clipping_plane_near, plane_normal: near_plane_normal).each do |tri|
-          tri.p1 *= mat_proj
-          tri.p2 *= mat_proj
-          tri.p3 *= mat_proj
+          tri *= mat_proj
 
           # Invert the y axis
           tri.p1.y = tri.p1.y * -1.0
@@ -104,10 +100,10 @@ module PF
 
       # Clip against the edges of the screen
       {
-        {Vec3d.new(0.0, 0.0, 0.0), Vec3d.new(0.0, 1.0, 0.0)},
-        {Vec3d.new(0.0, height - 1.0, 0.0), Vec3d.new(0.0, -1.0, 0.0)},
-        {Vec3d.new(0.0, 0.0, 0.0), Vec3d.new(1.0, 0.0, 0.0)},
-        {Vec3d.new(width - 1.0, 0.0, 0.0), Vec3d.new(-1.0, 0.0, 0.0)},
+        {Vector3.new(0.0, 0.0, 0.0), Vector3.new(0.0, 1.0, 0.0)},
+        {Vector3.new(0.0, height - 1.0, 0.0), Vector3.new(0.0, -1.0, 0.0)},
+        {Vector3.new(0.0, 0.0, 0.0), Vector3.new(1.0, 0.0, 0.0)},
+        {Vector3.new(width - 1.0, 0.0, 0.0), Vector3.new(-1.0, 0.0, 0.0)},
       }.each do |clip|
         0.upto(tris.size - 1) do
           tri = tris.pop

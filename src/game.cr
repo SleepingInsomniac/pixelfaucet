@@ -15,7 +15,7 @@ module PF
     getter width : Int32
     getter height : Int32
 
-    @viewport : Vector(Int32, 2)? = nil
+    @viewport : Vector2(Int32)? = nil
 
     delegate :draw_point, :draw_line, :draw_circle, :draw_triangle, :draw_rect, :draw_shape,
       :fill_triangle, :fill_rect, :fill_shape, to: @screen

@@ -1,11 +1,12 @@
-require "./vec3d"
+require "../transform3d"
+require "../vector"
 require "./mat4"
 
 module PF
   class Camera
-    property position : Vec3d(Float64) = Vec3d.new(0.0, 0.0, 0.0)
-    property up : Vec3d(Float64) = Vec3d.new(0.0, 1.0, 0.0)
-    property rotation : Vec3d(Float64) = Vec3d.new(0.0, 0.0, 0.0)
+    property position : Vector3(Float64) = Vector3.new(0.0, 0.0, 0.0)
+    property up : Vector3(Float64) = Vector3.new(0.0, 1.0, 0.0)
+    property rotation : Vector3(Float64) = Vector3.new(0.0, 0.0, 0.0)
 
     # Rotation about the X axis
     def pitch
@@ -35,15 +36,15 @@ module PF
     end
 
     def forward_vector
-      Vec3d.new(0.0, 0.0, 1.0) * rotation_matrix
+      Transform3d.apply(Vector3.new(0.0, 0.0, 1.0), rotation_matrix)
     end
 
     def strafe_vector
-      Vec3d.new(1.0, 0.0, 0.0) * rotation_matrix
+      Transform3d.apply(Vector3.new(1.0, 0.0, 0.0), rotation_matrix)
     end
 
     def up_vector
-      Vec3d.new(0.0, 1.0, 0.0) * rotation_matrix
+      Transform3d.apply(Vector3.new(0.0, 1.0, 0.0), rotation_matrix)
     end
 
     def matrix

@@ -8,7 +8,7 @@ describe Vector do
     it "multiplies 2 vectors" do
       v1 = Vector[1, 2]
       v2 = Vector[2, 2]
-      (v1 * v2).should eq(Vector(Int32, 2).new(2, 4))
+      (v1 * v2).should eq(Vector2(Int32).new(2, 4))
     end
   end
 
@@ -91,6 +91,32 @@ describe Vector do
     it "converts float to int" do
       v = Vector[1.5, 2.5]
       v.to_i32.should eq(Vector[1, 2])
+    end
+  end
+
+  describe "Matrix multiplication" do
+    it "returns the scaled value when multiplied by an identity matrix" do
+      v = Vector[1, 2]
+      m = Matrix[
+        1, 0,
+        0, 1,
+      ]
+      (v * m).should eq(v)
+      m = Matrix[
+        2, 0,
+        0, 1,
+      ]
+      (v * m).should eq(Vector[2, 2])
+    end
+
+    it "multiplies correctly" do
+      v = Vector[2, 1, 3]
+      m = Matrix[
+        1, 2, 3,
+        4, 5, 6,
+        7, 8, 9,
+      ]
+      (v * m).should eq(Vector[13, 31, 49])
     end
   end
 end

@@ -33,7 +33,7 @@ module PF
       self
     end
 
-    def translate(to : Vector)
+    def translate(to : Vector2)
       translate(to.x, to.y)
     end
 
@@ -106,11 +106,11 @@ module PF
     end
 
     def apply(x : Float | Int, y : Float | Int)
-      result = Vector[x, y, 1.0] * @matrix
+      result = Vector[x, y, typeof(x, y).new(1)] * @matrix
       Vector[result.x, result.y]
     end
 
-    def apply(point : Vector)
+    def apply(point : Vector2)
       apply(point.x, point.y)
     end
   end

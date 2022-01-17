@@ -13,12 +13,12 @@ module PF
     end
 
     # ditto
-    def draw_point(point : Vector(Int, 2), pixel : Pixel = Pixel.new)
+    def draw_point(point : Vector2(Int), pixel : Pixel = Pixel.new)
       draw_point(point.x, point.y, pixel)
     end
 
     # ditto
-    def draw_point(point : Vector(Float, 2), pixel : Pixel = Pixel.new)
+    def draw_point(point : Vector2(Float), pixel : Pixel = Pixel.new)
       draw_point(point.to_i32, pixel)
     end
   end

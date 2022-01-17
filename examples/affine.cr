@@ -5,6 +5,7 @@ require "../src/transform2d"
 module PF
   class Affine < Game
     @bricks : Sprite
+    @top_left : Vector2(Int32) = Vector[0, 0]
     @transform : Transform2d = Transform2d.new
     @angle = 0.0
     @size = 1.0
@@ -39,7 +40,7 @@ module PF
       b1.y.upto(b2.y) do |y|
         b1.x.upto(b2.x) do |x|
           point = @transform.apply(x, y).to_i
-          if point >= Vector[0, 0] && point < @bricks.size
+          if point >= @top_left && point < @bricks.size
             draw_point(x.to_i, y.to_i, @bricks.peak(point))
           end
         end

@@ -1,15 +1,15 @@
 module PF
   class Mesh
     setter tris = [] of Tri
-    property origin = Vec3d(Float64).new(0.0, 0.0, 0.0)
-    property rotation = Vec3d(Float64).new(0.0, 0.0, 0.0)
-    property position = Vec3d(Float64).new(0.0, 0.0, 0.0)
+    property origin = Vector3(Float64).new(0.0, 0.0, 0.0)
+    property rotation = Vector3(Float64).new(0.0, 0.0, 0.0)
+    property position = Vector3(Float64).new(0.0, 0.0, 0.0)
 
     # Load an obj file
     def self.load_obj(path, use_normals : Bool = false)
-      verticies = [] of Vec3d(Float64)
-      texture_verticies = [] of Vec3d(Float64)
-      normal_verticies = [] of Vec3d(Float64)
+      verticies = [] of Vector3(Float64)
+      texture_verticies = [] of Vector3(Float64)
+      normal_verticies = [] of Vector3(Float64)
       tris = [] of Tri
 
       line_no = 0
@@ -21,18 +21,18 @@ module PF
           case parts[0]
           when "v"
             w = parts[4]?.try { |n| n.to_f64 }
-            verticies << Vec3d.new(x: parts[1].to_f64, y: parts[2].to_f64, z: parts[3].to_f64, w: w)
+            verticies << Vector3.new(x: parts[1].to_f64, y: parts[2].to_f64, z: parts[3].to_f64)
           when "vt"
             v = parts[2]?.try { |n| n.to_f64 } || 0.0
             w = parts[3]?.try { |n| n.to_f64 } || 0.0
-            texture_verticies << Vec3d.new(parts[1].to_f64, v, w)
+            texture_verticies << Vector3.new(parts[1].to_f64, v, w)
           when "vn"
             if use_normals
-              normal_verticies << Vec3d.new(parts[1].to_f64, parts[2].to_f64, parts[3].to_f64)
+              normal_verticies << Vector3.new(parts[1].to_f64, parts[2].to_f64, parts[3].to_f64)
             end
           when "f"
-            face_verts = [] of Vec3d(Float64)
-            normal : Vec3d(Float64)? = nil
+            face_verts = [] of Vector3(Float64)
+            normal : Vector3(Float64)? = nil
             parts[1..].each do |part|
               face = part.split('/')
               face_verts << verticies[face[0].to_i - 1]

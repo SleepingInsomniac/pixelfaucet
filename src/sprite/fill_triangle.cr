@@ -2,7 +2,7 @@ require "../line"
 
 module PF
   class Sprite
-    def fill_triangle(p1 : Vector, p2 : Vector, p3 : Vector, pixel : Pixel = Pixel.new)
+    def fill_triangle(p1 : Vector2, p2 : Vector2, p3 : Vector2, pixel : Pixel = Pixel.new)
       # Sort points from top to bottom
       p1, p2 = p2, p1 if p2.y < p1.y
       p1, p3 = p3, p1 if p3.y < p1.y
@@ -54,7 +54,7 @@ module PF
       end
     end
 
-    def fill_triangle(points : Enumerable(Vector), pixel : Pixel = Pixel.new)
+    def fill_triangle(points : Enumerable(Vector2), pixel : Pixel = Pixel.new)
       fill_triangle(points[0], points[1], points[2], pixel)
     end
   end

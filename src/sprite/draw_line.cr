@@ -36,12 +36,12 @@ module PF
     end
 
     # ditto
-    def draw_line(p1 : Vector(Int, 2), p2 : Vector(Int, 2), pixel : Pixel = Pixel.new)
+    def draw_line(p1 : Vector2(Int), p2 : Vector2(Int), pixel : Pixel = Pixel.new)
       draw_line(p1.x, p1.y, p2.x, p2.y, pixel)
     end
 
     # ditto
-    def draw_line(p1 : Vector(Float, 2), p2 : Vector(Float, 2), pixel : Pixel = Pixel.new)
+    def draw_line(p1 : Vector2(Float), p2 : Vector2(Float), pixel : Pixel = Pixel.new)
       draw_line(p1.to_i32, p2.to_i32, pixel)
     end
 

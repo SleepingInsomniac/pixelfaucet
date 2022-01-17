@@ -1,7 +1,7 @@
 module PF
   class Sprite
     # Fill an abitrary polygon. Expects a clockwise winding of points
-    def fill_shape(points : Enumerable(Vector), color : Pixel = Pixel.new)
+    def fill_shape(points : Enumerable(Vector2), color : Pixel = Pixel.new)
       return if points.empty?
       return draw_point(points[0], color) if points.size == 1
       return draw_line(points[0], points[1], color) if points.size == 2
@@ -61,7 +61,7 @@ module PF
       end
     end
 
-    def fill_shape(*points : Vector, color : Pixel = Pixel.new)
+    def fill_shape(*points : Vector2, color : Pixel = Pixel.new)
       fill_shape(points, color)
     end
   end

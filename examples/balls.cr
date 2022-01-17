@@ -8,7 +8,7 @@ module PF
   class Ball < Entity
     include CircleCollision
 
-    getter frame : Array(Vector(Float64, 2))
+    getter frame : Array(Vector2(Float64))
     getter color = Pixel.random
 
     def initialize(size : Float64)
@@ -31,10 +31,10 @@ module PF
     end
 
     def add_ball
-      position = Vector(Float64, 2).new(rand(0.0_f64..@width.to_f64), rand(0.0_f64..@height.to_f64))
+      position = Vector2(Float64).new(rand(0.0_f64..@width.to_f64), rand(0.0_f64..@height.to_f64))
       ball = Ball.new(rand(10.0..30.0))
       ball.position = position
-      ball.velocity = Vector(Float64, 2).new(rand(-50.0..50.0), rand(-50.0..50.0))
+      ball.velocity = Vector2(Float64).new(rand(-50.0..50.0), rand(-50.0..50.0))
       @balls << ball
     end
 

@@ -13,8 +13,8 @@ class Wind
   @step : Float64?
 
   struct Gust
-    property position : PF::Vector(Float64, 2)
-    property strength : PF::Vector(Float64, 2)
+    property position : PF::Vector2(Float64)
+    property strength : PF::Vector2(Float64)
 
     def initialize(@position, @strength)
     end
@@ -34,7 +34,7 @@ class Wind
     while y < @height
       x = step / 2
       while x < @width
-        @gusts << Gust.new(PF::Vector(Float64, 2).new(x, y), PF::Vector(Float64, 2).new(rand(-1.0..1.0), rand(-1.0..1.0)))
+        @gusts << Gust.new(PF::Vector2(Float64).new(x, y), PF::Vector2(Float64).new(rand(-1.0..1.0), rand(-1.0..1.0)))
         x += step
       end
       y += step
@@ -44,12 +44,12 @@ end
 
 class Flake
   property shape : UInt8
-  property position : PF::Vector(Float64, 2)
+  property position : PF::Vector2(Float64)
   property z_pos : Float64
-  property velocity : PF::Vector(Float64, 2)
+  property velocity : PF::Vector2(Float64)
 
-  def initialize(@position, @shape = rand(0_u8..2_u8), @z_pos = rand(0.0..1.0), velocity : PF::Vector(Float64, 2)? = nil)
-    @velocity = velocity || PF::Vector(Float64, 2).new(rand(-2.0..2.0), rand(0.0..20.0))
+  def initialize(@position, @shape = rand(0_u8..2_u8), @z_pos = rand(0.0..1.0), velocity : PF::Vector2(Float64)? = nil)
+    @velocity = velocity || PF::Vector2(Float64).new(rand(-2.0..2.0), rand(0.0..20.0))
   end
 
   def update(dt)

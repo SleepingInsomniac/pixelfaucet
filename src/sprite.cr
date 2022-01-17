@@ -55,7 +55,7 @@ module PF
     end
 
     # ditto
-    def draw_to(dest : SDL::Surface | Sprite, at : Vector(Int, 2))
+    def draw_to(dest : SDL::Surface | Sprite, at : Vector2(Int))
       draw_to(dest, at.x, at.y)
     end
 
@@ -70,7 +70,7 @@ module PF
     end
 
     # ditto
-    def peak(point : Vector(Int, 2))
+    def peak(point : Vector2(Int))
       pixel_pointer(point.x, point.y).value
     end
 
@@ -87,7 +87,7 @@ module PF
     end
 
     # ditto
-    def sample(point : Vector(Int, 2))
+    def sample(point : Vector2(Int))
       sample(point.x, point.y)
     end
 
@@ -105,7 +105,7 @@ module PF
     end
 
     # ditto
-    def sample(point : Vector(Int, 2), alpha = true)
+    def sample(point : Vector2(Int), alpha = true)
       sample(point.x, point.y, true)
     end
 

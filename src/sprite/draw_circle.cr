@@ -28,7 +28,7 @@ module PF
       end
     end
 
-    def draw_circle(c : Vector(Int, 2), r : Int, pixel : Pixel = Pixel.new)
+    def draw_circle(c : Vector2(Int), r : Int, pixel : Pixel = Pixel.new)
       draw_circle(c.x, c.y, r, pixel)
     end
   end

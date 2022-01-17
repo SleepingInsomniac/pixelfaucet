@@ -48,7 +48,7 @@ module PF
       self.rot_x(x) * self.rot_y(y) * self.rot_z(z)
     end
 
-    def self.rotation(angle : Vector(Float64, 3))
+    def self.rotation(angle : Vector3(Float64))
       self.rotation(angle.x, angle.y, angle.z)
     end
 
@@ -61,7 +61,7 @@ module PF
       ]
     end
 
-    def self.translation(pos : Vector(Float64, 3))
+    def self.translation(pos : Vector3(Float64))
       self.translation(pos.x, pos.y, pos.z)
     end
 
@@ -78,7 +78,7 @@ module PF
       matrix
     end
 
-    def self.point_at(position : Vector(Float64, 3), target : Vector(Float64, 3), up : Vector(Float64, 3) = Vector[0.0, 1.0, 0.0])
+    def self.point_at(position : Vector3(Float64), target : Vector3(Float64), up : Vector3(Float64) = Vector[0.0, 1.0, 0.0])
       new_forward = (target - position).normalized
       new_up = (up - new_forward * up.dot(new_forward)).normalized
       new_right = new_up.cross(new_forward)
@@ -92,13 +92,24 @@ module PF
     end
 
     # TODO: Optionally return the result of w in some way (pointer / tuple?)
-    def self.apply(point : Vector(Float64, 3), matrix : Matrix(Float64, 4, 4))
+    def self.apply(point : Vector3(Float64), matrix : Matrix(Float64, 4, 4))
       vector = Vector[point.x, point.y, point.z, 1.0] * matrix
       if vector.w == 0.0
         Vector[vector.x, vector.y, vector.z]
       else
         Vector[vector.x, vector.y, vector.z] / vector.w
       end
+    end
+
+    def self.apply(point : Vector3(Float64), matrix : Mat4)
+      vec = Vector3.new(
+        point.x * matrix[0, 0] + point.y * matrix[1, 0] + point.z * matrix[2, 0] + matrix[3, 0],
+        point.x * matrix[0, 1] + point.y * matrix[1, 1] + point.z * matrix[2, 1] + matrix[3, 1],
+        point.x * matrix[0, 2] + point.y * matrix[1, 2] + point.z * matrix[2, 2] + matrix[3, 2]
+      )
+      w = point.x * matrix[0, 3] + point.y * matrix[1, 3] + point.z * matrix[2, 3] + matrix[3, 3]
+      vec /= w unless w == 0.0
+      vec
     end
 
     def initialize
@@ -128,14 +139,14 @@ module PF
       self
     end
 
-    def self.rotate(r : Vector(Float64, 3))
+    def self.rotate(r : Vector3(Float64))
       rot_x(r.x)
       rot_y(r.y)
       rot_z(r.z)
       self
     end
 
-    def translate(pos : Vector(Float64, 3))
+    def translate(pos : Vector3(Float64))
       @matrix = PF::Transform3d.translation * @matrix
       self
     end
@@ -147,13 +158,8 @@ module PF
     end
 
     # TODO: Optionally return the result of w in some way (pointer / tuple?)
-    def apply(point : Vector(Float64, 3))
-      vector = Vector[point.x, point.y.point.z, 1.0] * @matrix
-      if vector.w == 0.0
-        Vector[vector.x, vector.y, vector.z]
-      else
-        Vector[vector.x, vector.y, vector.z] / vector.w
-      end
+    def apply(point : Vector3(Float64))
+      PF::Transform3d.apply(point, @matrix)
     end
   end
 end

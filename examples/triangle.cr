@@ -6,10 +6,10 @@ require "../src/shape"
 require "../src/vector"
 
 class Triangle < PF::Entity
-  property frame : Array(PF::Vector(Float64, 2))
+  property frame : Array(PF::Vector2(Float64))
 
   def initialize(*args, **kwargs)
-    @frame = [] of PF::Vector(Float64, 2)
+    @frame = [] of PF::Vector2(Float64)
   end
 
   def update(dt)

@@ -2,9 +2,9 @@ require "./vector"
 
 module PF
   struct Line(T)
-    property p1 : Vector(T, 2), p2 : Vector(T, 2)
+    property p1 : Vector2(T), p2 : Vector2(T)
 
-    def initialize(@p1 : Vector(T, 2), @p2 : Vector(T, 2))
+    def initialize(@p1 : Vector2(T), @p2 : Vector2(T))
     end
 
     def rise

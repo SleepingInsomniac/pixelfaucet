@@ -13,7 +13,7 @@ module PF
       ])
     end
 
-    def self.point_at(position : Vec3d, target : Vec3d, up : Vec3d = Vec3d.new(0.0, 1.0, 0.0))
+    def self.point_at(position : Vector3, target : Vector3, up : Vector3 = Vector3.new(0.0, 1.0, 0.0))
       new_forward = (target - position).normalized
       new_up = (up - new_forward * up.dot(new_forward)).normalized
       new_right = new_up.cross(new_forward)
@@ -59,11 +59,11 @@ module PF
       ])
     end
 
-    def self.rotation(r : Vec3d)
+    def self.rotation(r : Vector3)
       Mat4.rot_x(r.x) * Mat4.rot_y(r.y) * Mat4.rot_z(r.z)
     end
 
-    def self.translation(pos : Vec3d)
+    def self.translation(pos : Vector3)
       new(Slice[
         1.0, 0.0, 0.0, pos.x,
         0.0, 1.0, 0.0, pos.y,
@@ -119,7 +119,7 @@ module PF
       result
     end
 
-    def translate(pos : Vec3d)
+    def translate(pos : Vector3)
       self * Mat4.translation(pos)
     end
 

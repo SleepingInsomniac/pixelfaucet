@@ -12,7 +12,7 @@ module PF
     end
 
     # Rotate points by *rotation*
-    def self.rotate(points : Enumerable(Vector), rotation : Float64)
+    def self.rotate(points : Enumerable(Vector2), rotation : Float64)
       rc = Math.cos(rotation)
       rs = Math.sin(rotation)
 
@@ -22,22 +22,22 @@ module PF
     end
 
     # Translate points by *translation*
-    def self.translate(points : Enumerable(Vector), translation : Vector)
+    def self.translate(points : Enumerable(Vector2), translation : Vector2)
       points.map { |p| p + translation }
     end
 
     # ditto
-    def self.translate(*points : Vector, translation : Vector)
+    def self.translate(*points : Vector2, translation : Vector2)
       self.translation(points, translation: translation)
     end
 
     # Scale points by a certain *amount*
-    def self.scale(points : Enumerable(Vector), amount : Vector)
+    def self.scale(points : Enumerable(Vector2), amount : Vector2)
       points.map { |p| p * amount }
     end
 
     # calculate length from center for all points, and then get the average
-    def self.average_radius(points : Enumerable(Vector))
+    def self.average_radius(points : Enumerable(Vector2))
       points.map(&.length).reduce { |t, p| t + p } / points.size
     end
   end
