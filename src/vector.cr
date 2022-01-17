@@ -5,7 +5,7 @@ module PF
     # Creates a new `Vector` with the given *args*
     #
     # ```
-    # PF::Vector[1, 2] # => PF::Vec2(Int32)(@x=1, @y=2)
+    # PF::Vector[1, 2] # => PF::Vector2(Int32)(@x=1, @y=2)
     # ```
     macro [](*args)
       PF::Vector{{args.size}}(typeof({{*args}})).new(
@@ -28,7 +28,7 @@ module PF
 
       # Returns the size of this vector
       # ```
-      # PF::Vec2.new(1, 2).size => 2
+      # PF::Vector{{i}}.new(...).size => {{i}}
       # ```
       def size
         {{ i.id }}
@@ -136,7 +136,7 @@ module PF
       #   0, 2, 0,
       #   0, 0, 1,
       # ]
-      # # => PF::Vec3(Int32)(@x=1, @y=4, @z=3)
+      # # => PF::Vector3(Int32)(@x=1, @y=4, @z=3)
       # ```
       def *(matrix : Matrix)
         PF::Vector[{% for col in 0...i %}
