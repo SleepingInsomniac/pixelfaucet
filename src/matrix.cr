@@ -38,6 +38,8 @@ module PF
       end
     end
 
+    delegate :fill, to: @values
+
     def initialize
       @values = Slice(T).new(W * H, T.new(0))
     end
@@ -55,6 +57,16 @@ module PF
       nums.each_with_index { |n, i| @values[i] = n }
     end
 
+    def reset_to_identity!
+      {% unless W == H %}
+        raise "Matrix({{W}}x{{H}}) is not square"
+      {% end %}
+      fill(T.new(0))
+      {% for i in 0...W %}
+        self[{{i}}, {{i}}] = T.new(1)
+      {% end %}
+    end
+
     # Width of the matrix
     def width
       W
@@ -66,11 +78,7 @@ module PF
     end
 
     def size
-      {% if W == H %}
-        W
-      {% else %}
-        raise "Matrix({{W}}x{{H}}) is not square"
-      {% end %}
+      W * H
     end
 
     # Tests the equality of two matricies
@@ -102,7 +110,7 @@ module PF
     end
 
     def *(other : Matrix)
-      result = Matrix(T, W, H).new
+      result = Matrix(typeof(self[0, 0] * other[0, 0]), W, H).new
       {% for y in (0...H) %}
         {% for x in (0...W) %}
           {% for n in (0...W) %}
@@ -113,14 +121,16 @@ module PF
       result
     end
 
-    def inspect
-      String.build do |io|
-        H.times do |h|
-          io << '['
-          W.times { |w| io << self[w, h] }
-          io << "]\n"
+    def to_s(io)
+      io << {{ @type }} << '['
+      (0...H).each do |y|
+        (0...W).each do |x|
+          io << self[x, y]
+          io << ' ' unless x == W - 1
         end
+        io << ", " unless y == H - 1
       end
+      io << ']'
     end
   end
 end

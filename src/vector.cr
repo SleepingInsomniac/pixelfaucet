@@ -139,8 +139,8 @@ module PF
       # # => PF::Vector3(Int32)(@x=1, @y=4, @z=3)
       # ```
       def *(matrix : Matrix)
-        PF::Vector[{% for col in 0...i %}
-          {% for row in 0...i %} @{{ vars[row].id }} * matrix[{{row}}, {{col}}] {% if row != i - 1 %} + {% end %}{% end %},
+        PF::Vector[{% for row in 0...i %}
+          {% for col in 0...i %} @{{ vars[col].id }} * matrix[{{col}}, {{row}}] {% if col != i - 1 %} + {% end %}{% end %},
         {% end %}]
       end
 
@@ -150,7 +150,7 @@ module PF
                                to_u8: UInt8, to_u16: UInt16, to_u32: UInt32, to_u64: UInt64, to_u128: UInt128,
                                to_f32: Float32, to_f64: Float64,
                              } %}
-        # Convert this vector to {{ type }}
+        # Convert the components in this vector to {{ type }}
         def {{ method }}
           Vector{{i}}({{ type }}).new({% for arg in 0...i %} @{{vars[arg].id}}.{{method}}, {% end %})
         end
