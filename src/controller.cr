@@ -68,6 +68,11 @@ module PF
 
     # ===============
 
+    def any_pressed?
+      @keysdown.any? { |name, state| state & PRESSED > 0 }
+    end
+
+    # Returns true the first time called if a button has been pressed
     def pressed?(name)
       return false if @keysdown[name] & READ != 0
       return false unless @keysdown[name] & PRESSED != 0
@@ -75,11 +80,13 @@ module PF
       true
     end
 
-    def action?(name)
+    # Returns true if a registered button is being held
+    def held?(name)
       @keysdown[name] & PRESSED > 0
     end
 
-    def held?(name)
+    # ditto
+    def action?(name)
       @keysdown[name] & PRESSED > 0
     end
   end
