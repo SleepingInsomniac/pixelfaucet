@@ -38,6 +38,20 @@ module PF
       end
     end
 
+    # Map
+    def map_event(event : SDL::Event?)
+      case event
+      when SDL::Event::Keyboard
+        {% if T == LibSDL::Scancode %}
+          press(event.scancode) if event.keydown?
+          release(event.scancode) if event.keyup?
+        {% elsif T == LibSDL::Keycode %}
+          press(event.code) if event.keydown?
+          release(event.code) if event.keyup?
+        {% end %}
+      end
+    end
+
     def registered?(button)
       @mapping.keys.includes?(button)
     end
@@ -61,8 +75,11 @@ module PF
       true
     end
 
-    # Returns duration of time pressed or false if not pressed
     def action?(name)
+      @keysdown[name] & PRESSED > 0
+    end
+
+    def held?(name)
       @keysdown[name] & PRESSED > 0
     end
   end
