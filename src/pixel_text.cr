@@ -1,5 +1,6 @@
 require "sdl/image"
 require "./sprite"
+require "./pixel"
 
 module PF
   class PixelText < Sprite
@@ -49,6 +50,13 @@ module PF
     end
 
     def draw_to(sprite : Sprite, text : String, x : Int32 = 0, y : Int32 = 0)
+      draw_to(sprite.surface, text, x, y)
+    end
+
+    def draw_to(sprite : Sprite, text : String, x : Int32 = 0, y : Int32 = 0, bg : Pixel? = nil)
+      if background = bg
+        sprite.fill_rect(x - 1, y - 1, x + (char_width * text.size) - 1, y + char_height - 1, background)
+      end
       draw_to(sprite.surface, text, x, y)
     end
   end
