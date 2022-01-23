@@ -36,6 +36,13 @@ describe Matrix do
       result = mat * ident
       result.should eq(mat)
     end
+
+    it "multiplies different types" do
+      m1 = Matrix[1, 2, 3, 4]
+      m2 = Matrix[2.0, 0.0, 0.0, 2.0]
+      m3 = Matrix[2.0, 4.0, 6.0, 8.0]
+      (m1 * m2).should eq(m3)
+    end
   end
 
   describe "#size" do
@@ -45,18 +52,32 @@ describe Matrix do
         3, 4,
       ]
 
-      mat.size.should eq(2)
+      mat.width.should eq(2)
     end
+  end
 
-    it "raises an exception if called on a non-square matrix" do
-      mat = Matrix(Int32, 2, 4).new(Slice[
-        1, 2,
-        3, 4,
-        5, 6,
-        7, 8,
-      ])
+  describe "#==" do
+    it "accurately show equality" do
+      m1 = Matrix[
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+      ]
 
-      expect_raises(Exception, "Matrix(2x4) is not square") { mat.size }
+      m2 = Matrix[
+        1, 1, 1,
+        1, 1, 1,
+        1, 1, 1,
+      ]
+
+      m3 = Matrix[
+        2, 2, 2,
+        2, 2, 2,
+        2, 2, 2,
+      ]
+
+      (m1 == m2).should eq(true)
+      (m1 == m3).should eq(false)
     end
   end
 end
