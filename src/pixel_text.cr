@@ -10,7 +10,7 @@ module PF
 
     def initialize(path : String, @char_width : Int32 = 7, @char_height : Int32 = 8, mapping : String? = nil)
       super(path)
-      @chars = mapping || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?().,/\\[]{}$#+-“”‘’'\"@"
+      @chars = mapping || "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?().,/\\[]{}$#+-“”‘’'\"@=><_"
     end
 
     def color(pixel : Pixel)
