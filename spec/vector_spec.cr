@@ -8,7 +8,7 @@ describe Vector do
     it "multiplies 2 vectors" do
       v1 = Vector[1, 2]
       v2 = Vector[2, 2]
-      (v1 * v2).should eq(Vector2(Int32).new(2, 4))
+      (v1 * v2).should eq(Vector[2, 4])
     end
   end
 

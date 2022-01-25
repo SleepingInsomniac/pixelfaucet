@@ -1,9 +1,9 @@
 module PF
   class Mesh
     setter tris = [] of Tri
-    property origin = Vector3(Float64).new(0.0, 0.0, 0.0)
-    property rotation = Vector3(Float64).new(0.0, 0.0, 0.0)
-    property position = Vector3(Float64).new(0.0, 0.0, 0.0)
+    property origin : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
+    property rotation : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
+    property position : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
 
     # Load an obj file
     def self.load_obj(path, use_normals : Bool = false)

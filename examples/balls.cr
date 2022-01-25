@@ -31,10 +31,10 @@ module PF
     end
 
     def add_ball
-      position = Vector2(Float64).new(rand(0.0_f64..@width.to_f64), rand(0.0_f64..@height.to_f64))
+      position = Vector[rand(0.0_f64..@width.to_f64), rand(0.0_f64..@height.to_f64)]
       ball = Ball.new(rand(10.0..30.0))
       ball.position = position
-      ball.velocity = Vector2(Float64).new(rand(-50.0..50.0), rand(-50.0..50.0))
+      ball.velocity = Vector[rand(-50.0..50.0), rand(-50.0..50.0)]
       @balls << ball
     end
 

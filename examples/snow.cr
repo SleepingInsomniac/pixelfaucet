@@ -34,7 +34,7 @@ class Wind
     while y < @height
       x = step / 2
       while x < @width
-        @gusts << Gust.new(PF::Vector2(Float64).new(x, y), PF::Vector2(Float64).new(rand(-1.0..1.0), rand(-1.0..1.0)))
+        @gusts << Gust.new(PF::Vector[x, y], PF::Vector[rand(-1.0..1.0), rand(-1.0..1.0)])
         x += step
       end
       y += step
@@ -49,7 +49,7 @@ class Flake
   property velocity : PF::Vector2(Float64)
 
   def initialize(@position, @shape = rand(0_u8..2_u8), @z_pos = rand(0.0..1.0), velocity : PF::Vector2(Float64)? = nil)
-    @velocity = velocity || PF::Vector2(Float64).new(rand(-2.0..2.0), rand(0.0..20.0))
+    @velocity = velocity || PF::Vector[rand(-2.0..2.0), rand(0.0..20.0)]
   end
 
   def update(dt)

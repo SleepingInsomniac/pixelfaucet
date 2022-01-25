@@ -15,9 +15,9 @@ module PF
     end
 
     def initialize(p1x : Float64, p1y : Float64, p1z : Float64, p2x : Float64, p2y : Float64, p2z : Float64, p3x : Float64, p3y : Float64, p3z : Float64, @color = PF::Pixel.white)
-      @p1 = Vector3(Float64).new(p1x, p1y, p1z)
-      @p2 = Vector3(Float64).new(p2x, p2y, p2z)
-      @p3 = Vector3(Float64).new(p3x, p3y, p3z)
+      @p1 = Vector[p1x, p1y, p1z]
+      @p2 = Vector[p2x, p2y, p2z]
+      @p3 = Vector[p3x, p3y, p3z]
     end
 
     # Return the normal assuming clockwise pointing winding
@@ -61,9 +61,9 @@ module PF
       plane_normal = plane_normal.normalized
 
       # Create two temporary storage arrays to classify points either side of plane
-      inside_points = StaticArray(Vector3(Float64), 3).new(Vector3(Float64).new(0.0, 0.0, 0.0))
+      inside_points = StaticArray(Vector3(Float64), 3).new(Vector[0.0, 0.0, 0.0])
       inside_count = 0
-      outside_points = StaticArray(Vector3(Float64), 3).new(Vector3(Float64).new(0.0, 0.0, 0.0))
+      outside_points = StaticArray(Vector3(Float64), 3).new(Vector[0.0, 0.0, 0.0])
       outside_count = 0
 
       # Classify each point as inside or outside of the plane
