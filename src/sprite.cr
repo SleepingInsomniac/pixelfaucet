@@ -4,6 +4,26 @@ require "./sprite/*"
 
 module PF
   class Sprite
+    def self.load_tiles(path, tile_width, tile_height)
+      sheet = Sprite.new(path)
+      sprites = [] of Sprite
+
+      tiles_x = sheet.width // tile_width
+      tiles_y = sheet.height // tile_height
+
+      0.upto(tiles_x - 1) do |tx|
+        0.upto(tiles_y - 1) do |ty|
+          sx = tx * tile_width
+          sy = ty * tile_height
+          sprite = Sprite.new(tile_width, tile_height)
+          sheet.draw_to(sprite, Vector[sx, sy], Vector[tile_width, tile_height], Vector[0, 0])
+          sprites << sprite
+        end
+      end
+
+      sprites
+    end
+
     property surface : SDL::Surface
 
     delegate :fill, :lock, :format, to: @surface
@@ -57,6 +77,11 @@ module PF
     # ditto
     def draw_to(dest : SDL::Surface | Sprite, at : Vector2(Int))
       draw_to(dest, at.x, at.y)
+    end
+
+    # Draw this sprite to another given a source rect and destination
+    def draw_to(sprite : Sprite, source : Vector2(Int), size : Vector2(Int), dest : Vector2(Int))
+      @surface.blit(sprite.surface, SDL::Rect.new(source.x, source.y, size.x, size.y), SDL::Rect.new(dest.x, dest.y, size.x, size.y))
     end
 
     # Raw access to the pixels as a Slice

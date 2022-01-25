@@ -54,5 +54,12 @@ module PF
     def draw_line(line : Line, pixel : Pixel = Pixel.new)
       draw_line(line.p1.to_i32, line.p2.to_i32, pixel)
     end
+
+    # Draw a horizontal line to a certain *width*
+    def scan_line(x : Int, y : Int, width : Int, pixel : Pixel = Pixel.new)
+      0.upto(width) do |n|
+        draw_point(x + n, y, pixel)
+      end
+    end
   end
 end

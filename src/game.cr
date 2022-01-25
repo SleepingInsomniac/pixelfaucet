@@ -17,8 +17,8 @@ module PF
 
     @viewport : Vector2(Int32)? = nil
 
-    delegate :draw_point, :draw_line, :draw_circle, :draw_triangle, :draw_rect, :draw_shape,
-      :fill_triangle, :fill_rect, :fill_shape, to: @screen
+    delegate :draw_point, :draw_line, :scan_line, :draw_circle, :draw_triangle, :draw_rect, :draw_shape,
+      :fill_triangle, :fill_rect, :fill_circle, :fill_shape, to: @screen
 
     @fps_lasttime : Float64 = Time.monotonic.total_milliseconds # the last recorded time.
     @fps_current : UInt32 = 0                                   # the current FPS.
