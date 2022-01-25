@@ -99,7 +99,7 @@ class Snow < PF::Game
       if flake.shape == 0
         draw_point(flake.position.to_i32, color)
       else
-        draw_circle(flake.position.to_i32, flake.shape, color)
+        fill_circle(flake.position.to_i32, flake.shape, color)
       end
     end
   end
