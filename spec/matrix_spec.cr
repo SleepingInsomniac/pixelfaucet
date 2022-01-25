@@ -10,7 +10,7 @@ describe Matrix do
       1, 0,
     ]
 
-    m.class.should eq(Matrix(Int32, 2, 2))
+    m.class.should eq(Matrix(Int32, 4))
     m[1, 0].should eq(1)
     m[0, 1].should eq(1)
   end
@@ -24,7 +24,7 @@ describe Matrix do
         1.0, 2.0, 3.0, 4.0,
       ]
 
-      mat.class.should eq(Matrix(Float64, 4, 4))
+      mat.class.should eq(Matrix(Float64, 16))
 
       ident = Matrix[
         1.0, 0.0, 0.0, 0.0,

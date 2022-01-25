@@ -3,7 +3,7 @@ require "./vector"
 
 module PF
   class Transform3d
-    property matrix : Matrix(Float64, 4, 4)
+    property matrix : Matrix(Float64, 16)
 
     def self.identity
       Matrix[
@@ -67,7 +67,7 @@ module PF
 
     # Does not work for scaling, only for rotation / translation
     def self.quick_inverse(other : Matrix)
-      matrix = Matrix(Float64, 4, 4).new
+      matrix = Matrix(Float64, 16).new(4, 4)
       matrix[0, 0] = other[0, 0]; matrix[0, 1] = other[1, 0]; matrix[0, 2] = other[2, 0]; matrix[0, 3] = 0.0
       matrix[1, 0] = other[0, 1]; matrix[1, 1] = other[1, 1]; matrix[1, 2] = other[2, 1]; matrix[1, 3] = 0.0
       matrix[2, 0] = other[0, 2]; matrix[2, 1] = other[1, 2]; matrix[2, 2] = other[2, 2]; matrix[2, 3] = 0.0
@@ -92,7 +92,7 @@ module PF
     end
 
     # TODO: Optionally return the result of w in some way (pointer / tuple?)
-    def self.apply(point : Vector3(Float64), matrix : Matrix(Float64, 4, 4))
+    def self.apply(point : Vector3(Float64), matrix : Matrix(Float64, 16))
       vec = Vector3.new(
         point.x * matrix[0, 0] + point.y * matrix[1, 0] + point.z * matrix[2, 0] + matrix[3, 0],
         point.x * matrix[0, 1] + point.y * matrix[1, 1] + point.z * matrix[2, 1] + matrix[3, 1],

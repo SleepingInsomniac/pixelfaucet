@@ -11,7 +11,7 @@ module PF
     property aspect_ratio : Float64?
     property camera : Camera
     property light : Vector3(Float64) = Vector3.new(0.0, 0.0, -1.0).normalized
-    property mat_proj : Matrix(Float64, 4, 4)?
+    property mat_proj : Matrix(Float64, 16)?
     property clipping_plane_near : Vector3(Float64)
     property near_plane_normal : Vector3(Float64) = Vector3.new(0.0, 0.0, 1.0)
     @fov_rad : Float64?

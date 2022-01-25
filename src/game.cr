@@ -83,6 +83,7 @@ module PF
       calculate_fps(et)
       update((et - @last_time) / 1000.0, event)
       @last_time = et
+      GC.collect
     end
 
     private def calculate_fps(et)

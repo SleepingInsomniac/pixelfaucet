@@ -1,84 +1,63 @@
 module PF
-  struct Matrix(T, W, H)
-    property values : Slice(T)
+  struct Matrix(T, S)
+    include Indexable::Mutable(T)
+
+    getter values : StaticArray(T, S)
+    getter width : UInt8
+    getter height : UInt8
 
     # Creates a new square `Matrix` with the given *args*
     #
     # ```
-    # m = Matrix[1, 2, 3, 4]
-    # m[0, 0] # => 1
-    # m[1, 0] # => 2
-    # m[0, 1] # => 3
-    # m[1, 1] # => 4
-    # m.class # => Matrix(Int32, 2, 2)
+    # m = Matrix[1, 2, 3, 4] # => Matrix(Int32, 4) 2x2 [1, 2, 3, 4]
     # ```
     macro [](*args)
-      %values = Slice(typeof({{*args}})).new({{args.size}}, typeof({{*args}}).new(0))
-      {% for arg, i in args %}
-        %values.to_unsafe[{{i}}] = {{arg}}
-      {% end %}
       # width and height are the isqrt of args.size
-      {% if args.size == 1 %}
-        PF::Matrix(typeof({{*args}}), 1, 1).new(%values)
-      {% elsif args.size == 4 %}
-        PF::Matrix(typeof({{*args}}), 2, 2).new(%values)
+      {% if args.size == 4 %}
+        PF::Matrix(typeof({{*args}}), 4).new(2, 2, StaticArray[{{*args}}])
       {% elsif args.size == 9 %}
-        PF::Matrix(typeof({{*args}}), 3, 3).new(%values)
+        PF::Matrix(typeof({{*args}}), 9).new(3, 3, StaticArray[{{*args}}])
       {% elsif args.size == 16 %}
-        PF::Matrix(typeof({{*args}}), 4, 4).new(%values)
+        PF::Matrix(typeof({{*args}}), 16).new(4, 4, StaticArray[{{*args}}])
       {% else %}
         raise "Cannot determine width and height of matrix with {{ args.size }} elements, " \
-              "please provide them explicitly Matrix(Int32, 4, 4).new(...)"
+              "please provide them explicitly Matrix(Int32, 16).new(4, 4, StaticArray[...])"
       {% end %}
     end
 
-    def self.identity
-      new.tap do |m|
-        m.size.times { |n| m[n, n] = T.new(1) }
-      end
+    def initialize(@width : UInt8, @height : UInt8)
+      @values = StaticArray(T, S).new(T.new(0))
+    end
+
+    def initialize(@width : UInt8, @height : UInt8, @values : StaticArray(T, S))
     end
 
     delegate :fill, to: @values
 
-    def initialize
-      @values = Slice(T).new(W * H, T.new(0))
-    end
-
-    def initialize(@values)
-    end
-
-    # Create a new matrix
-    #
-    # ```
-    # PF::Matrix(Int32, 2, 2).new(1, 2, 3, 4)
-    # ```
-    def initialize(*nums : T)
-      @values = Slice(T).new(W * H, T.new(0))
-      nums.each_with_index { |n, i| @values[i] = n }
-    end
-
-    def reset_to_identity!
-      {% unless W == H %}
-        raise "Matrix({{W}}x{{H}}) is not square"
-      {% end %}
-      fill(T.new(0))
-      {% for i in 0...W %}
-        self[{{i}}, {{i}}] = T.new(1)
-      {% end %}
-    end
-
-    # Width of the matrix
-    def width
-      W
-    end
-
-    # Height of the matrix
-    def height
-      H
+    def index(col : Int, row : Int)
+      row * width + col
     end
 
     def size
-      W * H
+      S
+    end
+
+    def unsafe_fetch(index : Int)
+      @values.unsafe_fetch(index)
+    end
+
+    def unsafe_put(index : Int, value : T)
+      @values.unsafe_put(index, value)
+    end
+
+    # Fetch a value at a specified *column* and *row*
+    def [](col : Int, row : Int)
+      unsafe_fetch(index(col, row))
+    end
+
+    # Put a value at a specified *column* and *row*
+    def []=(col : Int, row : Int, value : T)
+      unsafe_put(index(col, row), value)
     end
 
     # Tests the equality of two matricies
@@ -86,50 +65,26 @@ module PF
       self.values == other.values
     end
 
-    # Get the index of an element in the matrix by *x* and *y* coordinates
-    def index(x : Int, y : Int)
-      y * width + x
-    end
-
-    def [](i : Int)
-      @values[i]
-    end
-
-    def []=(i : Int, value : T)
-      @values[i] = value
-    end
-
-    # Get an element
-    def [](x : Int, y : Int)
-      self[index(x, y)]
-    end
-
-    # Set an element at an *x* and *y* position
-    def []=(x : Int, y : Int, value : T)
-      self[index(x, y)] = value
-    end
-
     def *(other : Matrix)
-      result = Matrix(typeof(self[0, 0] * other[0, 0]), W, H).new
-      {% for y in (0...H) %}
-        {% for x in (0...W) %}
-          {% for n in (0...W) %}
-            result[{{x}},{{y}}] = result[{{x}},{{y}}] + self[{{n}}, {{y}}] * other[{{x}}, {{n}}]
-          {% end %}
-        {% end %}
-      {% end %}
+      result = Matrix(typeof(@values.unsafe_fetch(0) * other.values.unsafe_fetch(0)), S).new(width, height)
+      (0...height).each do |row|
+        (0...width).each do |col|
+          (0...width).each do |n|
+            result[col, row] = result[col, row] + self[n, row] * other[col, n]
+          end
+        end
+      end
       result
     end
 
     def to_s(io)
-      io << {{ @type }} << '['
-      (0...H).each do |y|
-        (0...W).each do |x|
-          io << self[x, y]
-          io << ' ' unless x == W - 1
-        end
-        io << ", " unless y == H - 1
-      end
+      io << {{@type}} << ' ' << width << "x" << height << " ["
+      {% for i in 0...S %}
+        io << unsafe_fetch({{i}})
+        {% if i != S - 1 %}
+          io << ", "
+        {% end %}
+      {% end %}
       io << ']'
     end
   end

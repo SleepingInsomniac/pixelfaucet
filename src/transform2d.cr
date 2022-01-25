@@ -3,7 +3,7 @@ require "./vector"
 
 module PF
   class Transform2d
-    property matrix : Matrix(Float64, 3, 3)
+    property matrix : Matrix(Float64, 9)
 
     def self.identity
       Matrix[
