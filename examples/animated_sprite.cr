@@ -1,33 +1,29 @@
 require "../src/game"
 require "../src/sprite"
 require "../src/pixel_text"
+require "../src/animation"
 
 module PF
   class SpriteExample < Game
     @text : PixelText = PixelText.new("assets/pf-font.png")
 
-    @tiles : Array(Sprite)
-    @frame = 0
-    @sub_frame = 0.0
-    @frame_time = 0.1
-
     def initialize(*args, **kwargs)
       super
-      @tiles = Sprite.load_tiles("assets/walking.png", 32, 64)
+      @person = Animation.new("assets/walking.png", 32, 64, 10)
+      @cat = Animation.new("assets/black-cat.png", 18, 14, 15)
     end
 
     def update(dt, event)
-      @sub_frame += dt
-      if @sub_frame > @frame_time
-        @sub_frame = @sub_frame % @frame_time
-        @frame = (@frame + 1) % @tiles.size
-      end
+      @person.update(dt)
+      @cat.update(dt)
     end
 
     def draw
       clear(60, 120, 200)
-      @text.draw_to(screen, "Frame: #{@frame}", 5, 5)
-      @tiles[@frame].draw_to(screen, (viewport // 2) - @tiles[@frame].size // 2)
+      @text.draw_to(screen, "Frame: #{@person.frame}", 5, 5)
+      fill_rect(0, 65, width - 1, height - 1, Pixel.new(100, 100, 100))
+      @person.draw_to(screen, (viewport // 2) - @person.size // 2)
+      @cat.draw_to(screen, 30, 56)
     end
   end
 end
