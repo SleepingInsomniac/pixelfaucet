@@ -4,7 +4,7 @@ module PF
 
     @state : UInt32
 
-    def initialize(@state = rand(type: UInt32))
+    def initialize(@state = ::rand(UInt32))
     end
 
     def new_seed(n : Number)
