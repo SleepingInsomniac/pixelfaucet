@@ -1,5 +1,5 @@
 module PF
-  class Lehmer32
+  struct Lehmer32
     include Random
 
     @state : UInt32
@@ -9,6 +9,7 @@ module PF
 
     def new_seed(n : Number)
       @state = n.to_u32!
+      self
     end
 
     # Generate the next number in the squence
