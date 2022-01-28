@@ -10,4 +10,4 @@ license: MIT
 
 dependencies:
   sdl:
-    github: ysbaddaden/sdl.cr
+    github: SleepingInsomniac/sdl.cr
