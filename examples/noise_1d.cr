@@ -15,11 +15,11 @@ module PF
       @noise_zoom = width / 4
       @xpos = 0.0
 
-      @controller = PF::Controller(LibSDL::Scancode).new({
-        LibSDL::Scancode::UP    => "scale up",
-        LibSDL::Scancode::DOWN  => "scale down",
-        LibSDL::Scancode::RIGHT => "zoom up",
-        LibSDL::Scancode::LEFT  => "zoom down",
+      @controller = PF::Controller(Keys).new({
+        Keys::UP    => "scale up",
+        Keys::DOWN  => "scale down",
+        Keys::RIGHT => "zoom up",
+        Keys::LEFT  => "zoom down",
       })
     end
 

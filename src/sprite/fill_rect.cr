@@ -12,5 +12,10 @@ module PF
         end
       end
     end
+
+    # ditto
+    def fill_rect(p1 : PF::Vector2(Int), p2 : PF::Vector2(Int), pixel : Pixel = Pixel.new)
+      fill_rect(p1.x, p1.y, p2.x, p2.y, pixel)
+    end
   end
 end

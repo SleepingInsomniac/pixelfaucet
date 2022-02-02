@@ -1,10 +1,17 @@
 require "./lib_sdl"
 
 module PF
+  alias Keys = LibSDL::Scancode
+
   # Handle button to action mapping in a dynamic way
   class Controller(T)
-    PRESSED = 0b0000001_u8
-    READ    = 0b0000010_u8
+    @[Flags]
+    enum State : UInt8
+      Unset    = 0
+      Pressed
+      Released
+      Read
+    end
 
     # Detect the current keyboard layout
     def self.detect_layout
@@ -31,10 +38,10 @@ module PF
     end
 
     def initialize(@mapping : Hash(T, String))
-      @keysdown = {} of String => UInt8
+      @keysdown = {} of String => State
 
       @mapping.values.each do |key|
-        @keysdown[key] = 0
+        @keysdown[key] = State::Unset
       end
     end
 
@@ -58,36 +65,45 @@ module PF
 
     def press(button)
       return nil unless registered?(button)
-      @keysdown[@mapping[button]] |= PRESSED
+      return nil if @keysdown[@mapping[button]] & State::Pressed == State::Pressed
+      @keysdown[@mapping[button]] = State::Pressed
     end
 
     def release(button)
       return nil unless registered?(button)
-      @keysdown[@mapping[button]] = 0
+      return nil unless @keysdown[@mapping[button]] & State::Pressed == State::Pressed
+      @keysdown[@mapping[button]] = State::Released
     end
 
     # ===============
 
-    def any_pressed?
-      @keysdown.any? { |name, state| state & PRESSED > 0 }
+    def any_held?
+      @keysdown.any? { |name, state| state & State::Pressed == State::Pressed }
+    end
+
+    def none_held?
+      !any_held?
     end
 
     # Returns true the first time called if a button has been pressed
     def pressed?(name)
-      return false if @keysdown[name] & READ != 0
-      return false unless @keysdown[name] & PRESSED != 0
-      @keysdown[name] |= READ
+      return false if @keysdown[name] & State::Read == State::Read
+      return false unless @keysdown[name] & State::Pressed == State::Pressed
+      @keysdown[name] |= State::Read
       true
     end
 
     # Returns true if a registered button is being held
     def held?(name)
-      @keysdown[name] & PRESSED > 0
+      @keysdown[name] & State::Pressed == State::Pressed
     end
 
-    # ditto
-    def action?(name)
-      @keysdown[name] & PRESSED > 0
+    # Returns true the first time called after a button has been released
+    def released?(name)
+      return false unless @keysdown[name] & State::Released == State::Released
+      return false if @keysdown[name] & State::Read == State::Read
+      @keysdown[name] |= State::Read
+      true
     end
   end
 end

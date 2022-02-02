@@ -1,21 +1,21 @@
 require "./lib_sdl"
 require "./pixel"
 require "./sprite"
+require "./controller"
 
 module PF
   abstract class Game
     FPS_INTERVAL = 1.0
     SHOW_FPS     = true
 
-    property scale : Int32
-    property title : String
-    property running = true
-    property screen : Sprite
-
+    getter title : String
     getter width : Int32
     getter height : Int32
-
+    getter scale : Int32
     @viewport : Vector2(Int32)? = nil
+
+    property running = true
+    property screen : Sprite
 
     delegate :draw_point, :draw_line, :scan_line, :draw_circle, :draw_triangle, :draw_rect, :draw_shape,
       :fill_triangle, :fill_rect, :fill_circle, :fill_shape, to: @screen
@@ -28,7 +28,7 @@ module PF
     def initialize(@width, @height, @scale = 1, @title = self.class.name,
                    flags = SDL::Renderer::Flags::ACCELERATED,
                    window_flags : SDL::Window::Flags = SDL::Window::Flags::SHOWN)
-      SDL.init(SDL::Init::VIDEO)
+      SDL.init(SDL::Init::EVERYTHING)
       @window = SDL::Window.new(@title, @width * @scale, @height * @scale, flags: window_flags)
       @renderer = SDL::Renderer.new(@window, flags: flags)
       @renderer.scale = {@scale, @scale}
@@ -37,6 +37,10 @@ module PF
 
     abstract def update(dt : Float64, event : SDL::Event)
     abstract def draw
+
+    # To be overridden
+    def on_exit
+    end
 
     def width=(value : Int32)
       @viewport = nil
@@ -75,6 +79,7 @@ module PF
         break unless @running
       end
     ensure
+      on_exit
       SDL.quit
     end
 

@@ -25,7 +25,7 @@ end
 class TriangleThing < PF::Game
   @tri : Triangle
   @paused = false
-  @controller : PF::Controller(LibSDL::Scancode)
+  @controller : PF::Controller(PF::Keys)
 
   def initialize(@width, @height, @scale)
     super(@width, @height, @scale)
@@ -34,10 +34,10 @@ class TriangleThing < PF::Game
     @tri.position = viewport / 2
     @tri.frame = PF::Shape.circle(3, size = @width / 3)
 
-    @controller = PF::Controller(LibSDL::Scancode).new({
-      LibSDL::Scancode::RIGHT => "Rotate Right",
-      LibSDL::Scancode::LEFT  => "Rotate Left",
-      LibSDL::Scancode::SPACE => "Pause",
+    @controller = PF::Controller(PF::Keys).new({
+      PF::Keys::RIGHT => "Rotate Right",
+      PF::Keys::LEFT  => "Rotate Left",
+      PF::Keys::SPACE => "Pause",
     })
   end
 
@@ -50,8 +50,8 @@ class TriangleThing < PF::Game
 
     @paused = !@paused if @controller.pressed?("Pause")
 
-    @tri.rotation = @tri.rotation + 0.5 * dt if @controller.action?("Rotate Right")
-    @tri.rotation = @tri.rotation - 0.5 * dt if @controller.action?("Rotate Left")
+    @tri.rotation = @tri.rotation + 0.5 * dt if @controller.held?("Rotate Right")
+    @tri.rotation = @tri.rotation - 0.5 * dt if @controller.held?("Rotate Left")
 
     unless @paused
       @tri.rotation = @tri.rotation + 1.0 * dt

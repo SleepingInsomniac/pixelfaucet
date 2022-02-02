@@ -1,14 +1,13 @@
 require "../src/game"
 require "../src/lehmer32"
 require "../src/pixel_text"
-require "../src/controller"
 
 module PF
   class Proceedural < Game
     @buffer_size : Int32
     @buffer : Pointer(UInt32)
-    @text = PF::PixelText.new("assets/pf-font.png")
-    @pan : PF::Vector2(Float64) = PF::Vector[0.0, 0.0]
+    @text = PixelText.new("assets/pf-font.png")
+    @pan : Vector2(Float64) = PF::Vector[0.0, 0.0]
     @seed : UInt32
 
     def initialize(*args, **kwargs)
@@ -17,13 +16,13 @@ module PF
       @buffer = screen.pixel_pointer(0, 0)
       @random = Lehmer32.new
       @redraw = true
-      @text.color(PF::Pixel.new(255, 255, 255))
+      @text.color(Pixel.new(255, 255, 255))
 
-      @controller = PF::Controller(LibSDL::Scancode).new({
-        LibSDL::Scancode::LEFT  => "left",
-        LibSDL::Scancode::RIGHT => "right",
-        LibSDL::Scancode::UP    => "up",
-        LibSDL::Scancode::DOWN  => "down",
+      @controller = Controller(Keys).new({
+        Keys::LEFT  => "left",
+        Keys::RIGHT => "right",
+        Keys::UP    => "up",
+        Keys::DOWN  => "down",
       })
 
       @speed = 100.0
@@ -36,7 +35,7 @@ module PF
 
     def update(dt, event)
       @controller.map_event(event)
-      @redraw = true if @controller.any_pressed?
+      @redraw = true if @controller.any_held?
       @pan.x += @speed * dt if @controller.held?("right")
       @pan.x -= @speed * dt if @controller.held?("left")
       @pan.y -= @speed * dt if @controller.held?("up")
