@@ -18,7 +18,7 @@ module PF
     property screen : Sprite
 
     delegate :draw_point, :draw_line, :scan_line, :draw_circle, :draw_triangle, :draw_rect, :draw_shape,
-      :fill_triangle, :fill_rect, :fill_circle, :fill_shape, to: @screen
+      :fill_triangle, :fill_rect, :fill_circle, :fill_shape, :draw_string, to: @screen
 
     @fps_lasttime : Float64 = Time.monotonic.total_milliseconds # the last recorded time.
     @fps_current : UInt32 = 0                                   # the current FPS.

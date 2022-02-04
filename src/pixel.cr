@@ -68,6 +68,10 @@ module PF
       PF::Pixel.new((@r - n).to_u8, (@g - n).to_u8, (@b - n).to_u8, @a)
     end
 
+    def to_u
+      to_u32
+    end
+
     def to_u32
       value = @r.to_u32 << 24
       value |= @g.to_u32 << 16

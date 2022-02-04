@@ -11,8 +11,8 @@ module PF
       tiles_x = sheet.width // tile_width
       tiles_y = sheet.height // tile_height
 
-      0.upto(tiles_x - 1) do |tx|
-        0.upto(tiles_y - 1) do |ty|
+      0.upto(tiles_y - 1) do |ty|
+        0.upto(tiles_x - 1) do |tx|
           sx = tx * tile_width
           sy = ty * tile_height
           sprite = Sprite.new(tile_width, tile_height)
