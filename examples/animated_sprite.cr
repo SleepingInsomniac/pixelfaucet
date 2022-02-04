@@ -1,12 +1,9 @@
 require "../src/game"
 require "../src/sprite"
-require "../src/pixel_text"
 require "../src/animation"
 
 module PF
   class SpriteExample < Game
-    @text : PixelText = PixelText.new("assets/pf-font.png")
-
     def initialize(*args, **kwargs)
       super
       @person = Animation.new("assets/walking.png", 32, 64, 10)
@@ -20,7 +17,7 @@ module PF
 
     def draw
       clear(60, 120, 200)
-      @text.draw_to(screen, "Frame: #{@person.frame}", 5, 5)
+      draw_string("Frame: #{@person.frame}", 5, 5)
       fill_rect(0, 65, width - 1, height - 1, Pixel.new(100, 100, 100))
       @person.draw_to(screen, (viewport // 2) - @person.size // 2)
       @cat.draw_to(screen, 30, 56)

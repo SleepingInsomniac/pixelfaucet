@@ -2,7 +2,6 @@ require "../src/game"
 require "../src/shape"
 require "../src/entity"
 require "../src/entity/circle_collision"
-require "../src/pixel_text"
 
 module PF
   class Ball < Entity
@@ -22,11 +21,9 @@ module PF
     ADD_BALL = 2.0
     @balls : Array(Ball) = [] of Ball
     @ball_clock = ADD_BALL
-    @text = PF::PixelText.new("assets/pf-font.png")
 
     def initialize(*args, **kwargs)
       super
-      @text.color(PF::Pixel.new(255, 255, 255))
       add_ball
     end
 
@@ -75,7 +72,7 @@ module PF
         fill_shape(Shape.translate(ball.frame, translation: ball.position).map(&.to_i32), ball.color)
         # draw_circle(ball.position.to_i32, ball.radius.to_i32, Pixel.green)
       end
-      @text.draw_to(screen, "#{@balls.size}", 5, 5)
+      draw_string("Balls: #{@balls.size}", 5, 5, Pixel.white)
     end
   end
 end

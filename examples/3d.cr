@@ -2,7 +2,6 @@ require "../src/game"
 require "../src/controller"
 require "../src/sprite"
 require "../src/pixel"
-require "../src/pixel_text"
 require "../src/vector"
 
 require "../src/3d/*"
@@ -12,7 +11,6 @@ class ThreeDee < PF::Game
   @camera : PF::Camera
   @paused = false
   @speed = 5.0
-  @text = PF::PixelText.new("./assets/pf-font.png")
   @controller : PF::Controller(PF::Keys)
 
   def initialize(*args, **kwargs)
@@ -96,7 +94,7 @@ class ThreeDee < PF::Game
   def draw
     clear(25, 50, 25)
     tris = @projector.project(@model.tris)
-    @text.draw_to(screen, "Triangles: #{tris.size}")
+    draw_string("Triangles: #{tris.size}", 3, 3)
 
     tris.each do |tri|
       # Rasterize all triangles

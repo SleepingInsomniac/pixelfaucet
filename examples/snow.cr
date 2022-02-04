@@ -3,7 +3,6 @@ require "../src/controller"
 require "../src/sprite"
 require "../src/pixel"
 require "../src/vector"
-require "../src/pixel_text"
 
 class Wind
   property width : Int32

@@ -1,12 +1,10 @@
 require "../src/game"
 require "../src/lehmer32"
-require "../src/pixel_text"
 
 module PF
   class Proceedural < Game
     @buffer_size : Int32
     @buffer : Pointer(UInt32)
-    @text = PixelText.new("assets/pf-font.png")
     @pan : Vector2(Float64) = PF::Vector[0.0, 0.0]
     @seed : UInt32
 
@@ -16,7 +14,6 @@ module PF
       @buffer = screen.pixel_pointer(0, 0)
       @random = Lehmer32.new
       @redraw = true
-      @text.color(Pixel.new(255, 255, 255))
 
       @controller = Controller(Keys).new({
         Keys::LEFT  => "left",
@@ -62,7 +59,7 @@ module PF
           end
         end
         time = elapsed_time - start
-        @text.draw_to(@screen, "frame: #{time.round(2)}ms", 5, 5, bg: Pixel.black)
+        draw_string("frame: #{time.round(2)}ms", 5, 5, Pixel.white, bg: Pixel.black)
       end
     end
   end
