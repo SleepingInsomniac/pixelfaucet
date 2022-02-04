@@ -1,6 +1,6 @@
 module PF
   abstract class Voice
-    delegate :start, :release, :held?, :released?, to: @envelope
+    delegate :start, :release, :held?, :released?, :finished?, to: @envelope
     property envelope : Envelope
     property note : Note
 
@@ -9,5 +9,8 @@ module PF
     end
 
     abstract def hertz(time : Float64)
+
+    def finished?(time : Float64)
+    end
   end
 end

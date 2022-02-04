@@ -3,13 +3,13 @@ module PF
     TWELFTH_ROOT = 2 ** (1 / 12)
     NOTES        = %w[A AS B C CS D DS E F FS G GS]
 
-    property note : UInt8 = 0
-    property octave : UInt8 = 4
+    property note : Int8 = 0
+    property octave : Int8 = 4
 
     def initialize
     end
 
-    def initialize(@note, @octave = 4u8)
+    def initialize(@note, @octave = 4i8)
     end
 
     def name
@@ -25,11 +25,15 @@ module PF
     end
 
     def +(value : UInt8)
+      octave_shift, note = (@note.to_i + value).divmod(12)
+      octave = (@octave + octave_shift).clamp(0i8, 8i8)
       Note.new(@note + value, @octave)
     end
 
-    def -(value : UInt8)
-      Note.new(@note - value, @octave)
+    def -(value : Int)
+      octave_shift, note = (@note.to_i - value).divmod(12)
+      octave = (@octave + octave_shift).clamp(0i8, 8i8)
+      Note.new(note.to_i8, octave.to_i8)
     end
 
     # # Decabells to volume
