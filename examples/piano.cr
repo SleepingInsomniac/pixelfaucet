@@ -1,6 +1,5 @@
 require "../src/game"
 require "../src/controller"
-require "../src/pixel_text"
 require "../src/audio"
 require "../src/audio/*"
 
@@ -8,12 +7,22 @@ module PF
   enum Instrument : UInt8
     RetroVoice
     PianoVoice
+    DrumVoice
   end
 
   class RetroVoice < Voice
+    def initialize(@note, time)
+      @envelope = Envelope.new(time,
+        attack_time: 0.01,
+        decay_time: 0.1,
+        sustain_level: 0.5,
+        release_time: 0.5
+      )
+    end
+
     def hertz(time)
       envelope.amplitude(time) * (
-        Oscilator.triangle(note.hertz, time)
+        Oscilator.square(note.hertz, time, 7.0, 0.001)
       )
     end
   end
@@ -21,31 +30,48 @@ module PF
   class PianoVoice < Voice
     def initialize(@note, time)
       @envelope = Envelope.new(time,
-        attack_time: 0.01,
-        decay_time: 1.0,
+        attack_time: 0.001,
+        decay_time: 0.7,
         sustain_level: 0.0,
-        release_time: 0.1,
-        releasable: false
+        release_time: 1.0
       )
     end
 
     def hertz(time)
       envelope.amplitude(time) * (
-        Oscilator.sin(note.hertz, time)
+        Oscilator.triangle(note.hertz - 1.5, time - 0.33)
+        Oscilator.saw(note.hertz, time, 5, 3.0, 0.000001) +
+        Oscilator.triangle(note.hertz + 1.5, time + 0.33)
+      ) / 3.0
+    end
+  end
+
+  class DrumVoice < Voice
+    def initialize(@note, time)
+      @envelope = Envelope.new(time,
+        attack_time: 0.01,
+        decay_time: 1.0,
+        sustain_level: 0.0,
+        release_time: 0.1
+      )
+    end
+
+    def hertz(time)
+      envelope.amplitude(time) * (
+        Oscilator.noise(note.hertz + Math.sin(time / 10), time)
       )
     end
   end
 
   class Piano < Game
-    @text : PF::PixelText = PF::PixelText.new("assets/pf-font.png")
     @key_size : Int32
     @key_width : Int32
     @middle : Int32
     @keys : UInt32 = 15
-    @base_octave : UInt8 = 4u8
+    @base_octave : Int8 = 4
     @accidentals : StaticArray(UInt8, 12) = StaticArray[0u8, 1u8, 0u8, 0u8, 1u8, 0u8, 1u8, 0u8, 0u8, 1u8, 0u8, 1u8]
-    # @highlight : Pixel = Pixel.new(0, 127, 255)
     @highlight : Pixel = Pixel.new(120, 120, 120)
+    @text_hl : Pixel = Pixel.new(0, 200, 255)
     @instrument : Instrument = Instrument::RetroVoice
 
     def initialize(*args, **kwargs)
@@ -55,12 +81,20 @@ module PF
       @key_width = width // 10
       @middle = (height // 2) + 25
 
-      @text.color(Pixel.new(127, 127, 127))
+      @text_color = Pixel.new(127, 127, 127)
       @controller = PF::Controller(Keys).new({
         Keys::UP     => "up",
         Keys::DOWN   => "down",
         Keys::KEY_1  => "1",
         Keys::KEY_2  => "2",
+        Keys::KEY_3  => "3",
+        Keys::KEY_4  => "4",
+        Keys::KEY_5  => "5",
+        Keys::KEY_6  => "6",
+        Keys::KEY_7  => "7",
+        Keys::KEY_8  => "8",
+        Keys::KEY_9  => "9",
+        Keys::KEY_0  => "0",
         Keys::Z      => "A",
         Keys::S      => "AS",
         Keys::X      => "B",
@@ -113,20 +147,23 @@ module PF
     def update(dt, event)
       @controller.map_event(event)
 
-      @base_octave += 1 if @controller.pressed?("up")
-      @base_octave -= 1 if @controller.pressed?("down")
+      @base_octave = ((@base_octave + 1) % 8) if @controller.pressed?("up")
+      @base_octave = ((@base_octave - 1) % 8) if @controller.pressed?("down")
       @instrument = Instrument::RetroVoice if @controller.pressed?("1")
       @instrument = Instrument::PianoVoice if @controller.pressed?("2")
+      @instrument = Instrument::DrumVoice if @controller.pressed?("3")
 
       {% for name, n in Note::NOTES + %w[A+ AS+ B+ C+] %}
         if @controller.pressed?({{name}})
           voice = case @instrument
           when Instrument::RetroVoice
-            RetroVoice.new(Note.new({{n}}_u8, @base_octave), @audio.time)
+            RetroVoice.new(Note.new({{n}}_i8, @base_octave), @audio.time)
           when Instrument::PianoVoice
-            PianoVoice.new(Note.new({{n}}_u8, @base_octave), @audio.time)
+            PianoVoice.new(Note.new({{n}}_i8, @base_octave), @audio.time)
+          when Instrument::DrumVoice
+            DrumVoice.new(Note.new({{n}}_i8, @base_octave), @audio.time)
           else
-            PianoVoice.new(Note.new({{n}}_u8, @base_octave), @audio.time)
+            PianoVoice.new(Note.new({{n}}_i8, @base_octave), @audio.time)
           end
           @keysdown[{{name}}] = voice
           @sounds << voice
@@ -137,6 +174,8 @@ module PF
           @keysdown.delete({{name}})
         end
       {% end %}
+
+      @sounds.reject!(&.finished?)
     end
 
     def draw
@@ -147,20 +186,20 @@ module PF
       1 : RetroVoice, 2 : PianoVoice
       Octave: #{@base_octave}, Voice : #{@instrument}
       TEXT
-      @text.draw_to(screen, text, 5, 5)
+      draw_string(text, 5, 5, @text_color)
 
       @white_keys.each do |key|
         top_left, bottom_right, name = key
         fill_rect(top_left, bottom_right, @keysdown[name]? ? @highlight : Pixel.white)
         draw_rect(top_left, bottom_right, Pixel.new(127, 127, 127))
-        @text.draw_to(screen, name, top_left.x + 2, top_left.y + (@key_size * 2) - @text.char_height - 2)
+        draw_string(name, top_left.x + 2, top_left.y + (@key_size * 2) - Sprite::CHAR_HEIGHT - 2, @keysdown[name]? ? @text_hl : @text_color)
       end
 
       @black_keys.each do |key|
         top_left, bottom_right, name = key
         fill_rect(top_left, bottom_right, @keysdown[name]? ? @highlight : Pixel.black)
         draw_rect(top_left, bottom_right, Pixel.new(127, 127, 127))
-        @text.draw_to(screen, name, top_left.x + 2, top_left.y + @key_size - @text.char_height - 2)
+        draw_string(name, top_left.x + 2, top_left.y + @key_size - Sprite::CHAR_HEIGHT - 2, @keysdown[name]? ? @text_hl : @text_color)
       end
 
       fill_rect(0, @middle - @key_size - 2, width, @middle - @key_size, Pixel.new(200, 20, 20))
