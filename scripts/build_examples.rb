@@ -33,8 +33,9 @@ unless options[:clean]
 
   Dir.chdir File.join(__dir__, '..')
   FileUtils.mkdir_p("examples/build")
-  FileUtils.rm("examples/build/assets")
-  FileUtils.ln_s("../../assets", "examples/build/assets")
+  unless File.exists?("examples/build/assets")
+    FileUtils.ln_s("../../assets", "examples/build/assets")
+  end
   Dir.glob("examples/*.cr").each do |path|
     full_cmd = %'#{cmd} #{flags.join(" ")} "#{path}"'
     puts full_cmd
