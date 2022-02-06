@@ -7,7 +7,7 @@ module PF
     getter width : Int32
     getter height : Int32
 
-    def initialize(sheet : String, @width, @height, fps : Int)
+    def initialize(sheet : String, @width, @height, fps : Float64)
       @frames = Sprite.load_tiles(sheet, width, height)
       @frame_timer = FrameTimer.new(fps: fps, frame_count: @frames.size)
     end
