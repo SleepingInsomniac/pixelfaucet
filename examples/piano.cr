@@ -4,138 +4,104 @@ require "../src/audio"
 require "../src/audio/*"
 
 module PF
-  enum Instrument : UInt8
-    RetroVoice
-    PianoVoice
-    DrumVoice
-  end
-
-  class RetroVoice < Voice
-    def initialize(@note, time)
-      @envelope = Envelope.new(time,
-        attack_time: 0.01,
-        decay_time: 0.1,
-        sustain_level: 0.5,
-        release_time: 0.5
-      )
-    end
-
-    def hertz(time)
-      envelope.amplitude(time) * (
-        Oscilator.square(note.hertz, time, 7.0, 0.001)
-      )
-    end
-  end
-
-  class PianoVoice < Voice
-    def initialize(@note, time)
-      @envelope = Envelope.new(time,
-        attack_time: 0.001,
-        decay_time: 0.7,
-        sustain_level: 0.0,
-        release_time: 1.0
-      )
-    end
-
-    def hertz(time)
-      envelope.amplitude(time) * (
-        Oscilator.triangle(note.hertz - 1.5, time - 0.33)
-        Oscilator.saw(note.hertz, time, 5, 3.0, 0.000001) +
-        Oscilator.triangle(note.hertz + 1.5, time + 0.33)
-      ) / 3.0
-    end
-  end
-
-  class DrumVoice < Voice
-    def initialize(@note, time)
-      @envelope = Envelope.new(time,
-        attack_time: 0.01,
-        decay_time: 1.0,
-        sustain_level: 0.0,
-        release_time: 0.1
-      )
-    end
-
-    def hertz(time)
-      envelope.amplitude(time) * (
-        Oscilator.noise(note.hertz + Math.sin(time / 10), time)
-      )
-    end
-  end
-
   class Piano < Game
+    @instrument : UInt8 = 0
+    @base_note : UInt8 = 69 # (in MIDI) - A4 / 440.0Hz
+
+    # Variables for drawing the piano keys
+    @highlight : Pixel = Pixel.new(120, 120, 120)
+    @text_hl : Pixel = Pixel.new(0, 200, 255)
     @key_size : Int32
     @key_width : Int32
     @middle : Int32
-    @keys : UInt32 = 15
-    @base_octave : Int8 = 4
-    @accidentals : StaticArray(UInt8, 12) = StaticArray[0u8, 1u8, 0u8, 0u8, 1u8, 0u8, 1u8, 0u8, 0u8, 1u8, 0u8, 1u8]
-    @highlight : Pixel = Pixel.new(120, 120, 120)
-    @text_hl : Pixel = Pixel.new(0, 200, 255)
-    @instrument : Instrument = Instrument::RetroVoice
+    @keys : UInt32 = 16
+    @white_keys = [] of Tuple(Vector2(Int32), Vector2(Int32), String)
+    @black_keys = [] of Tuple(Vector2(Int32), Vector2(Int32), String)
+
+    @instruments : Array(Instrument) = [RetroVoice.new, PianoVoice.new, Flute.new, KickDrum.new, SnareDrum.new]
 
     def initialize(*args, **kwargs)
       super
+
+      @text_color = Pixel.new(127, 127, 127)
+      @controller = PF::Controller(Keys).new({
+        Keys::UP    => "octave up",
+        Keys::DOWN  => "octave down",
+        Keys::LEFT  => "prev inst",
+        Keys::RIGHT => "next inst",
+
+        Keys::Z          => "A",
+        Keys::S          => "A#/Bb",
+        Keys::X          => "B",
+        Keys::C          => "C",
+        Keys::F          => "C#/Db",
+        Keys::V          => "D",
+        Keys::G          => "D#/Eb",
+        Keys::B          => "E",
+        Keys::N          => "F",
+        Keys::J          => "F#/Gb",
+        Keys::M          => "G",
+        Keys::K          => "G#/Ab",
+        Keys::COMMA      => "A+",
+        Keys::L          => "A#/Bb+",
+        Keys::PERIOD     => "B+",
+        Keys::SLASH      => "C+",
+        Keys::APOSTROPHE => "C#/Db+",
+      })
+
+      @sounds = [] of Sound
+      @keysdown = {} of String => Tuple(Instrument, UInt32)
+
+      # Initialize an audio handler
+      # - the given Proc will be called at the sample rate/freq param (44.1Khz is standard)
+      # - the channel variable describes which speaker the sample is for
+      @audio = Audio.new(channels: 1) do |time, channel|
+        value = 0.0
+        @instruments.each do |instrument|
+          instrument.sounds.each do |sound|
+            value += sound.sample(time)
+          end
+        end
+        value
+      end
 
       @key_size = height // 2 - 25
       @key_width = width // 10
       @middle = (height // 2) + 25
 
-      @text_color = Pixel.new(127, 127, 127)
-      @controller = PF::Controller(Keys).new({
-        Keys::UP     => "up",
-        Keys::DOWN   => "down",
-        Keys::KEY_1  => "1",
-        Keys::KEY_2  => "2",
-        Keys::KEY_3  => "3",
-        Keys::KEY_4  => "4",
-        Keys::KEY_5  => "5",
-        Keys::KEY_6  => "6",
-        Keys::KEY_7  => "7",
-        Keys::KEY_8  => "8",
-        Keys::KEY_9  => "9",
-        Keys::KEY_0  => "0",
-        Keys::Z      => "A",
-        Keys::S      => "AS",
-        Keys::X      => "B",
-        Keys::C      => "C",
-        Keys::F      => "CS",
-        Keys::V      => "D",
-        Keys::G      => "DS",
-        Keys::B      => "E",
-        Keys::N      => "F",
-        Keys::J      => "FS",
-        Keys::M      => "G",
-        Keys::K      => "GS",
-        Keys::COMMA  => "A+",
-        Keys::L      => "AS+",
-        Keys::PERIOD => "B+",
-        Keys::SLASH  => "C+",
-      })
+      calculate_keys
 
-      @sounds = [] of Voice
-      @keysdown = {} of String => Voice
+      # Without this, the audio will not make noise
+      @audio.play
+    end
 
-      @audio = Audio.new(channels: 1) do |time, channel|
-        @sounds.reduce(0.0) do |total, sound|
-          total + sound.hertz(time)
-        end
+    def calculate_keys(base : UInt8 = @base_note)
+      pos = 0
+
+      while @white_keys.size > 0
+        @white_keys.pop
       end
 
-      @audio.play
+      while @black_keys.size > 0
+        @black_keys.pop
+      end
 
-      @white_keys = [] of Tuple(Vector2(Int32), Vector2(Int32), String)
-      @black_keys = [] of Tuple(Vector2(Int32), Vector2(Int32), String)
+      0.upto(@keys) do |n|
+        note = Note.new(@base_note + n)
+        name = n > 11 ? note.name + "+" : note.name
 
-      pos = 0
-      (Note::NOTES + %w[A+ AS+ B+ C+]).map_with_index do |name, i|
-        if @accidentals[i % 12] == 0
+        unless note.accidental?
+          # Calculate the position of a white key
           top_left = Vector[@key_width * pos, @middle - @key_size]
           bottom_right = Vector[(@key_width * pos) + @key_width, @middle + @key_size]
           @white_keys << {top_left, bottom_right, name}
+          # position from the left is increased by 1 for every white key
           pos += 1
         else
+          # Calculate the position of a black key
+          # Black keys are thinner than white keys (space in between the black keys)
           shrinkage = (@key_width // 8)
+          # black keys are at the same position as the last, but half as tall and offset by half the width.
           left = (@key_width * pos) - (@key_width // 2) + shrinkage
           top_left = Vector[left, @middle - @key_size]
           bottom_right = Vector[left + @key_width - (shrinkage * 2), @middle]
@@ -147,46 +113,44 @@ module PF
     def update(dt, event)
       @controller.map_event(event)
 
-      @base_octave = ((@base_octave + 1) % 8) if @controller.pressed?("up")
-      @base_octave = ((@base_octave - 1) % 8) if @controller.pressed?("down")
-      @instrument = Instrument::RetroVoice if @controller.pressed?("1")
-      @instrument = Instrument::PianoVoice if @controller.pressed?("2")
-      @instrument = Instrument::DrumVoice if @controller.pressed?("3")
+      @base_note += 12 if @controller.pressed?("octave up") && @base_note <= 112
+      @base_note -= 12 if @controller.pressed?("octave down") && @base_note >= 21 + 12
 
-      {% for name, n in Note::NOTES + %w[A+ AS+ B+ C+] %}
-        if @controller.pressed?({{name}})
-          voice = case @instrument
-          when Instrument::RetroVoice
-            RetroVoice.new(Note.new({{n}}_i8, @base_octave), @audio.time)
-          when Instrument::PianoVoice
-            PianoVoice.new(Note.new({{n}}_i8, @base_octave), @audio.time)
-          when Instrument::DrumVoice
-            DrumVoice.new(Note.new({{n}}_i8, @base_octave), @audio.time)
-          else
-            PianoVoice.new(Note.new({{n}}_i8, @base_octave), @audio.time)
-          end
-          @keysdown[{{name}}] = voice
-          @sounds << voice
+      if @controller.pressed?("next inst")
+        @instrument = (@instrument + 1) % @instruments.size
+      end
+
+      if @controller.pressed?("prev inst")
+        @instrument = @instruments.size.to_u8 if @instrument == 0
+        @instrument -= 1
+      end
+
+      0.upto(@keys) do |n|
+        note = Note.new(n + @base_note)
+        name = n > 11 ? note.name + "+" : note.name
+
+        if @controller.pressed?(name)
+          note_id = @instruments[@instrument].on(note.hertz, @audio.time)
+          @keysdown[name] = {@instruments[@instrument], note_id}
         end
 
-        if @controller.released?({{name}})
-          @keysdown[{{name}}].release(@audio.time)
-          @keysdown.delete({{name}})
+        if @controller.released?(name)
+          instrument, note_id = @keysdown[name]
+          instrument.off(note_id, @audio.time)
+          @keysdown.delete(name)
         end
-      {% end %}
-
-      @sounds.reject!(&.finished?)
+      end
     end
 
     def draw
       clear
 
-      text = <<-TEXT
-      Press up/down to change octave, Bottom row of keyboard plays notes
-      1 : RetroVoice, 2 : PianoVoice
-      Octave: #{@base_octave}, Voice : #{@instrument}
-      TEXT
-      draw_string(text, 5, 5, @text_color)
+      draw_string(<<-TEXT, 5, 5, @text_color)
+        Press up/down to change octave, Bottom row of keyboard plays notes
+        #{@instruments.map(&.name).join(", ")}
+        Octave: #{@base_note // 12 - 1}, Voice : #{@instruments[@instrument].name}
+        #{@instruments[@instrument].sounds.map { |s| s.hertz.round(2) }}
+        TEXT
 
       @white_keys.each do |key|
         top_left, bottom_right, name = key

@@ -24,6 +24,7 @@ module PF
     @fps_current : UInt32 = 0                                   # the current FPS.
     @fps_frames : UInt32 = 0                                    # frames passed since the last recorded fps.
     @last_time : Float64 = Time.monotonic.total_milliseconds
+    @engine_started_at : Float64 = Time.monotonic.total_milliseconds
 
     def initialize(@width, @height, @scale = 1, @title = self.class.name,
                    flags = SDL::Renderer::Flags::ACCELERATED,
@@ -59,7 +60,11 @@ module PF
     end
 
     def elapsed_time
-      Time.monotonic.total_milliseconds
+      Time.monotonic.total_milliseconds - @engine_started_at
+    end
+
+    def elapsed_seconds
+      elapsed_time / 1000
     end
 
     def clear(r = 0, g = 0, b = 0)
@@ -84,10 +89,11 @@ module PF
     end
 
     private def engine_update(event)
-      et = elapsed_time
+      et = Time.monotonic.total_milliseconds
       calculate_fps(et)
       update((et - @last_time) / 1000.0, event)
       @last_time = et
+      Fiber.yield
       GC.collect
     end
 

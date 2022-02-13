@@ -97,7 +97,7 @@ module PF
     def draw_string(msg : String, x : Int, y : Int, color : Pixel = Pixel.black, bg : Pixel? = nil)
       cur_y = 0
       cur_x = 0
-      leading = 0
+      leading = 2
 
       msg.chars.each do |c|
         if c == '\n'

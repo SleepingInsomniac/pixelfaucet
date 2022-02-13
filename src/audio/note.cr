@@ -1,49 +1,74 @@
 module PF
   struct Note
-    TWELFTH_ROOT = 2 ** (1 / 12)
-    NOTES        = %w[A AS B C CS D DS E F FS G GS]
+    NAMES       = %w[C C#/Db D D#/Eb E F F#/Gb G G#/Ab A A#/Bb B]
+    ACCIDENTALS = StaticArray[1u8, 3u8, 6u8, 8u8, 10u8]
 
-    property note : Int8 = 0
-    property octave : Int8 = 4
+    getter tuning : Float64 = 440.0
+    getter number : Float64
+    @hertz : Float64? = nil
+    @index : UInt8? = nil
+    @name : String? = nil
+    @is_accidental : Bool? = nil
 
-    def initialize
+    def initialize(@number, @tuning = 440.0)
     end
 
-    def initialize(@note, @octave = 4i8)
+    def initialize(number : Number, tuning : Number = 440.0)
+      @number, @tuning = number.to_f, tuning.to_f
     end
 
     def name
-      NOTES[@note % 12]
+      @name ||= NAMES[index]
     end
 
-    def base_hertz
-      27.5 * (2 ** @octave)
+    def index
+      @index ||= @number.to_u8 % 12
+    end
+
+    def octave
+      (@number.to_i // 12) - 1
+    end
+
+    def accidental?
+      @is_accidental ||= ACCIDENTALS.includes?(index)
     end
 
     def hertz
-      base_hertz * (TWELFTH_ROOT ** @note)
+      @hertz ||= tuning * ((2 ** ((@number - 69) / 12)))
     end
 
-    def +(value : UInt8)
-      octave_shift, note = (@note.to_i + value).divmod(12)
-      octave = (@octave + octave_shift).clamp(0i8, 8i8)
-      Note.new(@note + value, @octave)
+    def tuning=(value : Float64)
+      Note.new(@number, value)
     end
 
-    def -(value : Int)
-      octave_shift, note = (@note.to_i - value).divmod(12)
-      octave = (@octave + octave_shift).clamp(0i8, 8i8)
-      Note.new(note.to_i8, octave.to_i8)
+    def note=(value : Float64)
+      Note.new(value, @tuning)
+    end
+
+    def +(value : Float64)
+      Note.new(@number + value, tuning)
+    end
+
+    def -(value : Float64)
+      Note.new(@number - value, tuning)
+    end
+
+    def *(value : Float64)
+      Note.new(@number * value, tuning)
+    end
+
+    def /(value : Float64)
+      Note.new(@number / value, tuning)
     end
 
     # # Decabells to volume
     # def db_to_volume(db : Float64)
     #   10.0 ** (0.05 * db)
     # end
-    #
+
     # # Volume to decabells
     # def volume_to_db(volume : Float64)
-    #   20.0 * Math.log10f(volume)
+    #   20.0 * Math.log(volume, 10)
     # end
   end
 end
