@@ -117,7 +117,8 @@ module PF
     end
 
     # Sample a color with alhpa
-    def sample(x : Int, y : Int, alpha = true)
+    def sample(x : Int, y : Int, alpha : Boolean)
+      return sample(x, y) unless alpha
       raw_pixel = pixel_pointer(x, y).value
 
       r = uninitialized UInt8
@@ -130,13 +131,13 @@ module PF
     end
 
     # ditto
-    def sample(point : Vector2(Int), alpha = true)
-      sample(point.x, point.y, true)
+    def sample(point : Vector2(Int), alpha : Boolean)
+      sample(point.x, point.y, alpha)
     end
 
     # Get the pointer to a pixel
     def pixel_pointer(x : Int32, y : Int32)
-      target = @surface.pixels + (y * @surface.pitch) + (x * 4)
+      target = @surface.pixels + (y * @surface.pitch) + (x * sizeof(UInt32))
       target.as(Pointer(UInt32))
     end
   end

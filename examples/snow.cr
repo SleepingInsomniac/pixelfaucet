@@ -15,7 +15,7 @@ class Wind
     property position : PF::Vector2(Float64)
     property strength : PF::Vector2(Float64)
 
-    def initialize(@position, @strength)
+    def initialize(@position, @strength = PF::Vector[rand(-5.0..5.0), rand(-5.0..5.0)])
     end
   end
 
@@ -33,7 +33,7 @@ class Wind
     while y < @height
       x = step / 2
       while x < @width
-        @gusts << Gust.new(PF::Vector[x, y], PF::Vector[rand(-1.0..1.0), rand(-1.0..1.0)])
+        @gusts << Gust.new(PF::Vector[x, y])
         x += step
       end
       y += step
@@ -48,11 +48,11 @@ class Flake
   property velocity : PF::Vector2(Float64)
 
   def initialize(@position, @shape = rand(0_u8..2_u8), @z_pos = rand(0.0..1.0), velocity : PF::Vector2(Float64)? = nil)
-    @velocity = velocity || PF::Vector[rand(-2.0..2.0), rand(0.0..20.0)]
+    @velocity = velocity || PF::Vector[rand(-2.0..2.0), rand(10.0..20.0)]
   end
 
   def update(dt)
-    @velocity.y = @velocity.y + 1.0 * dt
+    @velocity.y = @velocity.y + 5.0 * dt
     @position += @velocity * dt
   end
 end
@@ -66,6 +66,9 @@ class Snow < PF::Game
     super
 
     @wind = Wind.new(@width, @height)
+    500.times do
+      @flakes << Flake.new(position: PF::Vector[rand(0.0..@width.to_f64), rand(0.0..@height.to_f64)])
+    end
     clear(0, 0, 15)
   end
 

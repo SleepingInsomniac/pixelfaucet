@@ -39,10 +39,10 @@ module PF
     property r : UInt8, g : UInt8, b : UInt8, a : UInt8
 
     def initialize(rgba : UInt32)
-      @r = ((rgba >> 24) & 0xFF).to_u8
-      @g = ((rgba >> 16) & 0xFF).to_u8
-      @b = ((rgba >> 8) & 0xFF).to_u8
-      @a = (rgba & 0xFF).to_u8
+      @r = (rgba >> 24).to_u8!
+      @g = (rgba >> 16).to_u8!
+      @b = (rgba >> 8).to_u8!
+      @a = (rgba).to_u8!
     end
 
     def initialize(@r : UInt8 = 255, @g : UInt8 = 255, @b : UInt8 = 255, @a : UInt8 = 255)
@@ -73,6 +73,7 @@ module PF
     end
 
     def to_u32
+      value = uninitialized UInt32
       value = @r.to_u32 << 24
       value |= @g.to_u32 << 16
       value |= @b.to_u32 << 8
