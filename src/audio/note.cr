@@ -1,7 +1,8 @@
 module PF
   struct Note
-    NAMES       = %w[C C#/Db D D#/Eb E F F#/Gb G G#/Ab A A#/Bb B]
-    ACCIDENTALS = StaticArray[1u8, 3u8, 6u8, 8u8, 10u8]
+    TWELFTH_ROOT = 2 ** (1 / 12)
+    NAMES        = %w[C C#/Db D D#/Eb E F F#/Gb G G#/Ab A A#/Bb B]
+    ACCIDENTALS  = StaticArray[1u8, 3u8, 6u8, 8u8, 10u8]
 
     getter tuning : Float64 = 440.0
     getter number : Float64

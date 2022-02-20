@@ -6,7 +6,7 @@ module PF
     @device_id : LibSDL::AudioDeviceID
     property volume = 0.5
     # https://dsp.stackexchange.com/questions/3581/algorithms-to-mix-audio-signals-without-clipping
-    property headroom = 0.4
+    property headroom = 0.3
     delegate :freq, to: @spec
     @playing : Bool = false
     getter time : Float64 = 0.0

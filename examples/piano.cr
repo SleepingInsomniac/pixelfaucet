@@ -18,7 +18,7 @@ module PF
     @white_keys = [] of Tuple(Vector2(Int32), Vector2(Int32), String)
     @black_keys = [] of Tuple(Vector2(Int32), Vector2(Int32), String)
 
-    @instruments : Array(Instrument) = [RetroVoice.new, PianoVoice.new, Flute.new, KickDrum.new, SnareDrum.new]
+    @instruments : Array(Instrument) = [RetroVoice.new, PianoVoice.new, Flute.new, KickDrum.new, SnareDrum.new, Harmonica.new]
 
     def initialize(*args, **kwargs)
       super
