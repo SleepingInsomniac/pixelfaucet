@@ -60,13 +60,15 @@ module PF
     property started_at : Float64
     property wave : Wave
     property released_at : Float64? = nil
+    property volume : Float64 = 1.0
 
-    def initialize(@hertz, @envelope, @started_at, @wave = Sound.sin_wave)
+    def initialize(@hertz, @envelope, @started_at, @volume = 1.0, @wave = Sound.sin_wave)
     end
 
     def sample(time : Float64)
       @wave.call(time - @started_at, @hertz) *
-        @envelope.amplitude(time, @started_at, @released_at)
+        @envelope.amplitude(time, @started_at, @released_at) *
+        @volume
     end
 
     def release!(time : Float64)
