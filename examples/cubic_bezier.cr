@@ -8,6 +8,8 @@ module PF
     CTL_COLOR   = Pixel.new(0x505050FF)
     CURVE_COLOR = Pixel.new(0x0077FFFF)
     SEL_COLOR   = Pixel.new(0xFFFF00FF)
+    EXT_X_COLOR = Pixel.new(0xFF00FFFF)
+    EXT_Y_COLOR = Pixel.new(0x00FF00FF)
 
     @curve : Bezier::Cubic(Float64)
 
@@ -56,6 +58,16 @@ module PF
 
       draw_string("Length: " + @curve.length.round(2).to_s, 5, 5, FONT_COLOR)
       draw_curve(@curve, CURVE_COLOR)
+
+      ext_x, ext_y = @curve.extremeties
+
+      ext_x.each do |point|
+        draw_circle(point.to_i, 3, EXT_X_COLOR)
+      end
+
+      ext_y.each do |point|
+        draw_circle(point.to_i, 3, EXT_Y_COLOR)
+      end
 
       fill_circle(@curve.p0.to_i, 2, POINT_COLOR)
       fill_circle(@curve.p1.to_i, 2, POINT_COLOR)

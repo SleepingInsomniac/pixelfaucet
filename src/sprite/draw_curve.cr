@@ -1,6 +1,6 @@
 module PF
   class Sprite
-    def draw_curve(curve : Bezier::Cubic, samples : Int = 100, pixel : Pixel = Pixel.new)
+    def draw_curve(curve : Bezier::Cubic | Bezier::Quad, samples : Int = 100, pixel : Pixel = Pixel.new)
       point = curve.p0
       0.upto(samples) do |x|
         t = x / samples
@@ -10,7 +10,7 @@ module PF
       end
     end
 
-    def draw_curve(curve : Bezier::Cubic, pixel : Pixel)
+    def draw_curve(curve : Bezier::Cubic | Bezier::Quad, pixel : Pixel)
       draw_curve(curve, pixel: pixel)
     end
   end

@@ -17,6 +17,32 @@ module PF
         6 * (1 - t) * (p2 - 2 * p1 + p0) + 6 * t * (p3 - 2 * p2 + p1)
       end
 
+      def self.extremeties(p0 : Number, p1 : Number, p2 : Number, p3 : Number)
+        a = 3 * p3 - 9 * p2 + 9 * p1 - 3 * p0
+        b = 6 * p0 - 12 * p1 + 6 * p2
+        c = 3 * p1 - 3 * p0
+
+        disc = b * b - 4 * a * c
+
+        return Tuple.new unless disc >= 0
+
+        t1 = (-b + Math.sqrt(disc)) / (2 * a)
+        t2 = (-b - Math.sqrt(disc)) / (2 * a)
+
+        accept_1 = t1 >= 0 && t1 <= 1
+        accept_2 = t2 >= 0 && t2 <= 1
+
+        if accept_1 && accept_2
+          {t1, t2}
+        elsif accept_1
+          {t1}
+        elsif accept_2
+          {t2}
+        else
+          {0.5}
+        end
+      end
+
       property p0 : Vector2(T)
       property p1 : Vector2(T)
       property p2 : Vector2(T)
@@ -51,6 +77,17 @@ module PF
           T.new(self.class.derivative(t, @p0.y, @p1.y, @p2.y, @p3.y)),
           T.new(-self.class.derivative(t, @p0.x, @p1.x, @p2.x, @p3.x)),
         ].normalized
+      end
+
+      # Get the points at the extremeties of this curve
+      def extremeties
+        txs = self.class.extremeties(@p0.x, @p1.x, @p2.x, @p3.x)
+        tys = self.class.extremeties(@p0.y, @p1.y, @p2.y, @p3.y)
+
+        txs = txs.map { |t| at(t) }
+        tys = tys.map { |t| at(t) }
+
+        {txs, tys}
       end
     end
   end
