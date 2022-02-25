@@ -31,12 +31,12 @@ module PF
     def update(dt, event)
       case event
       when SDL::Event::MouseButton
-        if event.pressed? && event.button == 1
-          @selected_point = @hover_point
-        end
-
-        if event.released? && event.button == 1
-          @selected_point = nil
+        if event.button == 1
+          if event.pressed?
+            @selected_point = @hover_point
+          else
+            @selected_point = nil
+          end
         end
       when SDL::Event::MouseMotion
         @mouse_pos = Vector[event.x, event.y] // scale
@@ -44,8 +44,7 @@ module PF
         unless point = @selected_point
           @hover_point = @curve.points.find { |p| @mouse_pos.distance(p.value) < 4 }
         else
-          point.value.x = @mouse_pos.x.to_f
-          point.value.y = @mouse_pos.y.to_f
+          point.value = @mouse_pos.to_f
         end
       end
     end
@@ -57,16 +56,14 @@ module PF
       draw_line(@curve.p3, @curve.p2, CTL_COLOR)
 
       draw_string("Length: " + @curve.length.round(2).to_s, 5, 5, FONT_COLOR)
+
+      draw_rect(*@curve.rect.map(&.to_i), CTL_COLOR)
       draw_curve(@curve, CURVE_COLOR)
 
-      ext_x, ext_y = @curve.extremeties
-
-      ext_x.each do |point|
-        draw_circle(point.to_i, 3, EXT_X_COLOR)
-      end
-
-      ext_y.each do |point|
-        draw_circle(point.to_i, 3, EXT_Y_COLOR)
+      @curve.extremeties.each do |point|
+        point.try do |p|
+          draw_circle(p.to_i, 3, EXT_Y_COLOR)
+        end
       end
 
       fill_circle(@curve.p0.to_i, 2, POINT_COLOR)

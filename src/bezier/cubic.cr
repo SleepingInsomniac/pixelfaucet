@@ -24,7 +24,7 @@ module PF
 
         disc = b * b - 4 * a * c
 
-        return Tuple.new unless disc >= 0
+        return {nil, nil} unless disc >= 0
 
         t1 = (-b + Math.sqrt(disc)) / (2 * a)
         t2 = (-b - Math.sqrt(disc)) / (2 * a)
@@ -35,11 +35,11 @@ module PF
         if accept_1 && accept_2
           {t1, t2}
         elsif accept_1
-          {t1}
+          {t1, nil}
         elsif accept_2
-          {t2}
+          {nil, t2}
         else
-          {0.5}
+          {0.5, nil}
         end
       end
 
@@ -80,14 +80,31 @@ module PF
       end
 
       # Get the points at the extremeties of this curve
+      # note: Will return 4 values which are either Float64 | nil
       def extremeties
-        txs = self.class.extremeties(@p0.x, @p1.x, @p2.x, @p3.x)
-        tys = self.class.extremeties(@p0.y, @p1.y, @p2.y, @p3.y)
+        exts = self.class.extremeties(@p0.x, @p1.x, @p2.x, @p3.x) +
+               self.class.extremeties(@p0.y, @p1.y, @p2.y, @p3.y)
+        exts.map { |e| e ? at(e) : e }
+      end
 
-        txs = txs.map { |t| at(t) }
-        tys = tys.map { |t| at(t) }
+      def rect
+        tl, br = @p0, @p3
 
-        {txs, tys}
+        tl.x = @p3.x if @p3.x < tl.x
+        tl.y = @p3.y if @p3.y < tl.y
+        br.x = @p0.x if @p0.x > br.x
+        br.y = @p0.y if @p0.y > br.y
+
+        extremeties.each do |e|
+          e.try do |e|
+            tl.x = e.x if e.x < tl.x
+            tl.y = e.y if e.y < tl.y
+            br.x = e.x if e.x > br.x
+            br.y = e.y if e.y > br.y
+          end
+        end
+
+        {tl, br}
       end
     end
   end
