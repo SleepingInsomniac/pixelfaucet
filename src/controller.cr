@@ -2,6 +2,7 @@ require "./lib_sdl"
 
 module PF
   alias Keys = LibSDL::Scancode
+  alias KeyCodes = LibSDL::Keycode
 
   # Handle button to action mapping in a dynamic way
   class Controller(T)
@@ -17,9 +18,9 @@ module PF
     def self.detect_layout
       keys = String.build do |io|
         {
-          LibSDL::Keycode::Q,
-          LibSDL::Keycode::W,
-          LibSDL::Keycode::Y,
+          KeyCodes::Q,
+          KeyCodes::W,
+          KeyCodes::Y,
         }.each do |key_code|
           scan_code = LibSDL.get_scancode_from_key(key_code)
           key_name = LibSDL.get_scancode_name(scan_code)
@@ -48,7 +49,7 @@ module PF
     # Map
     def map_event(event : SDL::Event?)
       case event
-      when SDL::Event::Keyboard
+      when Event::Keyboard
         {% if T == LibSDL::Scancode %}
           press(event.scancode) if event.keydown?
           release(event.scancode) if event.keyup?
