@@ -5,11 +5,11 @@
 PixelFaucet is a "Game Engine" written in the Crystal programming language and uses SDL2 under the hood to create a window, renderer, and draw pixels.
 See the [examples](./examples).
 
-The examples can be built by running the `./scripts/build_examples.rb` script. This will build all the examples in the examples folder to the `examples/build` directory.
+The examples can be built by running the `./scripts/build_examples.rb` script. This will place the binaries in the `examples/build` folder.
 
 ## Setup
 
-PixelFaucet require the [crystal](https://crystal-lang.org) compiler which can be installed via [homebrew](https://brew.sh)
+PixelFaucet requires the [crystal](https://crystal-lang.org) compiler which can be installed via [homebrew](https://brew.sh)
 
 - Install crystal
 
