@@ -7,6 +7,13 @@ module PF
     property p1 : Vector3(Float64)
     property p2 : Vector3(Float64)
     property p3 : Vector3(Float64)
+
+    property t1 : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
+    property t2 : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
+    property t3 : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
+
+    property texture : Sprite*? = nil
+
     property color : PF::Pixel
 
     setter normal : Vector3(Float64)?
@@ -14,10 +21,7 @@ module PF
     def initialize(@p1 : Vector3(Float64), @p2 : Vector3(Float64), @p3 : Vector3(Float64), @color = PF::Pixel.white, @normal = nil)
     end
 
-    def initialize(p1x : Float64, p1y : Float64, p1z : Float64, p2x : Float64, p2y : Float64, p2z : Float64, p3x : Float64, p3y : Float64, p3z : Float64, @color = PF::Pixel.white)
-      @p1 = Vector[p1x, p1y, p1z]
-      @p2 = Vector[p2x, p2y, p2z]
-      @p3 = Vector[p3x, p3y, p3z]
+    def initialize(@p1, @p2, @p3, @t1, @t2, @t3, @texture = nil, @color = PF::Pixel.white)
     end
 
     # Return the normal assuming clockwise pointing winding
@@ -50,6 +54,10 @@ module PF
         Transform3d.apply(@p1, mat),
         Transform3d.apply(@p2, mat),
         Transform3d.apply(@p3, mat),
+        @t1,
+        @t2,
+        @t3,
+        @texture,
         @color
       )
     end
@@ -88,11 +96,13 @@ module PF
       if inside_count == 1 && outside_count == 2
         # One point inside the plane
         # the two intersection points and the one inside point form a new triangle
+
+        i_p1, t1 = G3d.line_intersects_plane(plane, plane_normal, inside_points[0], outside_points[0])
+        i_p2, t2 = G3d.line_intersects_plane(plane, plane_normal, inside_points[0], outside_points[1])
+
         return {
           Tri.new(
-            inside_points[0],
-            G3d.line_intersects_plane(plane, plane_normal, inside_points[0], outside_points[0]),
-            G3d.line_intersects_plane(plane, plane_normal, inside_points[0], outside_points[1]),
+            inside_points[0], i_p1, i_p2,
             color: @color
           ),
         }
@@ -103,23 +113,19 @@ module PF
         # We must now split the quad into two new triangles
 
         # Calculate the two intersection points
-        intersect_p1 = G3d.line_intersects_plane(plane, plane_normal, inside_points[0], outside_points[0])
-        intersect_p2 = G3d.line_intersects_plane(plane, plane_normal, inside_points[1], outside_points[0])
+        i_p1, t1 = G3d.line_intersects_plane(plane, plane_normal, inside_points[0], outside_points[0])
+        i_p2, t2 = G3d.line_intersects_plane(plane, plane_normal, inside_points[1], outside_points[0])
 
         return {
           # The first triangle will have the two inside points, and first intersection point
           Tri.new(
-            inside_points[0],
-            inside_points[1],
-            intersect_p1,
+            inside_points[0], inside_points[1], i_p1,
             color: @color
           ),
           # The second triangle will have the second inside point, the second intersection, then the first intersection
           # This order preserves clockwise winding
           Tri.new(
-            inside_points[1],
-            intersect_p2,
-            intersect_p1,
+            inside_points[1], i_p2, i_p1,
             color: @color
           ),
         }

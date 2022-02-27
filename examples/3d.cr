@@ -16,9 +16,11 @@ class ThreeDee < PF::Game
   def initialize(*args, **kwargs)
     super
 
-    @projector = PF::Projector.new(@width, @height)
+    @projector = PF::Projector.new(width, height)
     @camera = @projector.camera
+    # @model = PF::Mesh.load_obj("./assets/cube.obj")
     @model = PF::Mesh.load_obj("./assets/pixelfaucet.obj")
+    @texture = PF::Sprite.new("./assets/bricks.png")
     @model.position.z = @model.position.z + 2.0
 
     @controller = PF::Controller(PF::Keys).new({
@@ -32,15 +34,11 @@ class ThreeDee < PF::Game
       PF::Keys::S     => "Backward",
       PF::Keys::SPACE => "Pause",
     })
+
+    plug_in @controller
   end
 
-  def update(dt, event)
-    case event
-    when SDL::Event::Keyboard
-      @controller.press(event.scancode) if event.keydown?
-      @controller.release(event.scancode) if event.keyup?
-    end
-
+  def update(dt)
     @paused = !@paused if @controller.pressed?("Pause")
 
     forward = @camera.forward_vector
@@ -62,7 +60,7 @@ class ThreeDee < PF::Game
       @camera.position.y = @camera.position.y - @speed * dt
     end
 
-    # Controll the camera pitch instead of aft -
+    # Controll the camera pitch instead of elevation -
 
     # if @controller.held?("Up")
     #   @camera.pitch = @camera.pitch + (@speed / 2) * dt

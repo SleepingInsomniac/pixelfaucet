@@ -66,7 +66,7 @@ module PF
       0.upto(tris.size - 1) do
         tri = tris.pop
         shade = (tri.normal.dot(light) + 1.0) / 2 # light should be normalized
-        tri.color = tri.color * shade.clamp(0.0..1.0)
+        tri.color = tri.color * shade
 
         tri *= mat_view
 

@@ -11,6 +11,6 @@ describe "line_intersects_plane" do
     plane_point = PF::Vector[0.0, 0.0, 0.0]
 
     intersect = PF::G3d.line_intersects_plane(plane_point, plane_normal, line_start, line_end)
-    intersect.should eq(PF::Vector[0.0, 0.0, 0.0])
+    intersect.should eq({PF::Vector[0.0, 0.0, 0.0], 0.5})
   end
 end

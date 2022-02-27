@@ -11,7 +11,7 @@ module PF
       t = (-plane_dot_product - ad) / (bd - ad)
       line_start_to_end = line_end - line_start
       line_to_intersect = line_start_to_end * t
-      line_start + line_to_intersect
+      {line_start + line_to_intersect, t}
     end
   end
 end

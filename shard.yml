@@ -11,3 +11,4 @@ license: MIT
 dependencies:
   sdl:
     github: SleepingInsomniac/sdl.cr
+    version: 0.1.0

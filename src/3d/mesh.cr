@@ -18,6 +18,7 @@ module PF
           line_no += 1
           next if line =~ /^\s*$/
           parts = line.split(/\s+/)
+
           case parts[0]
           when "v"
             w = parts[4]?.try { |n| n.to_f64 }
@@ -32,10 +33,16 @@ module PF
             end
           when "f"
             face_verts = [] of Vector3(Float64)
+            face_tex = [] of Vector3(Float64)
+
             normal : Vector3(Float64)? = nil
             parts[1..].each do |part|
               face = part.split('/')
               face_verts << verticies[face[0].to_i - 1]
+
+              if tex_index = face[1]?
+                face_tex << texture_verticies[face[1].to_i - 1]
+              end
 
               # If the normal is specified, use that. (other Tri calculates this based on clockwise winding)
               if use_normals
@@ -44,11 +51,22 @@ module PF
                 end
               end
             end
-            tris << Tri.new(face_verts[0], face_verts[1], face_verts[2], normal: normal)
+
+            tri = Tri.new(face_verts[0], face_verts[1], face_verts[2], normal: normal)
+
+            # set the face texture coords if specified
+            unless face_tex.empty?
+              tri.t1 = face_tex[0]
+              tri.t2 = face_tex[1]
+              tri.t3 = face_tex[2]
+            end
+
+            tris << tri
 
             # Split a square into triangles
             if face_verts.size > 3
-              tris << Tri.new(face_verts[0], face_verts[2], face_verts[3], normal: normal)
+              tri = Tri.new(face_verts[0], face_verts[2], face_verts[3], normal: normal)
+              tris << tri
             end
           end
         end
