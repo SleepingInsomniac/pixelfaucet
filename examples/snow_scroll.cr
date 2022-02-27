@@ -7,11 +7,11 @@ class Snow < PF::Game
   def initialize(*args, **kwargs)
     super
 
-    @pixels = @screen.pixels
+    @pixels = screen.pixels
     clear(0, 0, 0x25)
   end
 
-  def update(dt, event)
+  def update(dt)
     @last_shift += dt
   end
 
@@ -19,9 +19,9 @@ class Snow < PF::Game
     if @last_shift >= 0.02
       @last_shift = 0.0
 
-      @pixels.rotate!(-@width)
+      @pixels.rotate!(-width)
 
-      0.upto(@width - 1) do |x|
+      0.upto(width - 1) do |x|
         if rand(0..250) == 0
           shade = rand(25_u8..255_u8)
           @pixels[x] = PF::Pixel.new(shade, shade, shade).to_u32
@@ -31,9 +31,9 @@ class Snow < PF::Game
       end
     end
 
-    0.upto(@height - 1) do |y|
+    0.upto(height - 1) do |y|
       if rand(0..2) == 0
-        row = Slice(UInt32).new(@pixels.to_unsafe + (y * @width), @width)
+        row = Slice(UInt32).new(@pixels.to_unsafe + (y * width), width)
         row.rotate!(rand(-1..1))
       end
     end

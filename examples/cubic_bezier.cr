@@ -16,8 +16,6 @@ module PF
     @hover_point : Vector2(Float64)*? = nil
     @selected_point : Vector2(Float64)*? = nil
 
-    @mouse_pos : Vector2(Int32) = Vector[0, 0]
-
     def initialize(*args, **kwargs)
       super
       @curve = Bezier::Cubic.new(
@@ -28,25 +26,25 @@ module PF
       )
     end
 
-    def update(dt, event)
-      case event
-      when SDL::Event::MouseButton
-        if event.button == 1
-          if event.pressed?
-            @selected_point = @hover_point
-          else
-            @selected_point = nil
-          end
-        end
-      when SDL::Event::MouseMotion
-        @mouse_pos = Vector[event.x, event.y] // scale
+    def on_mouse_motion(cursor)
+      if point = @selected_point
+        point.value = cursor.to_f
+      else
+        @hover_point = @curve.points.find { |p| cursor.distance(p.value) < 4 }
+      end
+    end
 
-        unless point = @selected_point
-          @hover_point = @curve.points.find { |p| @mouse_pos.distance(p.value) < 4 }
+    def on_mouse_button(event)
+      if event.button == 1
+        if event.pressed?
+          @selected_point = @hover_point
         else
-          point.value = @mouse_pos.to_f
+          @selected_point = nil
         end
       end
+    end
+
+    def update(dt)
     end
 
     def draw

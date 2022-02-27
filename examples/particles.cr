@@ -12,7 +12,7 @@ module PF
       @emitter.position = viewport / 2
     end
 
-    def update(dt, event)
+    def update(dt)
       @emitter.update(dt)
     end
 

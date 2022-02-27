@@ -2,15 +2,34 @@
 
 [![GitHub release](https://img.shields.io/github/release/sleepinginsomniac/pixelfaucet.svg)](https://github.com/sleepinginsomniac/pixelfaucet/releases)
 
-An SDL2 based game engine
+PixelFaucet is a "Game Engine" written in the Crystal programming language and uses SDL2 under the hood to create a window, renderer, and draw pixels.
+See the [examples](./examples).
 
-## Installation
+The examples can be built by running the `./scripts/build_examples.rb` script. This will build all the examples in the examples folder to the `examples/build` directory.
 
-1. Install sdl2
+## Setup
 
-homebrew: `brew install sdl2`
+PixelFaucet require the [crystal](https://crystal-lang.org) compiler which can be installed via [homebrew](https://brew.sh)
 
-2. Add the dependency to your `shard.yml`:
+- Install crystal
+
+```sh
+brew install crystal
+```
+
+- Install sdl2
+
+```sh
+brew install sdl2
+```
+
+- Create a new project:
+
+```sh
+crystal init app my_game
+```
+
+- Add the dependency to your `shard.yml`:
 
 ```yaml
 dependencies:
@@ -18,7 +37,11 @@ dependencies:
     github: sleepinginsomniac/pixelfaucet
 ```
 
-3. Run `shards install`
+- Run the shards command:
+
+```sh
+shards install
+```
 
 ## Usage
 
@@ -30,16 +53,26 @@ class Example < PF::Game
   end
 
   def draw
+    clear
+    0.upto(width) do |x|
+      0.upto(height) do |y|
+        draw_point(x, y, PF::Pixel.random)
+      end
+    end
   end
 end
 
-e = Example.new(100, 60)
+e = Example.new(100, 60, 5)
 e.run!
 ```
 
+## Documentation
+
+Run `crystal docs` to generate documentation. The documentation can then be found under the `docs` folder.
+
 ## Contributing
 
-1. Fork it (<https://github.com/your-github-user/pixel_faucet/fork>)
+1. Fork it (<https://github.com/sleepinginsomniac/pixelfaucet/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
@@ -47,4 +80,4 @@ e.run!
 
 ## Contributors
 
-- [Alex Clink](https://github.com/your-github-user) - creator and maintainer
+- [Alex Clink](https://github.com/sleepinginsomniac) - creator and maintainer

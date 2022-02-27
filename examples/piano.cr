@@ -48,6 +48,7 @@ module PF
         Keys::SLASH      => "C+",
         Keys::APOSTROPHE => "C#/Db+",
       })
+      plug_in @controller
 
       @sounds = [] of Sound
       @keysdown = {} of String => Tuple(Instrument, UInt32)
@@ -110,9 +111,7 @@ module PF
       end
     end
 
-    def update(dt, event)
-      @controller.map_event(event)
-
+    def update(dt)
       @base_note += 12 if @controller.pressed?("octave up") && @base_note <= 112
       @base_note -= 12 if @controller.pressed?("octave down") && @base_note >= 21 + 12
 

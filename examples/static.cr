@@ -11,7 +11,7 @@ module PF
       @buffer = screen.pixel_pointer(0, 0)
     end
 
-    def update(dt, event)
+    def update(dt)
     end
 
     def draw

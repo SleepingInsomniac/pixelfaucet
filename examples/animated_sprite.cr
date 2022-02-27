@@ -10,7 +10,7 @@ module PF
       @cat = Animation.new("assets/black-cat.png", 18, 14, 15)
     end
 
-    def update(dt, event)
+    def update(dt)
       @person.update(dt)
       @cat.update(dt)
     end

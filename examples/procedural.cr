@@ -21,6 +21,7 @@ module PF
         Keys::UP    => "up",
         Keys::DOWN  => "down",
       })
+      plug_in @controller
 
       @speed = 100.0
       @seed = str_to_seed("PixelFaucet")
@@ -30,8 +31,7 @@ module PF
       str.chars.map { |c| c.ord.to_u32! }.reduce(&.+)
     end
 
-    def update(dt, event)
-      @controller.map_event(event)
+    def update(dt)
       @redraw = true if @controller.any_held?
       @pan.x += @speed * dt if @controller.held?("right")
       @pan.x -= @speed * dt if @controller.held?("left")
@@ -42,7 +42,7 @@ module PF
     def draw
       if @redraw
         @redraw = false
-        start = elapsed_time
+        start = elapsed_milliseconds
         0.upto(height) do |y|
           0.upto(width) do |x|
             seed = ((@pan.x.to_u32! &+ x).to_u32! & 0xFFFF) << 16 | ((@pan.y.to_u32! &+ y).to_u32! & 0xFFFF)
@@ -58,7 +58,7 @@ module PF
             end
           end
         end
-        time = elapsed_time - start
+        time = elapsed_milliseconds - start
         draw_string("frame: #{time.round(2)}ms", 5, 5, Pixel.white, bg: Pixel.black)
       end
     end

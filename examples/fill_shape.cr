@@ -6,7 +6,7 @@ class FillShape < PF::Game
     super
   end
 
-  def update(dt, event)
+  def update(dt)
   end
 
   def draw

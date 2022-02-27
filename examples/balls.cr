@@ -28,14 +28,14 @@ module PF
     end
 
     def add_ball
-      position = Vector[rand(0.0_f64..@width.to_f64), rand(0.0_f64..@height.to_f64)]
+      position = Vector[rand(0.0_f64..width.to_f64), rand(0.0_f64..height.to_f64)]
       ball = Ball.new(rand(10.0..30.0))
       ball.position = position
       ball.velocity = Vector[rand(-50.0..50.0), rand(-50.0..50.0)]
       @balls << ball
     end
 
-    def update(dt, event)
+    def update(dt)
       @ball_clock -= dt
       if @ball_clock < 0
         @ball_clock = ADD_BALL

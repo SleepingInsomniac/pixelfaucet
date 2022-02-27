@@ -12,7 +12,7 @@ class TextGame < PF::Game
     @color = PF::Pixel.random
   end
 
-  def update(dt, event)
+  def update(dt)
     @x += @dx * dt
     @y += @dy * dt
 
@@ -22,8 +22,8 @@ class TextGame < PF::Game
       @color = PF::Pixel.random
     end
 
-    if @x > @width - (@msg.size * PF::Sprite::CHAR_WIDTH)
-      @x = @width - (@msg.size * PF::Sprite::CHAR_WIDTH)
+    if @x > width - (@msg.size * PF::Sprite::CHAR_WIDTH)
+      @x = width - (@msg.size * PF::Sprite::CHAR_WIDTH)
       @dx = -@dx
       @color = PF::Pixel.random
     end
@@ -34,8 +34,8 @@ class TextGame < PF::Game
       @color = PF::Pixel.random
     end
 
-    if @y > @height - (PF::Sprite::CHAR_HEIGHT)
-      @y = @height - (PF::Sprite::CHAR_HEIGHT)
+    if @y > height - (PF::Sprite::CHAR_HEIGHT)
+      @y = height - (PF::Sprite::CHAR_HEIGHT)
       @dy = -@dy
       @color = PF::Pixel.random
     end

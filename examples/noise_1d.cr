@@ -21,10 +21,10 @@ module PF
         Keys::RIGHT => "zoom up",
         Keys::LEFT  => "zoom down",
       })
+      plug_in @controller
     end
 
-    def update(dt, event)
-      @controller.map_event(event)
+    def update(dt)
       @noise_scale += (@noise_scale * 0.8) * dt if @controller.held?("scale up")
       @noise_scale -= (@noise_scale * 0.8) * dt if @controller.held?("scale down")
       @noise_zoom += (@noise_zoom * 0.8) * dt if @controller.held?("zoom up")

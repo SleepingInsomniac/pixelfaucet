@@ -17,7 +17,7 @@ module PF
       @bricks.convert(@screen)
     end
 
-    def update(dt, event)
+    def update(dt)
       @angle += 1.0 * dt
       @zoom, @size = -@zoom, @size.clamp(0.5..2.0) if @size > 2.0 || @size < 0.5
       @size = @size + @zoom * dt

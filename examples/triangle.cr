@@ -27,34 +27,29 @@ class TriangleThing < PF::Game
   @paused = false
   @controller : PF::Controller(PF::Keys)
 
-  def initialize(@width, @height, @scale)
-    super(@width, @height, @scale)
+  def initialize(*args, **kwargs)
+    super
 
     @tri = Triangle.new
     @tri.position = viewport / 2
-    @tri.frame = PF::Shape.circle(3, size = @width / 3)
+    @tri.frame = PF::Shape.circle(3, size = width / 3)
 
     @controller = PF::Controller(PF::Keys).new({
       PF::Keys::RIGHT => "Rotate Right",
       PF::Keys::LEFT  => "Rotate Left",
       PF::Keys::SPACE => "Pause",
     })
+    plug_in @controller
   end
 
-  def update(dt, event)
-    case event
-    when SDL::Event::Keyboard
-      @controller.press(event.scancode) if event.keydown?
-      @controller.release(event.scancode) if event.keyup?
-    end
-
+  def update(dt)
     @paused = !@paused if @controller.pressed?("Pause")
 
-    @tri.rotation = @tri.rotation + 0.5 * dt if @controller.held?("Rotate Right")
-    @tri.rotation = @tri.rotation - 0.5 * dt if @controller.held?("Rotate Left")
+    @tri.rotation = @tri.rotation + 1.0 * dt if @controller.held?("Rotate Right")
+    @tri.rotation = @tri.rotation - 1.0 * dt if @controller.held?("Rotate Left")
 
-    unless @paused
-      @tri.rotation = @tri.rotation + 1.0 * dt
+    unless @paused || @controller.any_held?
+      @tri.rotation = @tri.rotation + 0.5 * dt
     end
 
     @tri.update(dt)

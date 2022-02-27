@@ -10,7 +10,7 @@ module PF
       @sprite = Sprite.new("./assets/pf-font.png")
     end
 
-    def update(dt, event)
+    def update(dt)
     end
 
     def draw

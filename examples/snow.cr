@@ -65,19 +65,19 @@ class Snow < PF::Game
   def initialize(*args, **kwargs)
     super
 
-    @wind = Wind.new(@width, @height)
+    @wind = Wind.new(width, height)
     500.times do
-      @flakes << Flake.new(position: PF::Vector[rand(0.0..@width.to_f64), rand(0.0..@height.to_f64)])
+      @flakes << Flake.new(position: PF::Vector[rand(0.0..width.to_f64), rand(0.0..height.to_f64)])
     end
     clear(0, 0, 15)
   end
 
-  def update(dt, event)
+  def update(dt)
     @last_flake += dt
 
     if @last_flake >= 0.025
       @last_flake = 0.0
-      @flakes << Flake.new(position: PF::Vector[rand(0.0..@width.to_f64), 0.0])
+      @flakes << Flake.new(position: PF::Vector[rand(0.0..width.to_f64), 0.0])
     end
 
     @flakes.reject! do |flake|
@@ -89,7 +89,7 @@ class Snow < PF::Game
       end
 
       flake.update(dt)
-      flake.position.y > @height
+      flake.position.y > height
     end
   end
 
