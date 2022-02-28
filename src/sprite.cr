@@ -102,12 +102,7 @@ module PF
     # Sample a color at an *x* and *y* position
     def sample(x : Int, y : Int)
       raw_pixel = peak(x, y)
-
-      r = uninitialized UInt8
-      g = uninitialized UInt8
-      b = uninitialized UInt8
-
-      LibSDL.get_rgb(raw_pixel, format, pointerof(r), pointerof(g), pointerof(b))
+      LibSDL.get_rgb(raw_pixel, format, out r, out g, out b)
       Pixel.new(r, g, b)
     end
 
@@ -120,13 +115,7 @@ module PF
     def sample(x : Int, y : Int, alpha : Boolean)
       return sample(x, y) unless alpha
       raw_pixel = pixel_pointer(x, y).value
-
-      r = uninitialized UInt8
-      g = uninitialized UInt8
-      b = uninitialized UInt8
-      a = uninitialized UInt8
-
-      LibSDL.get_rgba(raw_pixel, format, pointerof(r), pointerof(g), pointerof(b), pointerof(a))
+      LibSDL.get_rgba(raw_pixel, format, out r, out g, out b, out a)
       Pixel.new(r, g, b, a)
     end
 
