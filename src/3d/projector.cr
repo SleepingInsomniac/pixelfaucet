@@ -54,6 +54,7 @@ module PF
       @fov_rad ||= 1.0 / Math.tan(@fov * 0.5 / 180.0 * Math::PI)
     end
 
+    # Project an array of Triangles into screen space
     def project(tris : Array(Tri), camera = @camera)
       mat_view = camera.view_matrix
 
@@ -96,6 +97,7 @@ module PF
       end
 
       # sort triangles
+      # TODO: Z-buffer
       tris.sort! { |a, b| b.z <=> a.z }
 
       # Clip against the edges of the screen

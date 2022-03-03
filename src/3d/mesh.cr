@@ -1,4 +1,6 @@
 module PF
+  # Mesh represents a collection of points and triangles
+  # TODO: Keep points in a collection, removing duplicates, and keep triangle verticies pointing to the points in that collection
   class Mesh
     setter tris = [] of Tri
     property origin : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
@@ -6,6 +8,7 @@ module PF
     property position : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
 
     # Load an obj file
+    # TODO: Load meshes specified by the obj file
     def self.load_obj(path, use_normals : Bool = false)
       verticies = [] of Vector3(Float64)
       texture_verticies = [] of Vector3(Float64)
@@ -64,6 +67,7 @@ module PF
             tris << tri
 
             # Split a square into triangles
+            # TODO: Handle texture points
             if face_verts.size > 3
               tri = Tri.new(face_verts[0], face_verts[2], face_verts[3], normal: normal)
               tris << tri

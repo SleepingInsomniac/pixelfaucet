@@ -36,15 +36,18 @@ module PF
     end
 
     def forward_vector
-      Transform3d.apply(Vector3.new(0.0, 0.0, 1.0), rotation_matrix)
+      v, w = Transform3d.apply(Vector3.new(0.0, 0.0, 1.0), rotation_matrix)
+      v
     end
 
     def strafe_vector
-      Transform3d.apply(Vector3.new(1.0, 0.0, 0.0), rotation_matrix)
+      v, w = Transform3d.apply(Vector3.new(1.0, 0.0, 0.0), rotation_matrix)
+      v
     end
 
     def up_vector
-      Transform3d.apply(Vector3.new(0.0, 1.0, 0.0), rotation_matrix)
+      v, w = Transform3d.apply(Vector3.new(0.0, 1.0, 0.0), rotation_matrix)
+      v
     end
 
     def matrix
