@@ -91,7 +91,6 @@ module PF
       ]
     end
 
-    # TODO: Optionally return the result of w in some way (pointer / tuple?)
     def self.apply(point : Vector3(Float64), matrix : Matrix(Float64, 16))
       vec = Vector3.new(
         point.x * matrix[0, 0] + point.y * matrix[1, 0] + point.z * matrix[2, 0] + matrix[3, 0],
@@ -100,7 +99,7 @@ module PF
       )
       w = point.x * matrix[0, 3] + point.y * matrix[1, 3] + point.z * matrix[2, 3] + matrix[3, 3]
       vec /= w unless w == 0.0
-      vec
+      {vec, w}
     end
 
     def initialize
@@ -148,7 +147,6 @@ module PF
       self
     end
 
-    # TODO: Optionally return the result of w in some way (pointer / tuple?)
     def apply(point : Vector3(Float64))
       PF::Transform3d.apply(point, @matrix)
     end
