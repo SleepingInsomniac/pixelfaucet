@@ -2,6 +2,10 @@ require "../bezier"
 
 module PF
   module Bezier
+    # Cubic bezier is a type of spline segment with 4 control points.
+    # The curve intersects points 0 and 3, while points 1 and 2 control the curve
+    #
+    # For information on the implementation see https://pomax.github.io/bezierinfo
     struct Cubic(T)
       include Aproximations
 
