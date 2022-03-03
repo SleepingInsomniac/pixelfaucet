@@ -53,19 +53,19 @@ module PF
     end
 
     def *(n : Float64)
-      PF::Pixel.new((@r * n).to_u8, (@g * n).to_u8, (@b * n).to_u8, @a)
+      Pixel.new((@r * n).to_u8, (@g * n).to_u8, (@b * n).to_u8, @a)
     end
 
     def /(n : Float64)
-      PF::Pixel.new((@r / n).to_u8, (@g / n).to_u8, (@b / n).to_u8, @a)
+      Pixel.new((@r / n).to_u8, (@g / n).to_u8, (@b / n).to_u8, @a)
     end
 
     def +(n : Float64)
-      PF::Pixel.new((@r + n).to_u8, (@g + n).to_u8, (@b + n).to_u8, @a)
+      Pixel.new((@r + n).to_u8, (@g + n).to_u8, (@b + n).to_u8, @a)
     end
 
     def -(n : Float64)
-      PF::Pixel.new((@r - n).to_u8, (@g - n).to_u8, (@b - n).to_u8, @a)
+      Pixel.new((@r - n).to_u8, (@g - n).to_u8, (@b - n).to_u8, @a)
     end
 
     def to_u

@@ -61,6 +61,11 @@ module PF
       (y - p1.y) / slope + p1.x
     end
 
+    # Linearly interpolate
+    def lerp(t : Float64)
+      (@p2 - @p1) * t + @p1
+    end
+
     def length
       Math.sqrt((run.abs * 2) + (rise.abs * 2))
     end
