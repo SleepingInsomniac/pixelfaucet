@@ -65,6 +65,15 @@ module PF
       self.translation(pos.x, pos.y, pos.z)
     end
 
+    def self.scale(scale : Vector3(Float64))
+      Matrix[
+        scale.x, 0.0, 0.0, 0.0,
+        0.0, scale.y, 0.0, 0.0,
+        0.0, 0.0, scale.z, 0.0,
+        0.0, 0.0, 0.0, 1.0,
+      ]
+    end
+
     # Does not work for scaling, only for rotation / translation
     def self.quick_inverse(other : Matrix)
       matrix = Matrix(Float64, 16).new(4, 4)
