@@ -61,7 +61,7 @@ module PF
     end
 
     # Draw a textured triangle
-    def fill_triangle(p1 : Vector2, p2 : Vector2, p3 : Vector2, t1 : Vector3, t2 : Vector3, t3 : Vector3, sprite : Sprite, color : Pixel = Pixel.white)
+    def fill_triangle(p1 : Vector2, p2 : Vector2, p3 : Vector2, t1 : Vector3, t2 : Vector3, t3 : Vector3, sprite : Sprite, buffer : DepthBuffer, color : Pixel = Pixel.white)
       # Sort points from top to bottom
       p1, p2, t1, t2 = p2, p1, t2, t1 if p2.y < p1.y
       p1, p3, t1, t3 = p3, p1, t3, t1 if p3.y < p1.y
@@ -151,17 +151,23 @@ module PF
           t = scan_size == 0 ? 0.0 : (x - x_left) / scan_size
           texture_point = texture_line.lerp(t)
 
-          # Get the x and y of the texture coords, divide by z for perspective, then
-          # multiply the point by the size of the sprite to get the final texture point
-          sample_point = Vector[texture_point.x / texture_point.z, texture_point.y / texture_point.z] * sprite.size
-          pixel = sprite.sample(sample_point.to_i)
+          if texture_point.z >= buffer[x, y + c]
+            buffer[x, y + c] = texture_point.z
+            # Get the x and y of the texture coords, divide by z for perspective, then
+            # multiply the point by the size of the sprite to get the final texture point
+            sample_point = ((Vector[texture_point.x, texture_point.y] / texture_point.z) * sprite.size)
+            # Invert the y axis for the sprite
+            sample_point.y = sprite.height - sample_point.y
+            # sample_point = sample_point / texture_point.z if texture_point.z != 0
+            pixel = sprite.sample((sample_point + 0.5).to_i)
 
-          # Blend the pixel sample with the provided color
-          pixel.r = (pixel.r * (color.r / 255)).to_u8
-          pixel.g = (pixel.g * (color.g / 255)).to_u8
-          pixel.b = (pixel.b * (color.b / 255)).to_u8
+            # Blend the pixel sample with the provided color
+            pixel.r = (pixel.r * (color.r / 255)).to_u8
+            pixel.g = (pixel.g * (color.g / 255)).to_u8
+            pixel.b = (pixel.b * (color.b / 255)).to_u8
 
-          draw_point(x, y + c, pixel)
+            draw_point(x, y + c, pixel)
+          end
         end
 
         # Once we hit the point where a line changes, we need a new slope for that line

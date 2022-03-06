@@ -55,7 +55,7 @@ module PF
     end
 
     # Project an array of Triangles into screen space
-    def project(tris : Array(Tri), camera = @camera)
+    def project(tris : Array(Tri), camera = @camera, sort : Bool = false)
       mat_view = camera.view_matrix
 
       # only draw triangles facing the camera
@@ -96,9 +96,8 @@ module PF
         end
       end
 
-      # sort triangles
-      # TODO: Z-buffer
-      tris.sort! { |a, b| b.z <=> a.z }
+      # sort triangles, no need to do this if using a depth buffer
+      tris.sort! { |a, b| b.z <=> a.z } if sort
 
       # Clip against the edges of the screen
       {
