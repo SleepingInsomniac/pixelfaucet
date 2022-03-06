@@ -70,6 +70,11 @@ describe Vector do
       v1 = Vector[5, 5]
       (v1 // 2).should eq(Vector[2, 2])
     end
+
+    it "applies exponents" do
+      v = Vector[2, 2] ** 5
+      v.should eq(Vector[32, 32])
+    end
   end
 
   describe "#-" do
@@ -77,6 +82,13 @@ describe Vector do
       v = Vector[1, 1]
       v = -v
       v.should eq(Vector[-1, -1])
+    end
+  end
+
+  describe "#sum" do
+    it "returns all components added together" do
+      v = Vector[1, 2, 3]
+      v.sum.should eq(6)
     end
   end
 

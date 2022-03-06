@@ -61,7 +61,7 @@ module PF
     end
 
     # Draw a textured triangle
-    def fill_triangle(p1 : Vector2, p2 : Vector2, p3 : Vector2, t1 : Vector2, t2 : Vector2, t3 : Vector2, sprite : Sprite, color : Pixel = Pixel.white)
+    def fill_triangle(p1 : Vector2, p2 : Vector2, p3 : Vector2, t1 : Vector3, t2 : Vector3, t3 : Vector3, sprite : Sprite, color : Pixel = Pixel.white)
       # Sort points from top to bottom
       p1, p2, t1, t2 = p2, p1, t2, t1 if p2.y < p1.y
       p1, p3, t1, t3 = p3, p1, t3, t1 if p3.y < p1.y
@@ -114,6 +114,7 @@ module PF
 
         # Get the normalized t value for this height level
         ty = height > 0 ? y / height : 0.0
+
         # LERP both texture edges at the y position to create a new line
         tyl =
           if switch_left
@@ -148,10 +149,14 @@ module PF
         x_left.upto(x_right) do |x|
           # LERP the line between the texture edges
           t = scan_size == 0 ? 0.0 : (x - x_left) / scan_size
-          # Multiply the point by the size of the sprite to get the final texture point
-          sample_point = texture_line.lerp(t) * sprite.size
-          pixel = sprite.sample((sample_point + 0.5).to_i)
+          texture_point = texture_line.lerp(t)
 
+          # Get the x and y of the texture coords, divide by z for perspective, then
+          # multiply the point by the size of the sprite to get the final texture point
+          sample_point = Vector[texture_point.x / texture_point.z, texture_point.y / texture_point.z] * sprite.size
+          pixel = sprite.sample(sample_point.to_i)
+
+          # Blend the pixel sample with the provided color
           pixel.r = (pixel.r * (color.r / 255)).to_u8
           pixel.g = (pixel.g * (color.g / 255)).to_u8
           pixel.b = (pixel.b * (color.b / 255)).to_u8

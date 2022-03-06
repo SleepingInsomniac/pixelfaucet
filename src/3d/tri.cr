@@ -48,15 +48,19 @@ module PF
 
     # Multiply all points by a *Matrix*, returning a new *Tri*
     def *(mat : Matrix)
+      # The transform function returns a w, which is the 4th component of the vertex
+      # this is the perspective information that we can use to apply textures
       pp1, w1 = Transform3d.apply(@p1, mat)
       pp2, w2 = Transform3d.apply(@p2, mat)
       pp3, w3 = Transform3d.apply(@p3, mat)
 
+      pt1 = @t1 / w1
+      pt2 = @t2 / w2
+      pt3 = @t3 / w3
+
       Tri.new(
         pp1, pp2, pp3,
-        @t1,
-        @t2,
-        @t3,
+        pt1, pt2, pt3,
         @color
       )
     end

@@ -23,12 +23,17 @@ module PF
           parts = line.split(/\s+/)
 
           case parts[0]
+          when "o"
+            puts "Object: #{parts[1]}"
+            # TODO: This is when a new mesh starts
+          when "mtllib"
+            # TODO This is where we need to load texture and material information
           when "v"
             w = parts[4]?.try { |n| n.to_f64 }
             verticies << Vector3.new(x: parts[1].to_f64, y: parts[2].to_f64, z: parts[3].to_f64)
           when "vt"
             v = parts[2]?.try { |n| n.to_f64 } || 0.0
-            w = parts[3]?.try { |n| n.to_f64 } || 0.0
+            w = parts[3]?.try { |n| n.to_f64 } || 1.0
             texture_verticies << Vector3.new(parts[1].to_f64, v, w)
           when "vn"
             if use_normals
@@ -67,9 +72,13 @@ module PF
             tris << tri
 
             # Split a square into triangles
-            # TODO: Handle texture points
             if face_verts.size > 3
               tri = Tri.new(face_verts[0], face_verts[2], face_verts[3], normal: normal)
+              unless face_tex.empty?
+                tri.t1 = face_tex[0]
+                tri.t2 = face_tex[2]
+                tri.t3 = face_tex[3]
+              end
               tris << tri
             end
           end

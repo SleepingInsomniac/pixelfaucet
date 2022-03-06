@@ -1,7 +1,7 @@
 require "./matrix"
 
 module PF
-  module Vector
+  abstract struct Vector
     # Creates a new `Vector` with the given *args*
     #
     # ```
@@ -18,7 +18,7 @@ module PF
 
   {% for i in 2..4 %}
     {% vars = %w[x y z w] %}
-    struct Vector{{i}}(T)
+    struct Vector{{i}}(T) < Vector
       {% for arg in 0...i %}
         property {{vars[arg].id}} : T
       {% end %}
@@ -64,7 +64,7 @@ module PF
         end
       {% end %}
 
-      {% for op in %w[* / // + - %] %}
+      {% for op in %w[* / // + - % **] %}
         # Applies `{{op.id}}` to all component of this vector with the corresponding component of *other*
         def {{ op.id }}(other : Vector{{i}})
           Vector[{% for arg in 0...i %} @{{vars[arg].id}} {{op.id}} other.{{vars[arg].id}}, {% end %}]
@@ -75,6 +75,13 @@ module PF
           Vector[{% for arg in 0...i %} @{{vars[arg].id}} {{op.id}} n, {% end %}]
         end
       {% end %}
+
+      # Add all components together
+      def sum
+        {% for arg in 0...i %}
+          @{{vars[arg].id}} {% if arg != i - 1 %} + {% end %}
+        {% end %}
+      end
 
       # The length or magnitude of the vector calculated by the Pythagorean theorem
       def magnitude

@@ -2,9 +2,9 @@ require "./vector"
 
 module PF
   struct Line(T)
-    property p1 : Vector2(T), p2 : Vector2(T)
+    property p1 : T, p2 : T
 
-    def initialize(@p1 : Vector2(T), @p2 : Vector2(T))
+    def initialize(@p1 : T, @p2 : T)
     end
 
     def rise
@@ -66,16 +66,18 @@ module PF
       (@p2 - @p1) * t + @p1
     end
 
+    # Return the length of the line
     def length
-      Math.sqrt((run.abs * 2) + (rise.abs * 2))
+      Math.sqrt(((@p2 - @p1) ** 2).sum)
     end
 
     def /(n : (Float | Int))
       Line.new(@p1 / n, @p2 / n)
     end
 
-    def to_point
-      Vector[run, rise]
+    # Convert this line into a normalized vector
+    def to_vector
+      (@p2 - @p1).normalized
     end
 
     # Find the normal axis to this line
