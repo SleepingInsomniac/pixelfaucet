@@ -22,7 +22,7 @@ module PF
       end
 
       # Form lines from the points
-      lines = [] of Line(Int32)
+      lines = [] of Line(Vector2(Int32))
       0.upto(points.size - 1) do |n|
         lines << Line.new(points[n], points[(n + 1) % points.size])
       end
