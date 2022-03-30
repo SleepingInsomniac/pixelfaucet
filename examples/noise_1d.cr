@@ -39,7 +39,7 @@ module PF
 
       0.upto(width) do |x|
         y = mid + (@noise.get((x + @xpos) / @noise_zoom) * @noise_scale).to_i
-        draw_point(x, y, Pixel.yellow)
+        draw_point(x, y, Pixel::Yellow)
       end
     end
   end

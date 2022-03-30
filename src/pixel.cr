@@ -1,39 +1,9 @@
+require "./colors"
+
 module PF
   struct Pixel
     def self.random
       new(rand(0_u8..0xFF_u8), rand(0_u8..0xFF_u8), rand(0_u8..0xFF_u8), 0xFF_u8)
-    end
-
-    def self.white
-      new(255, 255, 255)
-    end
-
-    def self.black
-      new(0, 0, 0)
-    end
-
-    def self.red
-      new(255, 0, 0)
-    end
-
-    def self.green
-      new(0, 255, 0)
-    end
-
-    def self.blue
-      new(0, 0, 255)
-    end
-
-    def self.yellow
-      new(255, 255, 0)
-    end
-
-    def self.magenta
-      new(255, 0, 255)
-    end
-
-    def self.cyan
-      new(0, 255, 255)
     end
 
     property r : UInt8, g : UInt8, b : UInt8, a : UInt8
@@ -50,6 +20,38 @@ module PF
 
     def format(format)
       LibSDL.map_rgba(format, @r, @g, @b, @a)
+    end
+
+    def blend_value(v1 : UInt8, v2 : UInt8, t : Float64) : UInt8
+      f1 = v1 / UInt8::MAX
+      f2 = v2 / UInt8::MAX
+      v = Math.sqrt((1 - t) * f1 ** 2 + t * f2 ** 2)
+      (v * UInt8::MAX).to_u8
+    end
+
+    def blend(other : Pixel, t : Float64 = 0.5)
+      Pixel.new(
+        blend_value(@r, other.r, t),
+        blend_value(@g, other.g, t),
+        blend_value(@b, other.b, t),
+        @a
+      )
+    end
+
+    def add(other : Pixel)
+      Pixel.new(
+        ((@r.to_u16 + other.r) // 2).to_u8,
+        ((@g.to_u16 + other.g) // 2).to_u8,
+        ((@b.to_u16 + other.b) // 2).to_u8
+      )
+    end
+
+    def darken(other : Pixel)
+      Pixel.new(
+        (@r * (other.r / 255)).to_u8,
+        (@g * (other.g / 255)).to_u8,
+        (@b * (other.b / 255)).to_u8
+      )
     end
 
     def *(n : Float64)

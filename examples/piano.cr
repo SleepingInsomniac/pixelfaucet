@@ -153,14 +153,14 @@ module PF
 
       @white_keys.each do |key|
         top_left, bottom_right, name = key
-        fill_rect(top_left, bottom_right, @keysdown[name]? ? @highlight : Pixel.white)
+        fill_rect(top_left, bottom_right, @keysdown[name]? ? @highlight : Pixel::White)
         draw_rect(top_left, bottom_right, Pixel.new(127, 127, 127))
         draw_string(name, top_left.x + 2, top_left.y + (@key_size * 2) - Sprite::CHAR_HEIGHT - 2, @keysdown[name]? ? @text_hl : @text_color)
       end
 
       @black_keys.each do |key|
         top_left, bottom_right, name = key
-        fill_rect(top_left, bottom_right, @keysdown[name]? ? @highlight : Pixel.black)
+        fill_rect(top_left, bottom_right, @keysdown[name]? ? @highlight : Pixel::Black)
         draw_rect(top_left, bottom_right, Pixel.new(127, 127, 127))
         draw_string(name, top_left.x + 2, top_left.y + @key_size - Sprite::CHAR_HEIGHT - 2, @keysdown[name]? ? @text_hl : @text_color)
       end

@@ -18,7 +18,7 @@ class Triangle < PF::Entity
   def draw(engine)
     _frame = PF::Shape.rotate(@frame, @rotation)
     _frame = PF::Shape.translate(_frame, @position)
-    engine.fill_triangle(_frame.map(&.to_i32), PF::Pixel.yellow)
+    engine.fill_triangle(_frame.map(&.to_i32), PF::Pixel::Yellow)
   end
 end
 

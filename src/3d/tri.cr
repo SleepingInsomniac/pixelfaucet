@@ -16,10 +16,10 @@ module PF
 
     setter normal : Vector3(Float64)?
 
-    def initialize(@p1 : Vector3(Float64), @p2 : Vector3(Float64), @p3 : Vector3(Float64), @color = PF::Pixel.white, @normal = nil)
+    def initialize(@p1 : Vector3(Float64), @p2 : Vector3(Float64), @p3 : Vector3(Float64), @color = PF::Pixel::White, @normal = nil)
     end
 
-    def initialize(@p1, @p2, @p3, @t1, @t2, @t3, @color = PF::Pixel.white)
+    def initialize(@p1, @p2, @p3, @t1, @t2, @t3, @color = PF::Pixel::White)
     end
 
     # Return the normal assuming clockwise pointing winding

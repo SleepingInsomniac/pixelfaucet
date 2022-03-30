@@ -124,7 +124,7 @@ module PF
       end
     end
 
-    def draw_string(msg : String, pos : Vector2(Int), color : Pixel = Pixel.black)
+    def draw_string(msg : String, pos : Vector2(Int), color : Pixel = Pixel::Black)
       draw_string(msg, pos.x, pos.y, color)
     end
   end

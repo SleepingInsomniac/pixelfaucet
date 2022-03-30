@@ -54,12 +54,12 @@ module PF
               b = @random.rand(0u8..0xFFu8)
               (@buffer + n).value = Pixel.new(b, b, b).to_u32
             else
-              (@buffer + n).value = Pixel.black.to_u32
+              (@buffer + n).value = Pixel::Black.to_u32
             end
           end
         end
         time = elapsed_milliseconds - start
-        draw_string("frame: #{time.round(2)}ms", 5, 5, Pixel.white, bg: Pixel.black)
+        draw_string("frame: #{time.round(2)}ms", 5, 5, Pixel::White, bg: Pixel::Black)
       end
     end
   end

@@ -97,7 +97,7 @@ class Snow < PF::Game
     clear(0, 0, 15)
 
     @flakes.each do |flake|
-      color = PF::Pixel.white * flake.z_pos
+      color = PF::Pixel::White * flake.z_pos
       if flake.shape == 0
         draw_point(flake.position.to_i32, color)
       else
