@@ -3,6 +3,7 @@ require "../src/controller"
 require "../src/sprite"
 require "../src/pixel"
 require "../src/vector"
+require "../src/sprite"
 
 require "../src/3d/*"
 
@@ -10,18 +11,24 @@ class ThreeDee < PF::Game
   @projector : PF::Projector
   @camera : PF::Camera
   @paused = false
-  @speed = 5.0
+  @speed = 10.0
   @controller : PF::Controller(PF::Keys)
+  @depth_buffer : PF::DepthBuffer
 
   def initialize(*args, **kwargs)
     super
 
     @projector = PF::Projector.new(width, height)
+    @depth_buffer = PF::DepthBuffer.new(width, height)
+
     @camera = @projector.camera
-    # @model = PF::Mesh.load_obj("./assets/cube.obj")
+
     @model = PF::Mesh.load_obj("./assets/pixelfaucet.obj")
-    @texture = PF::Sprite.new("./assets/bricks.png")
     @model.position.z = @model.position.z + 2.0
+
+    @cube_model = PF::Mesh.load_obj("./assets/cube.obj")
+    @cube_model.position.z = @cube_model.position.z + 2.5
+    @sprite = PF::Sprite.new("./assets/bricks.png")
 
     @controller = PF::Controller(PF::Keys).new({
       PF::Keys::RIGHT => "Rotate Right",
@@ -60,22 +67,23 @@ class ThreeDee < PF::Game
       @camera.position.y = @camera.position.y - @speed * dt
     end
 
-    # Controll the camera pitch instead of elevation -
+    # Control the camera pitch instead of elevation -
+    # TODO: this needs to account for where the camera is pointing
 
     # if @controller.held?("Up")
-    #   @camera.pitch = @camera.pitch + (@speed / 2) * dt
+    #   @camera.pitch = @camera.pitch + (@speed / 5) * dt
     # end
-
+    #
     # if @controller.held?("Down")
-    #   @camera.pitch = @camera.pitch - (@speed / 2) * dt
+    #   @camera.pitch = @camera.pitch - (@speed / 5) * dt
     # end
 
     if @controller.held?("Rotate Left")
-      @camera.yaw = @camera.yaw - (@speed / 2) * dt
+      @camera.yaw = @camera.yaw - (@speed / 3) * dt
     end
 
     if @controller.held?("Rotate Right")
-      @camera.yaw = @camera.yaw + (@speed / 2) * dt
+      @camera.yaw = @camera.yaw + (@speed / 3) * dt
     end
 
     if @controller.held?("Forward")
@@ -86,33 +94,53 @@ class ThreeDee < PF::Game
       @camera.position = @camera.position - (forward * @speed * dt)
     end
 
-    @model.rotation.x = @model.rotation.x + 3.0 * dt
+    @model.rotation.x = @model.rotation.x + 1.0 * dt
   end
 
   def draw
-    clear(25, 50, 25)
-    tris = @projector.project(@model.tris)
-    draw_string("Triangles: #{tris.size}", 3, 3)
+    # clear(25, 50, 25)
+    clear
+    @depth_buffer.clear
 
+    cube_tris = @projector.project(@cube_model.tris)
+    cube_tris.each do |tri|
+      fill_triangle(
+        tri.p1.to_i, tri.p2.to_i, tri.p3.to_i, # Points
+        tri.t1, tri.t2, tri.t3,                # Texture Points
+        @sprite,
+        @depth_buffer,
+        tri.color
+      )
+    end
+
+    tris = @projector.project(@model.tris)
     tris.each do |tri|
       # Rasterize all triangles
+
       fill_triangle(
         PF::Vector[tri.p1.x.to_i, tri.p1.y.to_i],
         PF::Vector[tri.p2.x.to_i, tri.p2.y.to_i],
         PF::Vector[tri.p3.x.to_i, tri.p3.y.to_i],
-        pixel: tri.color
+        pixel: tri.color # buffer: @depth_buffer
       )
-
-      # draw_triangle(
-      #   PF::Vector[tri.p1.x.to_i, tri.p1.y.to_i],
-      #   PF::Vector[tri.p2.x.to_i, tri.p2.y.to_i],
-      #   PF::Vector[tri.p3.x.to_i, tri.p3.y.to_i],
-      #   pixel: PF::Pixel.blue
-      # )
     end
+
+    string = String.build do |io|
+      io << "Triangles: " << tris.size + cube_tris.size
+      io << "\nPosition: "
+      io << "x: " << @camera.position.x.round(2)
+      io << "y: " << @camera.position.y.round(2)
+      io << "z: " << @camera.position.z.round(2)
+      io << "\nRotation: "
+      io << "x: " << @camera.rotation.x.round(2)
+      io << "y: " << @camera.rotation.y.round(2)
+      io << "z: " << @camera.rotation.z.round(2)
+    end
+
+    draw_string(string, 3, 3)
   end
 end
 
 # engine = ThreeDee.new(256, 240, 4)
-engine = ThreeDee.new(640, 480, 2)
+engine = ThreeDee.new(256 * 2, 240 * 2, 2)
 engine.run!
