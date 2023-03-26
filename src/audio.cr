@@ -1,5 +1,6 @@
 module PF
   class Audio
+    alias Callback = Float64, UInt8 -> Float64
     # stored as a class variable to avoid garbage collection, since it's passed to a C function
     @@box : Pointer(Void)?
     @spec : LibSDL::AudioSpec
@@ -12,7 +13,7 @@ module PF
     getter time : Float64 = 0.0
     @channel : UInt8 = 0u8
 
-    def initialize(freq : Int32 = 44100, channels : UInt8 = 2, samples : UInt16 = 512, &callback : Float64, UInt8 -> Float64)
+    def initialize(freq : Int32 = 44100, channels : UInt8 = 2, samples : UInt16 = 512, &callback : Callback)
       # Information to be passed to the audio callback
       boxed_data = Box.box({
         callback,

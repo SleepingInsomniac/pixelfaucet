@@ -18,13 +18,14 @@ module PF
     @white_keys = [] of Tuple(Vector2(Int32), Vector2(Int32), String)
     @black_keys = [] of Tuple(Vector2(Int32), Vector2(Int32), String)
 
-    @instruments : Array(Instrument) = [RetroVoice.new, PianoVoice.new, Flute.new, KickDrum.new, SnareDrum.new, Harmonica.new]
+    @instruments : Array(Instrument) = [RetroVoice.new, SineVoice.new, PianoVoice.new, Flute.new, KickDrum.new, SnareDrum.new, Harmonica.new]
 
     def initialize(*args, **kwargs)
       super
 
       @text_color = Pixel.new(127, 127, 127)
       @controller = PF::Controller(Keys).new({
+        Keys::E     => "echo",
         Keys::UP    => "octave up",
         Keys::DOWN  => "octave down",
         Keys::LEFT  => "prev inst",
@@ -52,18 +53,27 @@ module PF
 
       @sounds = [] of Sound
       @keysdown = {} of String => Tuple(Instrument, UInt32)
+      @echo = false
+
+      echo_effect = EchoEffect.new(44100 // 3)
 
       # Initialize an audio handler
       # - the given Proc will be called at the sample rate/freq param (44.1Khz is standard)
       # - the channel variable describes which speaker the sample is for
       @audio = Audio.new(channels: 1) do |time, channel|
         value = 0.0
+
         @instruments.each do |instrument|
           instrument.sounds.each do |sound|
             value += sound.sample(time)
           end
         end
-        value
+
+        if @echo
+          echo_effect.apply(value)
+        else
+          value
+        end
       end
 
       @key_size = height // 2 - 25
@@ -115,6 +125,10 @@ module PF
       @base_note += 12 if @controller.pressed?("octave up") && @base_note <= 112
       @base_note -= 12 if @controller.pressed?("octave down") && @base_note >= 21 + 12
 
+      if @controller.pressed?("echo")
+        @echo = !@echo
+      end
+
       if @controller.pressed?("next inst")
         @instrument = (@instrument + 1) % @instruments.size
       end
@@ -134,9 +148,11 @@ module PF
         end
 
         if @controller.released?(name)
-          instrument, note_id = @keysdown[name]
-          instrument.off(note_id, @audio.time)
-          @keysdown.delete(name)
+          if tuple = @keysdown.[name]?
+            instrument, note_id = tuple
+            instrument.off(note_id, @audio.time)
+            @keysdown.delete(name)
+          end
         end
       end
     end
@@ -147,9 +163,9 @@ module PF
       draw_string(<<-TEXT, 5, 5, @text_color)
         Press up/down to change octave, Bottom row of keyboard plays notes
         #{@instruments.map(&.name).join(", ")}
-        Octave: #{@base_note // 12 - 1}, Voice : #{@instruments[@instrument].name}
+        Octave: #{@base_note // 12 - 1}, Voice: #{@instruments[@instrument].name}, Echo: #{@echo ? "on" : "off"}
         #{@instruments[@instrument].sounds.map { |s| s.hertz.round(2) }}
-        TEXT
+      TEXT
 
       @white_keys.each do |key|
         top_left, bottom_right, name = key

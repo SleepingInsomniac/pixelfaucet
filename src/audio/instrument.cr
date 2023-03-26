@@ -41,7 +41,20 @@ module PF
         sustain: Envelope::Stage.new(Float64::INFINITY, 0.5, 0.5),
         release: Envelope::Stage.new(0.5, 1.0, 0.0)
       )
-      @wave = Sound.saw_wave(7.0, 0.001)
+      @wave = Sound.saw_wave(10.0, 0.005)
+    end
+  end
+
+  class SineVoice < Instrument
+    def initialize
+      @name = "Sine"
+      @envelope = Envelope.new(
+        attack: Envelope::Stage.new(0.01, 0.0, 1.0),
+        decay: Envelope::Stage.new(0.1, 1.0, 0.5),
+        sustain: Envelope::Stage.new(Float64::INFINITY, 0.5, 0.5),
+        release: Envelope::Stage.new(0.5, 1.0, 0.0)
+      )
+      @wave = Sound.sin_wave(5.0, 0.001)
     end
   end
 
@@ -62,17 +75,25 @@ module PF
         release: Envelope::Stage.new(0.3, 1.0, 0.0)
       )
 
+      harmonics = [
+        {1.0, 0.0},
+        {0.5, 0.0},
+        {0.25, 0.0},
+      ]
+
       @wave = ->(time : Float64, hertz : Float64) do
         # https://www.desmos.com/calculator/mnxargxllk
-        av = 2 * Math::PI * hertz * time
-        y = (Math.sin(Math::PI * (av / Math::PI)) ** 3) + Math.sin(Math::PI * ((av / Math::PI) + (2 / 3)))
-        y = (Math.sin(av) ** 3) + Math.sin(av + 0.6666)
-        y += y / 2
-        y += y / 4
-        y += y / 8
-        y += y / 16
-        y += y / 32
-        y /= 5
+        y = 0.0
+
+        harmonics.each do |amplitude, phase|
+          av = 2 * Math::PI * (hertz / 2.0) * time + phase
+          y += amplitude * (
+            (Math.sin(Math::PI * (av / Math::PI)) ** 3) +
+            (Math.sin(Math::PI * ((av / Math::PI) + (2 / 3))))
+          )
+        end
+
+        y
       end
     end
   end
