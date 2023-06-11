@@ -4,11 +4,10 @@ version: 0.0.7
 authors:
   - Alex Clink <alexclink@gmail.com>
 
-crystal: 1.3.2
+crystal: 1.8.2
 
 license: MIT
 
 dependencies:
   sdl:
     github: SleepingInsomniac/sdl.cr
-    version: 0.1.0

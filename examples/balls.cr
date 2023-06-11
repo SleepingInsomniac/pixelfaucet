@@ -70,7 +70,6 @@ module PF
       clear(10, 10, 30)
       @balls.each do |ball|
         fill_shape(Shape.translate(ball.frame, translation: ball.position).map(&.to_i32), ball.color)
-        # draw_circle(ball.position.to_i32, ball.radius.to_i32, Pixel.green)
       end
       draw_string("Balls: #{@balls.size}", 5, 5, Pixel::White)
     end
