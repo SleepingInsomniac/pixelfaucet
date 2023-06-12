@@ -111,22 +111,37 @@ class ThreeDee < PF::Game
         @depth_buffer,
         tri.color
       )
+
+      if tri.clipped
+        p1 = PF::Vector[tri.p1.x.to_i, tri.p1.y.to_i]
+        p2 = PF::Vector[tri.p2.x.to_i, tri.p2.y.to_i]
+        p3 = PF::Vector[tri.p3.x.to_i, tri.p3.y.to_i]
+        draw_triangle(p1, p2, p3, PF::Pixel.new(255, 255, 0))
+      end
     end
 
-    tris = @projector.project(@model.tris)
+    tris = @projector.project(@model.tris, sort: true)
     tris.each do |tri|
       # Rasterize all triangles
 
+      p1 = PF::Vector[tri.p1.x.to_i, tri.p1.y.to_i]
+      p2 = PF::Vector[tri.p2.x.to_i, tri.p2.y.to_i]
+      p3 = PF::Vector[tri.p3.x.to_i, tri.p3.y.to_i]
+
       fill_triangle(
-        PF::Vector[tri.p1.x.to_i, tri.p1.y.to_i],
-        PF::Vector[tri.p2.x.to_i, tri.p2.y.to_i],
-        PF::Vector[tri.p3.x.to_i, tri.p3.y.to_i],
+        p1,
+        p2,
+        p3,
         pixel: tri.color # buffer: @depth_buffer
       )
+
+      if tri.clipped
+        draw_triangle(p1, p2, p3, PF::Pixel.new(255, 0, 0))
+      end
     end
 
     string = String.build do |io|
-      io << "Triangles: " << tris.size + cube_tris.size
+      io << "Triangles: " << cube_tris.size + tris.size
       io << "\nPosition: "
       io << "x: " << @camera.position.x.round(2)
       io << "y: " << @camera.position.y.round(2)

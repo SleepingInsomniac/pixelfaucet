@@ -6,18 +6,20 @@ module PF
     getter width : Int32 | Float64
     getter height : Int32 | Float64
     property near = 0.1
-    property far = 1000.0
-    getter fov = 90.0
+    property far = 50.0
+    getter fov = 70.0
     property aspect_ratio : Float64?
     property camera : Camera
     property light : Vector3(Float64) = Vector3.new(0.0, 0.0, -1.0).normalized
     property mat_proj : Matrix(Float64, 16)?
     property clipping_plane_near : Vector3(Float64)
-    property near_plane_normal : Vector3(Float64) = Vector3.new(0.0, 0.0, 1.0)
+    property clipping_plane_far : Vector3(Float64)
+
     @fov_rad : Float64?
 
     def initialize(@width, @height, @camera = Camera.new)
       @clipping_plane_near = Vector3.new(0.0, 0.0, @near)
+      @clipping_plane_far = Vector3.new(0.0, 0.0, @far)
     end
 
     def mat_proj
@@ -58,42 +60,50 @@ module PF
     def project(tris : Array(Tri), camera = @camera, sort : Bool = false)
       mat_view = camera.view_matrix
 
-      # only draw triangles facing the camera
+      # Only draw triangles facing the camera
       tris = tris.select do |tri|
         tri.normal.dot(tri.p1 - camera.position) < 0.0
       end
 
-      # Iterate tris to transform into view, project, and clip
-      0.upto(tris.size - 1) do
-        tri = tris.pop
+      # Iterate tris to transform into
+      tris = tris.map do |tri|
         shade = (tri.normal.dot(light) + 1.0) / 2 # light should be normalized
         tri.color = tri.color * shade
+        tri * mat_view
+      end
 
-        tri *= mat_view
+      # Clip tris
+      {
+        {clipping_plane_near, Vector[0.0, 0.0, 1.0]},
+        {clipping_plane_far, Vector[0.0, 0.0, -1.0]},
+      }.each do |clip|
+        0.upto(tris.size - 1) do
+          tri = tris.pop
+          tri.clip(plane: clip[0], plane_normal: clip[1]).each do |tri|
+            tris.unshift(tri)
+          end
+        end
+      end
 
-        # Clip against the near plane
-        tri.clip(plane: clipping_plane_near, plane_normal: near_plane_normal).each do |tri|
-          tri *= mat_proj
+      # Project the triangles
+      tris = tris.map do |tri|
+        z = tri.z
+        tri *= mat_proj
+        tri.z = z
 
+        tri.map_points do |point|
           # Invert the y axis
-          tri.p1.y = tri.p1.y * -1.0
-          tri.p2.y = tri.p2.y * -1.0
-          tri.p3.y = tri.p3.y * -1.0
+          point.y *= -1.0
 
           # scale into screen space
-          tri.p1 += 1.0
-          tri.p2 += 1.0
-          tri.p3 += 1.0
+          point += 1.0
+          point.x *= 0.5 * width
+          point.y *= 0.5 * height
 
-          tri.p1.x = tri.p1.x * 0.5 * width
-          tri.p1.y = tri.p1.y * 0.5 * height
-          tri.p2.x = tri.p2.x * 0.5 * width
-          tri.p2.y = tri.p2.y * 0.5 * height
-          tri.p3.x = tri.p3.x * 0.5 * width
-          tri.p3.y = tri.p3.y * 0.5 * height
-
-          tris.unshift(tri)
+          point
         end
+
+        tri
       end
 
       # sort triangles, no need to do this if using a depth buffer

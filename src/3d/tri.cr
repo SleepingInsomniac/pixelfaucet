@@ -12,14 +12,15 @@ module PF
     property t2 : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
     property t3 : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
 
-    property color : PF::Pixel
+    property color : Pixel
 
+    getter clipped : Bool = false
     setter normal : Vector3(Float64)?
 
-    def initialize(@p1 : Vector3(Float64), @p2 : Vector3(Float64), @p3 : Vector3(Float64), @color = PF::Pixel::White, @normal = nil)
+    def initialize(@p1 : Vector3(Float64), @p2 : Vector3(Float64), @p3 : Vector3(Float64), @color = PF::Pixel::White, @normal = nil, @clipped = false)
     end
 
-    def initialize(@p1, @p2, @p3, @t1, @t2, @t3, @color = PF::Pixel::White)
+    def initialize(@p1, @p2, @p3, @t1, @t2, @t3, @color = PF::Pixel::White, @clipped = false)
     end
 
     # Return the normal assuming clockwise pointing winding
@@ -44,6 +45,18 @@ module PF
     # Get the average z value
     def z
       (@p1.z + @p2.z + @p3.z) / 3.0
+    end
+
+    def z=(value : Float64)
+      @p1.z = value
+      @p2.z = value
+      @p3.z = value
+    end
+
+    def map_points
+      @p1 = yield @p1
+      @p2 = yield @p2
+      @p3 = yield @p3
     end
 
     # Multiply all points by a *Matrix*, returning a new *Tri*
@@ -119,7 +132,8 @@ module PF
           Tri.new(
             inside_points[0], clip_p1, clip_p2,
             inside_texts[0], int_t1, int_t2,
-            color: @color
+            color: @color,
+            clipped: true
           ),
         }
       end
@@ -141,14 +155,16 @@ module PF
           Tri.new(
             inside_points[0], inside_points[1], clip_p1,
             inside_texts[0], inside_texts[1], int_t1,
-            color: @color
+            color: @color,
+            clipped: true
           ),
           # The second triangle will have the second inside point, the second intersection, then the first intersection
           # This order preserves clockwise winding
           Tri.new(
             inside_points[1], clip_p2, clip_p1,
             inside_texts[1], int_t2, int_t1,
-            color: @color
+            color: @color,
+            clipped: true
           ),
         }
       end
