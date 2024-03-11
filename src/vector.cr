@@ -8,7 +8,7 @@ module PF
     # PF::Vector[1, 2] # => PF::Vector2(Int32)(@x=1, @y=2)
     # ```
     macro [](*args)
-      PF::Vector{{args.size}}(typeof({{*args}})).new(
+      PF::Vector{{args.size}}(typeof({{args.splat}})).new(
         {% for arg in args %}
           {{ arg }},
         {% end %}

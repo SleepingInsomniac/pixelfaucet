@@ -156,6 +156,5 @@ class ThreeDee < PF::Game
   end
 end
 
-# engine = ThreeDee.new(256, 240, 4)
-engine = ThreeDee.new(256 * 2, 240 * 2, 2)
+engine = ThreeDee.new(640, 480, 2)
 engine.run!

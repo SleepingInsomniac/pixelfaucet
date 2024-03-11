@@ -14,11 +14,11 @@ module PF
     macro [](*args)
       # width and height are the isqrt of args.size
       {% if args.size == 4 %}
-        PF::Matrix(typeof({{*args}}), 4).new(2, 2, StaticArray[{{*args}}])
+        PF::Matrix(typeof({{args.splat}}), 4).new(2, 2, StaticArray[{{args.splat}}])
       {% elsif args.size == 9 %}
-        PF::Matrix(typeof({{*args}}), 9).new(3, 3, StaticArray[{{*args}}])
+        PF::Matrix(typeof({{args.splat}}), 9).new(3, 3, StaticArray[{{args.splat}}])
       {% elsif args.size == 16 %}
-        PF::Matrix(typeof({{*args}}), 16).new(4, 4, StaticArray[{{*args}}])
+        PF::Matrix(typeof({{args.splat}}), 16).new(4, 4, StaticArray[{{args.splat}}])
       {% else %}
         raise "Cannot determine width and height of matrix with {{ args.size }} elements, " \
               "please provide them explicitly Matrix(Int32, 16).new(4, 4, StaticArray[...])"
