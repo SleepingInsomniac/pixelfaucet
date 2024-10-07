@@ -1,3 +1,3 @@
 module PF
-  VERSION = "0.0.7"
+  VERSION = {% `shards version`.chomp.stringify %}
 end

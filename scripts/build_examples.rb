@@ -1,49 +1,48 @@
 #!/usr/bin/env ruby
 
-v_major, v_minor, v_patch = RUBY_VERSION.split('.').map(&:to_i)
-unless v_major == 3 && v_minor >= 2
-  $stderr.puts "Warn: script designed for Ruby 3.2.x, running: #{RUBY_VERSION}"
-end
-
 require 'optparse'
 require 'fileutils'
-
-OUT_PATH = 'examples/build'
 
 options = {
   release: true,
   debug: false,
+  clean: false,
 }
 
 OptionParser.new do |opts|
   opts.banner = "Usage: build_examples.rb [options]"
 
-  opts.on("--[no-]release", "Build in release mode (default: #{options[:release]})") do |value|
-    options[:release] = value
+  opts.on("--release", "Build in release mode") do
+    options[:release] = true
   end
 
-  opts.on("--[no-]debug", "Include debug information (default: #{options[:debug]})") do |value|
-    options[:debug] = value
+  opts.on("--no-release", "Build faster") do
+    options[:release] = false
+  end
+
+  opts.on("--clean", "Remove built examples") do
+    options[:clean] = true
   end
 end.parse!
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+unless options[:clean]
+  cmd = "crystal build"
+  flags = []
+  flags << "--release" if options[:release]
+  flags << "--no-debug" unless options[:debug]
 
-cmd = "crystal build"
-flags = []
-flags << "--release" if options[:release]
-flags << "--no-debug" unless options[:debug]
-
-Dir.chdir File.join(__dir__, '..')
-FileUtils.mkdir_p(OUT_PATH)
-
-unless File.exist?("#{OUT_PATH}/assets")
-  FileUtils.ln_s("../../assets", "#{OUT_PATH}/assets")
-end
-
-Dir.glob("examples/*.cr").each do |path|
-  bin_name = File.basename(path, ".cr")
-  full_cmd = %'#{cmd} #{flags.join(" ")} "#{path}" -o #{OUT_PATH}/#{bin_name}'
-  puts full_cmd
-  system full_cmd
+  Dir.chdir File.join(__dir__, '..')
+  FileUtils.mkdir_p("examples/build")
+  unless File.exist?("examples/build/assets")
+    FileUtils.ln_s("../../assets", "examples/build/assets")
+  end
+  Dir.glob("examples/*.cr").each do |path|
+    full_cmd = %'#{cmd} #{flags.join(" ")} "#{path}"'
+    puts full_cmd
+    system full_cmd
+    bin_name = File.basename(path, ".cr")
+    FileUtils.mv(bin_name, "examples/build/#{bin_name}")
+  end
+else
+  # TODO
 end

@@ -1,3 +1,5 @@
+require "pf2d"
+
 require "./lib_sdl"
 require "./flags"
 require "./fps"
@@ -12,8 +14,8 @@ module PF
     SHOW_FPS = true
 
     property title : String
-    property viewport : Vector2(Int32) = Vector[0, 0]
-    getter scale : Vector2(Int32) = Vector[1, 1]
+    property viewport : PF2d::Vec2(Int32) = PF2d::Vec[0, 0]
+    getter scale : PF2d::Vec2(Int32) = PF2d::Vec[1, 1]
     getter window : SDL::Window
     getter renderer : SDL::Renderer
 
@@ -22,7 +24,7 @@ module PF
     property controllers = [] of PF::Controller(Keys)
 
     delegate :draw_point, :draw_line, :draw_curve, :scan_line, :draw_circle, :draw_triangle, :draw_rect, :draw_shape,
-      :fill_triangle, :fill_rect, :fill_circle, :fill_shape, :draw_string, to: @screen
+      :fill_triangle, :paint_triangle, :fill_rect, :fill_circle, :fill_shape, :draw_string, to: @screen
 
     @milliseconds : Float64 = Time.monotonic.total_milliseconds
     @last_ms : Float64 = Time.monotonic.total_milliseconds
@@ -36,8 +38,8 @@ module PF
       render_flags = Flags::Render::ACCELERATED, window_flags = Flags::Window::SHOWN
     )
       SDL.init(SDL::Init::EVERYTHING)
-      @scale = Vector[scale, scale]
-      @viewport = Vector[width, height]
+      @scale = PF2d::Vec[scale, scale]
+      @viewport = PF2d::Vec[width, height]
       winsize = @viewport * @scale
       @window = SDL::Window.new(@title, winsize.x, winsize.y, flags: window_flags)
       @renderer = SDL::Renderer.new(@window, flags: render_flags)
@@ -123,7 +125,7 @@ module PF
 
     # Called when the mouse is moved
     # override in your subclass to hook into this behavior
-    def on_mouse_motion(cursor : Vector2(Int32))
+    def on_mouse_motion(cursor : PF2d::Vec)
     end
 
     # Called when the mouse is clicked
@@ -152,7 +154,7 @@ module PF
       while event = Event.poll
         case event
         when Event::MouseMotion
-          on_mouse_motion(Vector[event.x, event.y] // scale)
+          on_mouse_motion(PF2d::Vec[event.x, event.y] // scale)
         when Event::MouseButton
           on_mouse_button(event)
         when Event::Keyboard

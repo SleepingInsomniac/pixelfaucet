@@ -5,8 +5,9 @@ module PF
   class Proceedural < Game
     @buffer_size : Int32
     @buffer : Pointer(UInt32)
-    @pan : Vector2(Float64) = PF::Vector[0.0, 0.0]
+    @pan : PF2d::Vec2(Float64) = PF2d::Vec[0.0, 0.0]
     @seed : UInt32
+    @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
 
     def initialize(*args, **kwargs)
       super
@@ -59,7 +60,7 @@ module PF
           end
         end
         time = elapsed_milliseconds - start
-        draw_string("frame: #{time.round(2)}ms", 5, 5, Pixel::White, bg: Pixel::Black)
+        draw_string("frame: #{time.round(2)}ms", 5, 5, @font, Pixel::White)
       end
     end
   end

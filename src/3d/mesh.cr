@@ -30,10 +30,10 @@ module PF
     end
 
     setter tris = [] of Tri
-    property origin : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
-    property rotation : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
-    property position : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
-    property scale : Vector3(Float64) = Vector[1.0, 1.0, 1.0]
+    property origin : Vector3(Float64) = PF2d::Vec[0.0, 0.0, 0.0]
+    property rotation : Vector3(Float64) = PF2d::Vec[0.0, 0.0, 0.0]
+    property position : Vector3(Float64) = PF2d::Vec[0.0, 0.0, 0.0]
+    property scale : Vector3(Float64) = PF2d::Vec[1.0, 1.0, 1.0]
 
     # Load an obj file
     # TODO: Load meshes specified by the obj file
@@ -60,13 +60,13 @@ module PF
             # Vertex coord
             # EX: v 0.0 1.0 1.0
             w = parts[4]?.try { |n| n.to_f64 } || 1.0
-            verticies << Vector[parts[1].to_f64, parts[2].to_f64, parts[3].to_f64]
+            verticies << PF2d::Vec[parts[1].to_f64, parts[2].to_f64, parts[3].to_f64]
           when "vt"
             # Vertex Texture coord
             # EX: vt 0.0 1.0
             v = parts[2]?.try { |n| n.to_f64 } || 0.0
             # w = parts[3]?.try { |n| n.to_f64 } || 1.0
-            texture_verticies << Vector[parts[1].to_f64, v, 1.0]
+            texture_verticies << PF2d::Vec[parts[1].to_f64, v, 1.0]
           when "vn"
             # Vertex Normal
             if use_normals

@@ -32,7 +32,7 @@ module PF
       current_frame.draw_to(sprite, x, y)
     end
 
-    def draw_to(sprite : Sprite, pos : Vector2(Int))
+    def draw_to(sprite : Sprite, pos : PF2d::Vec)
       draw_to(sprite, pos.x, pos.y)
     end
   end

@@ -1,6 +1,5 @@
+require "pixelfont"
 require "sdl/image"
-require "./vector"
-require "./sprite/*"
 
 module PF
   class Sprite
@@ -16,13 +15,16 @@ module PF
           sx = tx * tile_width
           sy = ty * tile_height
           sprite = Sprite.new(tile_width, tile_height)
-          sheet.draw_to(sprite, Vector[sx, sy], Vector[tile_width, tile_height], Vector[0, 0])
+          sheet.draw_to(sprite, PF2d::Vec[sx, sy], PF2d::Vec[tile_width, tile_height], PF2d::Vec[0, 0])
           sprites << sprite
         end
       end
 
       sprites
     end
+
+    include PF2d::Drawable(UInt32 | Pixel)
+    include PF2d::Viewable(Pixel)
 
     property surface : SDL::Surface
 
@@ -50,8 +52,8 @@ module PF
       @surface.height
     end
 
-    def size
-      Vector[width, height]
+    def size : PF2d::Vec2
+      PF2d::Vec[width, height]
     end
 
     # Convert the color mode of this sprite to another for optimization
@@ -75,12 +77,12 @@ module PF
     end
 
     # ditto
-    def draw_to(dest : SDL::Surface | Sprite, at : Vector2(Int))
+    def draw_to(dest : SDL::Surface | Sprite, at : PF2d::Vec)
       draw_to(dest, at.x, at.y)
     end
 
     # Draw this sprite to another given a source rect and destination
-    def draw_to(sprite : Sprite, source : Vector2(Int), size : Vector2(Int), dest : Vector2(Int))
+    def draw_to(sprite : Sprite, source : PF2d::Vec, size : PF2d::Vec, dest : PF2d::Vec)
       @surface.blit(sprite.surface, SDL::Rect.new(source.x, source.y, size.x, size.y), SDL::Rect.new(dest.x, dest.y, size.x, size.y))
     end
 
@@ -95,8 +97,12 @@ module PF
     end
 
     # ditto
-    def peak(point : Vector2(Int))
+    def peak(point : PF2d::Vec)
       pixel_pointer(point.x, point.y).value
+    end
+
+    def get_point(x : Number, y : Number) : Pixel
+      sample(x.to_i, y.to_i)
     end
 
     # Sample a color at an *x* and *y* position
@@ -107,12 +113,12 @@ module PF
     end
 
     # ditto
-    def sample(point : Vector2(Int))
+    def sample(point : PF2d::Vec)
       sample(point.x, point.y)
     end
 
     # Sample a color with alhpa
-    def sample(x : Int, y : Int, alpha : Boolean)
+    def sample(x : Int, y : Int, alpha : Bool)
       return sample(x, y) unless alpha
       raw_pixel = pixel_pointer(x, y).value
       LibSDL.get_rgba(raw_pixel, format, out r, out g, out b, out a)
@@ -120,7 +126,7 @@ module PF
     end
 
     # ditto
-    def sample(point : Vector2(Int), alpha : Boolean)
+    def sample(point : PF2d::Vec, alpha : Bool)
       sample(point.x, point.y, alpha)
     end
 
@@ -128,6 +134,23 @@ module PF
     def pixel_pointer(x : Int32, y : Int32)
       target = @surface.pixels + (y * @surface.pitch) + (x * sizeof(UInt32))
       target.as(Pointer(UInt32))
+    end
+
+    # Implements PF2d::Drawable(UInt32)
+    def draw_point(x, y, value : UInt32 | Pixel)
+      if x >= 0 && x < width && y >= 0 && y < height
+        pixel_pointer(x.to_i32, y.to_i32).value = value.to_u32
+      end
+    end
+
+    def draw_string(string : String, x : Number, y : Number, font : Pixelfont::Font, pixel)
+      font.draw(string) do |px, py, on|
+        draw_point(px + x, py + y, pixel) if on
+      end
+    end
+
+    def draw_string(string : String, pos : PF2d::Vec, font : Pixelfont::Font, pixel)
+      draw_string(string, pos.x, pos.y, font, pixel)
     end
   end
 end

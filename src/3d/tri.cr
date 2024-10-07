@@ -8,9 +8,9 @@ module PF
     property p2 : Vector3(Float64)
     property p3 : Vector3(Float64)
 
-    property t1 : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
-    property t2 : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
-    property t3 : Vector3(Float64) = Vector[0.0, 0.0, 0.0]
+    property t1 : Vector3(Float64) = PF2d::Vec[0.0, 0.0, 0.0]
+    property t2 : Vector3(Float64) = PF2d::Vec[0.0, 0.0, 0.0]
+    property t3 : Vector3(Float64) = PF2d::Vec[0.0, 0.0, 0.0]
 
     property color : Pixel
 

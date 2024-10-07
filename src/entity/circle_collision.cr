@@ -28,7 +28,7 @@ module PF
 
       # Calculate the new velocities
       normal_vec = (position - other.position) / d
-      tangental_vec = Vector[-normal_vec.y, normal_vec.x]
+      tangental_vec = PF2d::Vec[-normal_vec.y, normal_vec.x]
 
       # Dot product of velocity with the tangent
       # (the direction in which to bounce towards)

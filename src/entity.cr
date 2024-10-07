@@ -5,8 +5,8 @@ module PF
   class Entity
     property sprite : Sprite? = nil
 
-    property position : Vector2(Float64) = Vector[0.0, 0.0]
-    property velocity : Vector2(Float64) = Vector[0.0, 0.0]
+    property position : PF2d::Vec2(Float64) = PF2d::Vec[0.0, 0.0]
+    property velocity : PF2d::Vec2(Float64) = PF2d::Vec[0.0, 0.0]
     property rotation : Float64 = 0.0
     property rotation_speed : Float64 = 0.0
     property mass : Float64 = 1.0

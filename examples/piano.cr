@@ -5,6 +5,7 @@ require "../src/audio/*"
 
 module PF
   class Piano < Game
+    @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
     @instrument : UInt8 = 0
     @base_note : UInt8 = 69 # (in MIDI) - A4 / 440.0Hz
 
@@ -15,8 +16,8 @@ module PF
     @key_width : Int32
     @middle : Int32
     @keys : UInt32 = 16
-    @white_keys = [] of Tuple(Vector2(Int32), Vector2(Int32), String)
-    @black_keys = [] of Tuple(Vector2(Int32), Vector2(Int32), String)
+    @white_keys = [] of Tuple(PF2d::Vec2(Int32), PF2d::Vec2(Int32), String)
+    @black_keys = [] of Tuple(PF2d::Vec2(Int32), PF2d::Vec2(Int32), String)
 
     @instruments : Array(Instrument) = [RetroVoice.new, SineVoice.new, PianoVoice.new, Flute.new, KickDrum.new, SnareDrum.new, Harmonica.new]
 
@@ -103,8 +104,8 @@ module PF
 
         unless note.accidental?
           # Calculate the position of a white key
-          top_left = Vector[@key_width * pos, @middle - @key_size]
-          bottom_right = Vector[(@key_width * pos) + @key_width, @middle + @key_size]
+          top_left = PF2d::Vec[@key_width * pos, @middle - @key_size]
+          bottom_right = PF2d::Vec[(@key_width * pos) + @key_width, @middle + @key_size]
           @white_keys << {top_left, bottom_right, name}
           # position from the left is increased by 1 for every white key
           pos += 1
@@ -114,8 +115,8 @@ module PF
           shrinkage = (@key_width // 8)
           # black keys are at the same position as the last, but half as tall and offset by half the width.
           left = (@key_width * pos) - (@key_width // 2) + shrinkage
-          top_left = Vector[left, @middle - @key_size]
-          bottom_right = Vector[left + @key_width - (shrinkage * 2), @middle]
+          top_left = PF2d::Vec[left, @middle - @key_size]
+          bottom_right = PF2d::Vec[left + @key_width - (shrinkage * 2), @middle]
           @black_keys << {top_left, bottom_right, name}
         end
       end
@@ -160,7 +161,7 @@ module PF
     def draw
       clear
 
-      draw_string(<<-TEXT, 5, 5, @text_color)
+      draw_string(<<-TEXT, 5, 5, @font, @text_color)
         Press up/down to change octave, Bottom row of keyboard plays notes
         #{@instruments.map(&.name).join(", ")}
         Octave: #{@base_note // 12 - 1}, Voice: #{@instruments[@instrument].name}, Echo: #{@echo ? "on" : "off"}
@@ -171,14 +172,14 @@ module PF
         top_left, bottom_right, name = key
         fill_rect(top_left, bottom_right, @keysdown[name]? ? @highlight : Pixel::White)
         draw_rect(top_left, bottom_right, Pixel.new(127, 127, 127))
-        draw_string(name, top_left.x + 2, top_left.y + (@key_size * 2) - Sprite::CHAR_HEIGHT - 2, @keysdown[name]? ? @text_hl : @text_color)
+        draw_string(name, top_left.x + 2, top_left.y + (@key_size * 2) - @font.line_height - 2, @font, @keysdown[name]? ? @text_hl : @text_color)
       end
 
       @black_keys.each do |key|
         top_left, bottom_right, name = key
         fill_rect(top_left, bottom_right, @keysdown[name]? ? @highlight : Pixel::Black)
         draw_rect(top_left, bottom_right, Pixel.new(127, 127, 127))
-        draw_string(name, top_left.x + 2, top_left.y + @key_size - Sprite::CHAR_HEIGHT - 2, @keysdown[name]? ? @text_hl : @text_color)
+        draw_string(name, top_left.x + 2, top_left.y + @key_size - @font.line_height - 2, @font, @keysdown[name]? ? @text_hl : @text_color)
       end
 
       fill_rect(0, @middle - @key_size - 2, width, @middle - @key_size, Pixel.new(200, 20, 20))

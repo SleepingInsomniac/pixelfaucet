@@ -2,7 +2,6 @@ require "../src/game"
 require "../src/controller"
 require "../src/sprite"
 require "../src/pixel"
-require "../src/vector"
 
 class Wind
   property width : Int32
@@ -12,10 +11,10 @@ class Wind
   @step : Float64?
 
   struct Gust
-    property position : PF::Vector2(Float64)
-    property strength : PF::Vector2(Float64)
+    property position : PF2d::Vec2(Float64)
+    property strength : PF2d::Vec2(Float64)
 
-    def initialize(@position, @strength = PF::Vector[rand(-5.0..5.0), rand(-5.0..5.0)])
+    def initialize(@position, @strength = PF2d::Vec[rand(-5.0..5.0), rand(-5.0..5.0)])
     end
   end
 
@@ -33,7 +32,7 @@ class Wind
     while y < @height
       x = step / 2
       while x < @width
-        @gusts << Gust.new(PF::Vector[x, y])
+        @gusts << Gust.new(PF2d::Vec[x, y])
         x += step
       end
       y += step
@@ -43,12 +42,12 @@ end
 
 class Flake
   property shape : UInt8
-  property position : PF::Vector2(Float64)
+  property position : PF2d::Vec2(Float64)
   property z_pos : Float64
-  property velocity : PF::Vector2(Float64)
+  property velocity : PF2d::Vec2(Float64)
 
-  def initialize(@position, @shape = rand(0_u8..2_u8), @z_pos = rand(0.0..1.0), velocity : PF::Vector2(Float64)? = nil)
-    @velocity = velocity || PF::Vector[rand(-2.0..2.0), rand(10.0..20.0)]
+  def initialize(@position, @shape = rand(0_u8..2_u8), @z_pos = rand(0.0..1.0), velocity : PF2d::Vec2(Float64)? = nil)
+    @velocity = velocity || PF2d::Vec[rand(-2.0..2.0), rand(10.0..20.0)]
   end
 
   def update(dt)
@@ -67,7 +66,7 @@ class Snow < PF::Game
 
     @wind = Wind.new(width, height)
     500.times do
-      @flakes << Flake.new(position: PF::Vector[rand(0.0..width.to_f64), rand(0.0..height.to_f64)])
+      @flakes << Flake.new(position: PF2d::Vec[rand(0.0..width.to_f64), rand(0.0..height.to_f64)])
     end
     clear(0, 0, 15)
   end
@@ -77,7 +76,7 @@ class Snow < PF::Game
 
     if @last_flake >= 0.025
       @last_flake = 0.0
-      @flakes << Flake.new(position: PF::Vector[rand(0.0..width.to_f64), 0.0])
+      @flakes << Flake.new(position: PF2d::Vec[rand(0.0..width.to_f64), 0.0])
     end
 
     @flakes.reject! do |flake|

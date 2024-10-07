@@ -7,7 +7,7 @@ module PF
 
     def initialize(*args, **kwargs)
       super
-      @sprite = Sprite.new("./assets/pf-font.png")
+      @sprite = Sprite.new("./assets/walking.png")
     end
 
     def update(dt)

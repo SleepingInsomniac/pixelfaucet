@@ -7,7 +7,7 @@ module PF
   class Ball < Entity
     include CircleCollision
 
-    getter frame : Array(Vector2(Float64))
+    getter frame : Array(PF2d::Vec2(Float64))
     getter color = Pixel.random
 
     def initialize(size : Float64)
@@ -21,6 +21,7 @@ module PF
     ADD_BALL = 2.0
     @balls : Array(Ball) = [] of Ball
     @ball_clock = ADD_BALL
+    @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
 
     def initialize(*args, **kwargs)
       super
@@ -28,10 +29,10 @@ module PF
     end
 
     def add_ball
-      position = Vector[rand(0.0_f64..width.to_f64), rand(0.0_f64..height.to_f64)]
+      position = PF2d::Vec[rand(0.0_f64..width.to_f64), rand(0.0_f64..height.to_f64)]
       ball = Ball.new(rand(10.0..30.0))
       ball.position = position
-      ball.velocity = Vector[rand(-50.0..50.0), rand(-50.0..50.0)]
+      ball.velocity = PF2d::Vec[rand(-50.0..50.0), rand(-50.0..50.0)]
       @balls << ball
     end
 
@@ -71,7 +72,7 @@ module PF
       @balls.each do |ball|
         fill_shape(Shape.translate(ball.frame, translation: ball.position).map(&.to_i32), ball.color)
       end
-      draw_string("Balls: #{@balls.size}", 5, 5, Pixel::White)
+      draw_string("Balls: #{@balls.size}", 5, 5, @font, Pixel::White)
     end
   end
 end

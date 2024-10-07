@@ -1,12 +1,11 @@
 require "../src/game"
 require "../src/sprite"
-require "../src/transform2d"
 
 module PF
   class Affine < Game
     @bricks : Sprite
-    @top_left : Vector2(Int32) = Vector[0, 0]
-    @transform : Transform2d = Transform2d.new
+    @top_left : PF2d::Vec2(Int32) = PF2d::Vec[0, 0]
+    @transform : PF2d::Transform = PF2d::Transform.new
     @angle = 0.0
     @size = 1.0
     @zoom = 0.5

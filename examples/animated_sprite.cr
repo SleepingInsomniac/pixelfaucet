@@ -8,6 +8,7 @@ module PF
       super
       @person = Animation.new("assets/walking.png", 32, 64, 10)
       @cat = Animation.new("assets/black-cat.png", 18, 14, 15)
+      @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
     end
 
     def update(dt)
@@ -17,7 +18,7 @@ module PF
 
     def draw
       clear(60, 120, 200)
-      draw_string("Frame: #{@person.frame}", 5, 5)
+      draw_string("Frame: #{@person.frame}", 5, 5, @font, Pixel::White)
       fill_rect(0, 65, width - 1, height - 1, Pixel.new(100, 100, 100))
       @person.draw_to(screen, (viewport // 2) - @person.size // 2)
       @cat.draw_to(screen, 30, 56)

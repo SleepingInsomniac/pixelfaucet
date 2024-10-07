@@ -3,13 +3,12 @@ require "../src/controller"
 require "../src/entity"
 require "../src/pixel"
 require "../src/shape"
-require "../src/vector"
 
 class Triangle < PF::Entity
-  property frame : Array(PF::Vector2(Float64))
+  property frame : Array(PF2d::Vec2(Float64))
 
   def initialize(*args, **kwargs)
-    @frame = [] of PF::Vector2(Float64)
+    @frame = [] of PF2d::Vec2(Float64)
   end
 
   def update(dt)

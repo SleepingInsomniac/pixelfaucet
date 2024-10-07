@@ -8,8 +8,8 @@ class TextGame < PF::Game
     @dx = 50.0
     @dy = 50.0
     @msg = "Hello, World!"
-    # @msg = "HI"
     @color = PF::Pixel.random
+    @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
   end
 
   def update(dt)
@@ -22,8 +22,8 @@ class TextGame < PF::Game
       @color = PF::Pixel.random
     end
 
-    if @x > width - (@msg.size * PF::Sprite::CHAR_WIDTH)
-      @x = width - (@msg.size * PF::Sprite::CHAR_WIDTH)
+    if @x > width - @font.width_of(@msg)
+      @x = width - @font.width_of(@msg)
       @dx = -@dx
       @color = PF::Pixel.random
     end
@@ -34,8 +34,8 @@ class TextGame < PF::Game
       @color = PF::Pixel.random
     end
 
-    if @y > height - (PF::Sprite::CHAR_HEIGHT)
-      @y = height - (PF::Sprite::CHAR_HEIGHT)
+    if @y > height - @font.line_height
+      @y = height - @font.line_height
       @dy = -@dy
       @color = PF::Pixel.random
     end
@@ -43,7 +43,7 @@ class TextGame < PF::Game
 
   def draw
     clear(0, 0, 50)
-    draw_string(@msg, @x.to_i, @y.to_i, @color)
+    draw_string(@msg, @x.to_i, @y.to_i, @font, @color)
   end
 end
 
