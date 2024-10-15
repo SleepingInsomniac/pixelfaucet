@@ -58,12 +58,6 @@ class CubicBezier < PF::Game
     draw_rect(*@curve.rect.map(&.to_i), CTL_COLOR)
     draw_curve(@curve, CURVE_COLOR)
 
-    @curve.extremeties.each do |point|
-      point.try do |p|
-        draw_circle(p.to_i, 3, EXT_Y_COLOR)
-      end
-    end
-
     fill_circle(@curve.p0.to_i, 2, POINT_COLOR)
     fill_circle(@curve.p1.to_i, 2, POINT_COLOR)
     fill_circle(@curve.p2.to_i, 2, POINT_COLOR)
@@ -76,6 +70,12 @@ class CubicBezier < PF::Game
 
     if point = @hover_point
       draw_circle(point.value.to_i, 5, SEL_COLOR)
+    end
+
+    @curve.extremities.each do |point|
+      point.try do |p|
+        draw_circle(p.to_i, 3, EXT_Y_COLOR)
+      end
     end
   end
 end
