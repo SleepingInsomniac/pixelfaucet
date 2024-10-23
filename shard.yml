@@ -1,5 +1,5 @@
 name: pixelfaucet
-version: 0.0.8
+version: 0.0.9
 
 authors:
   - Alex Clink <alexclink@gmail.com>
@@ -14,7 +14,10 @@ dependencies:
     version: 0.1.0
   pf2d:
     github: SleepingInsomniac/pf2d
+    version: 0.3.0
   pf3d:
     github: SleepingInsomniac/pf3d
+    version: 0.1.1
   pixelfont:
     github: SleepingInsomniac/pixelfont
+    version: 1.1.1

@@ -1,7 +1,6 @@
 require "pf3d"
 
 require "../src/game"
-require "../src/controller"
 require "../src/sprite"
 require "../src/pixel"
 require "../src/sprite"

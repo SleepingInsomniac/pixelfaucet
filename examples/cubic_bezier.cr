@@ -30,7 +30,7 @@ class CubicBezier < PF::Game
     if point = @selected_point
       point.value = cursor.to_f
     else
-      @hover_point = @curve.points.find { |p| cursor.distance(p.value) < 4 }
+      @hover_point = @curve.point_pointers.find { |p| cursor.distance(p.value) < 4 }
     end
   end
 
@@ -50,32 +50,34 @@ class CubicBezier < PF::Game
   def draw
     clear
 
+    draw_line(0, height // 2, width, height // 2, PF::Pixel.new(25, 25, 25))
+
     draw_line(@curve.p0, @curve.p1, CTL_COLOR)
     draw_line(@curve.p3, @curve.p2, CTL_COLOR)
 
     draw_string("Length: " + @curve.length.round(2).to_s, 5, 5, @font, FONT_COLOR)
 
-    draw_rect(*@curve.rect.map(&.to_i), CTL_COLOR)
+    draw_rect(@curve.rect, CTL_COLOR)
     draw_curve(@curve, CURVE_COLOR)
 
-    fill_circle(@curve.p0.to_i, 2, POINT_COLOR)
-    fill_circle(@curve.p1.to_i, 2, POINT_COLOR)
-    fill_circle(@curve.p2.to_i, 2, POINT_COLOR)
-    fill_circle(@curve.p3.to_i, 2, POINT_COLOR)
+    @curve.horizontal_intersects(height // 2) do |p|
+      draw_circle(p.to_i, 3, PF::Pixel::Orange)
+    end
 
-    draw_string("P1 (#{@curve.p0.x.to_i}, #{@curve.p0.y.to_i})", @curve.p0, @font, FONT_COLOR)
-    draw_string("P2 (#{@curve.p1.x.to_i}, #{@curve.p1.y.to_i})", @curve.p1, @font, FONT_COLOR)
-    draw_string("P3 (#{@curve.p2.x.to_i}, #{@curve.p2.y.to_i})", @curve.p2, @font, FONT_COLOR)
-    draw_string("P4 (#{@curve.p3.x.to_i}, #{@curve.p3.y.to_i})", @curve.p3, @font, FONT_COLOR)
+    @curve.points.each do |p|
+      fill_circle(p.to_i, 2, POINT_COLOR)
+    end
+
+    @curve.points.each_with_index do |p, i|
+      draw_string("P#{i} (#{p.x.to_i}, #{p.y.to_i})", p, @font, FONT_COLOR)
+    end
 
     if point = @hover_point
       draw_circle(point.value.to_i, 5, SEL_COLOR)
     end
 
-    @curve.extremities.each do |point|
-      point.try do |p|
-        draw_circle(p.to_i, 3, EXT_Y_COLOR)
-      end
+    @curve.extrema do |point|
+      draw_circle(point.to_i, 3, EXT_Y_COLOR)
     end
   end
 end
