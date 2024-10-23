@@ -25,7 +25,7 @@ module PF
       sound.release!(time)
 
       spawn do
-        sleep @envelope.release.duration
+        sleep @envelope.release.duration.seconds
         @sounds.delete(sound)
         @notes.delete(note_id)
       end

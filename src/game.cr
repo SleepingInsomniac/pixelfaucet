@@ -51,7 +51,10 @@ module PF
       end
     end
 
+    # Could be called multiple times per frame, used for updating the simulation
     abstract def update(dt : Float64)
+
+    # Called to draw the current frame
     abstract def draw
 
     # Returns the width of the window and render area

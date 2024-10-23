@@ -1,5 +1,3 @@
-require "./lib_sdl"
-
 module PF
   alias Keys = LibSDL::Scancode
   alias KeyCodes = LibSDL::Keycode
