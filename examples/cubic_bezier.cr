@@ -10,6 +10,8 @@ class CubicBezier < PF::Game
   EXT_Y_COLOR = PF::Pixel.new(0x00FF00FF)
 
   @curve : PF2d::Bezier::Cubic(Float64)
+  @qc1 : PF2d::Bezier::Cubic(Float64)
+  @qc2 : PF2d::Bezier::Cubic(Float64)
 
   @hover_point : PF2d::Vec2(Float64)*? = nil
   @selected_point : PF2d::Vec2(Float64)*? = nil
@@ -24,6 +26,8 @@ class CubicBezier < PF::Game
       PF2d::Vec[width * 0.66, height * 0.3],
       PF2d::Vec[width * 0.75, height * 0.7]
     )
+
+    @qc1, @qc2 = @curve.split(0.5)
   end
 
   def on_mouse_motion(cursor)
@@ -58,6 +62,13 @@ class CubicBezier < PF::Game
     draw_string("Length: " + @curve.length.round(2).to_s, 5, 5, @font, FONT_COLOR)
 
     draw_rect(@curve.rect, CTL_COLOR)
+
+    draw_curve(@qc1, PF::Pixel.new(30, 10, 10))
+    draw_curve(@qc2, PF::Pixel.new(10, 30, 10))
+
+    @qc1.points.each { |p| draw_circle(p.to_i, 3, PF::Pixel.new(25, 25, 25)) }
+    @qc2.points.each { |p| draw_circle(p.to_i, 3, PF::Pixel.new(25, 25, 25)) }
+
     draw_curve(@curve, CURVE_COLOR)
 
     @curve.horizontal_intersects(height // 2) do |p|
