@@ -4,17 +4,21 @@ class Life < PF::Game
   CELL_ON  = PF::Pixel.new(255, 255, 0)
   CELL_OFF = PF::Pixel.new(0, 0, 100)
 
+  @last_pos : PF2d::Vec? = nil
+  @mouse_down = false
+  @simulation = false
+  @sim_speed = 0.01
+  @sub_frame = 0.0
+
   def initialize(*args, **kwargs)
     super
 
     @controller = PF::Controller(PF::Keys).new({
       PF::Keys::SPACE => "Play/Pause",
+      PF::Keys::UP    => "Faster",
+      PF::Keys::DOWN  => "Slower",
     })
     plug_in @controller
-    @mouse_down = false
-    @simulation = false
-    @sim_speed = 0.01
-    @sub_frame = 0.0
     clear(CELL_OFF.r, CELL_OFF.g, CELL_OFF.b)
   end
 
@@ -71,7 +75,8 @@ class Life < PF::Game
   end
 
   def on_mouse_motion(cursor)
-    if @mouse_down
+    if @mouse_down && @last_pos != cursor
+      @last_pos = cursor
       pixel = @screen.get_point(cursor.x, cursor.y)
 
       if pixel == CELL_OFF
@@ -92,11 +97,19 @@ class Life < PF::Game
     if @controller.pressed?("Play/Pause")
       @simulation = !@simulation
     end
+
+    if @controller.pressed?("Faster")
+      @sim_speed /= 2.0
+    end
+
+    if @controller.pressed?("Slower")
+      @sim_speed *= 2.0
+    end
   end
 
   def draw
   end
 end
 
-engine = Life.new(100, 100, 4)
+engine = Life.new(100, 100, 6)
 engine.run!
