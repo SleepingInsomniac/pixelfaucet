@@ -35,7 +35,7 @@ module PF
 
     def initialize(
       width : Int32, height : Int32, scale : Int32 = 1, @title : String = self.class.name,
-      render_flags = Flags::Render::ACCELERATED, window_flags = Flags::Window::SHOWN
+      render_flags = Flags::Render::ACCELERATED, window_flags = Flags::Window::SHOWN,
     )
       SDL.init(SDL::Init::EVERYTHING)
       @scale = PF2d::Vec[scale, scale]
@@ -94,6 +94,11 @@ module PF
     # Clear the screen to black, or optionally an RGB color
     def clear(r = 0, g = 0, b = 0)
       @screen.fill(r, g, b)
+    end
+
+    # :ditto:
+    def clear(color : PF::Pixel)
+      @screen.fill(color)
     end
 
     # Returns the time taken in seconds since the last frame

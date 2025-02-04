@@ -4,10 +4,10 @@ class Life < PF::Game
   CELL_ON  = PF::Pixel.new(255, 255, 0)
   CELL_OFF = PF::Pixel.new(0, 0, 100)
 
-  @last_pos : PF2d::Vec? = nil
+  @last_pos : PF2d::Vec2(Int32)? = nil
   @mouse_down = false
   @simulation = false
-  @sim_speed = 0.01
+  @sim_speed = 0.1
   @sub_frame = 0.0
 
   def initialize(*args, **kwargs)
@@ -19,7 +19,7 @@ class Life < PF::Game
       PF::Keys::DOWN  => "Slower",
     })
     plug_in @controller
-    clear(CELL_OFF.r, CELL_OFF.g, CELL_OFF.b)
+    clear(CELL_OFF)
   end
 
   def update(dt)
@@ -57,38 +57,42 @@ class Life < PF::Game
   end
 
   def neighbors(x, y)
-    [
-      [-1, -1],
-      [0, -1],
-      [1, -1],
-
-      [-1, 0],
-      # self
-      [1, 0],
-
-      [-1, 1],
-      [0, 1],
-      [1, 1],
-    ].map do |(dx, dy)|
+    {
+      {-1, -1}, {0, -1}, {1, -1},
+      {-1, 0}, {1, 0},
+      {-1, 1}, {0, 1}, {1, 1},
+    }.map do |(dx, dy)|
       @screen.get_point(x + dx, y + dy)
+    end
+  end
+
+  def toggle_cell(pos)
+    pixel = @screen.get_point(pos)
+
+    if pixel != CELL_ON
+      draw_point(pos, CELL_ON)
+    else
+      draw_point(pos, CELL_OFF)
     end
   end
 
   def on_mouse_motion(cursor)
     if @mouse_down && @last_pos != cursor
       @last_pos = cursor
-      pixel = @screen.get_point(cursor.x, cursor.y)
-
-      if pixel == CELL_OFF
-        draw_point(cursor.x, cursor.y, CELL_ON)
-      else
-        draw_point(cursor.x, cursor.y, CELL_OFF)
-      end
+      toggle_cell(cursor)
     end
   end
 
   def on_mouse_button(event)
     if event.button == 1 # left click
+      if event.pressed?
+        pos = PF2d::Vec[event.x // @scale.x, event.y // @scale.y]
+        @last_pos = pos
+        toggle_cell(pos)
+      else
+        @last_pos = nil
+      end
+
       @mouse_down = event.pressed?
     end
   end
@@ -111,5 +115,5 @@ class Life < PF::Game
   end
 end
 
-engine = Life.new(100, 100, 6)
+engine = Life.new(50, 50, 10)
 engine.run!

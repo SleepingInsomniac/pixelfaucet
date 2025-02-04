@@ -56,6 +56,11 @@ module PF
       PF2d::Vec[width, height]
     end
 
+    # Fill a sprite with a color
+    def fill(color : PF::Pixel)
+      @surface.fill(color.r, color.g, color.b)
+    end
+
     # Convert the color mode of this sprite to another for optimization
     def convert(other : SDL::Surface)
       @surface = @surface.convert(other)
