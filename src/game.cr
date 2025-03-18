@@ -23,8 +23,9 @@ module PF
     property screen : Sprite
     property controllers = [] of PF::Controller(Keys)
 
-    delegate :draw_point, :draw_line, :draw_curve, :scan_line, :draw_circle, :draw_triangle, :draw_rect, :draw_shape,
-      :fill_triangle, :paint_triangle, :fill_rect, :fill_circle, :fill_shape, :draw_string, to: @screen
+    delegate :draw_point, :draw_line, :draw_curve, :scan_line, :draw_circle, :draw_triangle, :draw_rect, :draw_spline,
+      :fill_triangle, :paint_triangle, :fill_rect, :fill_circle, :fill_poly, :fill_spline, :fill_splines, :draw_string,
+      to: @screen
 
     @milliseconds : Float64 = Time.monotonic.total_milliseconds
     @last_ms : Float64 = Time.monotonic.total_milliseconds
