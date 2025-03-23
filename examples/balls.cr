@@ -70,7 +70,7 @@ module PF
     def draw
       clear(10, 10, 30)
       @balls.each do |ball|
-        fill_shape(Shape.translate(ball.frame, translation: ball.position).map(&.to_i32), ball.color)
+        fill_poly(Shape.translate(ball.frame, translation: ball.position).map(&.to_i32), ball.color)
       end
       draw_string("Balls: #{@balls.size}", 5, 5, @font, Pixel::White)
     end
