@@ -71,8 +71,8 @@ class CubicBezier < PF::Game
 
     draw_curve(@curve, CURVE_COLOR)
 
-    @curve.horizontal_intersects(height // 2) do |p|
-      draw_circle(p.to_i, 3, PF::Pixel::Orange)
+    @curve.horizontal_intersects(height // 2) do |t|
+      draw_circle(@curve.at(t).to_i, 3, PF::Pixel::Orange)
     end
 
     @curve.points.each do |p|

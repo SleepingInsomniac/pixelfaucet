@@ -1,5 +1,4 @@
 require "../src/game"
-require "../src/sprite"
 
 module PF
   class Affine < Game
