@@ -1,3 +1,4 @@
+require "pf2d"
 require "./sprite"
 
 module PF
