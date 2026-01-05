@@ -1,9 +1,9 @@
 module PF
-  alias Keys = LibSDL::Scancode
-  alias KeyCodes = LibSDL::Keycode
+  alias Scancode = Sdl3::Scancode
+  alias KeyCode = Sdl3::Keycode
 
   # Handle button to action mapping in a dynamic way
-  class Controller(T)
+  class Keymap
     @[Flags]
     enum State : UInt8
       Unset    = 0
@@ -16,12 +16,12 @@ module PF
     def self.detect_layout
       keys = String.build do |io|
         {
-          KeyCodes::Q,
-          KeyCodes::W,
-          KeyCodes::Y,
+          KeyCode::Q,
+          KeyCode::W,
+          KeyCode::Y,
         }.each do |key_code|
-          scan_code = LibSDL.get_scancode_from_key(key_code)
-          key_name = LibSDL.get_scancode_name(scan_code)
+          scan_code = LibSdl3.get_scancode_from_key(key_code)
+          key_name = LibSdl3.get_scancode_name(scan_code)
           io << String.new(key_name)
         end
       end
@@ -36,25 +36,11 @@ module PF
       end
     end
 
-    def initialize(@mapping : Hash(T, String))
+    def initialize(@mapping : Hash(Scancode, String))
       @keysdown = {} of String => State
 
       @mapping.values.each do |key|
         @keysdown[key] = State::Unset
-      end
-    end
-
-    # Map
-    def map_event(event : SDL::Event?)
-      case event
-      when Event::Keyboard
-        {% if T == LibSDL::Scancode %}
-          press(event.scancode) if event.keydown?
-          release(event.scancode) if event.keyup?
-        {% elsif T == LibSDL::Keycode %}
-          press(event.code) if event.keydown?
-          release(event.code) if event.keyup?
-        {% end %}
       end
     end
 
