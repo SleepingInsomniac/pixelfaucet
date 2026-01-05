@@ -14,7 +14,7 @@ module PF
     def draw(engine)
       return if dead?
       brightness = ((((@lifespan - @age) / @lifespan) * 255) / 2).to_u8
-      color = Pixel.new(r: brightness, g: brightness, b: brightness)
+      color = RGBA.new(brightness, brightness, brightness)
       engine.draw_point(@position.x.to_i, @position.y.to_i, color)
     end
   end

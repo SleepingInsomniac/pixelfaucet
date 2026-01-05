@@ -2,7 +2,7 @@ require "./frame_timer"
 
 module PF
   class Animation
-    @frames : Array(Sprite)
+    getter frames : Array(Sprite)
     @frame_timer : FrameTimer
     getter width : Int32
     getter height : Int32
@@ -24,16 +24,8 @@ module PF
       @frames[frame]
     end
 
-    def update(dt : Float64)
-      @frame_timer.update(dt)
-    end
-
-    def draw_to(sprite : Sprite, x : Int, y : Int)
-      current_frame.draw_to(sprite, x, y)
-    end
-
-    def draw_to(sprite : Sprite, pos : PF2d::Vec)
-      draw_to(sprite, pos.x, pos.y)
+    def update(delta_time)
+      @frame_timer.update(delta_time)
     end
   end
 end

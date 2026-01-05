@@ -6,10 +6,9 @@ module PF
 
     getter tuning : Float64 = 440.0
     getter number : Float64
-    @hertz : Float64? = nil
-    @index : UInt8? = nil
-    @name : String? = nil
-    @is_accidental : Bool? = nil
+    getter hertz : Float64 do
+      tuning * ((2 ** ((@number - 69) / 12)))
+    end
 
     def initialize(@number, @tuning = 440.0)
     end
@@ -19,11 +18,11 @@ module PF
     end
 
     def name
-      @name ||= NAMES[index]
+      NAMES[index]
     end
 
     def index
-      @index ||= @number.to_u8 % 12
+      @number.to_u8 % 12
     end
 
     def octave
@@ -31,11 +30,7 @@ module PF
     end
 
     def accidental?
-      @is_accidental ||= ACCIDENTALS.includes?(index)
-    end
-
-    def hertz
-      @hertz ||= tuning * ((2 ** ((@number - 69) / 12)))
+      ACCIDENTALS.includes?(index)
     end
 
     def tuning=(value : Float64)
@@ -62,12 +57,12 @@ module PF
       Note.new(@number / value, tuning)
     end
 
-    # # Decabells to volume
+    # # Decibels to volume
     # def db_to_volume(db : Float64)
     #   10.0 ** (0.05 * db)
     # end
 
-    # # Volume to decabells
+    # # Volume to decibels
     # def volume_to_db(volume : Float64)
     #   20.0 * Math.log(volume, 10)
     # end
