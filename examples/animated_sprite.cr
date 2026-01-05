@@ -1,30 +1,31 @@
-require "../src/game"
-require "../src/sprite"
-require "../src/animation"
+require "../src/pixelfaucet"
 
-module PF
-  class SpriteExample < Game
-    def initialize(*args, **kwargs)
-      super
-      @person = Animation.new("assets/walking.png", 32, 64, 10)
-      @cat = Animation.new("assets/black-cat.png", 18, 14, 15)
-      @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
-    end
+class AnimatedSprite < PF::Game
+  include PF
+  include PF2d
 
-    def update(dt)
-      @person.update(dt)
-      @cat.update(dt)
-    end
+  def initialize(*args, **kwargs)
+    super
+    @person = Animation.new("assets/walking.png", 32, 64, 10)
+    @cat = Animation.new("assets/black-cat.png", 18, 14, 15)
+    @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
+  end
 
-    def draw
+  def update(delta_time)
+    @person.update(delta_time)
+    @cat.update(delta_time)
+  end
+
+  def frame(delta_time)
+    draw do
       clear(60, 120, 200)
-      draw_string("Frame: #{@person.frame}", 5, 5, @font, Pixel::White)
-      fill_rect(0, 65, width - 1, height - 1, Pixel.new(100, 100, 100))
-      @person.draw_to(screen, (viewport // 2) - @person.size // 2)
-      @cat.draw_to(screen, 30, 56)
+      draw_string("Frame: #{@person.frame}", 5, 5, @font, Colors::White)
+      fill_rect(0, 65, width - 1, height - 1, RGBA.new(100, 100, 100))
+      draw_sprite(@person.current_frame, (viewport // 2) - @person.size // 2)
+      draw_sprite(@cat.current_frame, Vec[30, 56])
     end
   end
 end
 
-game = PF::SpriteExample.new(120, 80, 5)
+game = AnimatedSprite.new(120, 80, 5, fps_limit: 120.0)
 game.run!

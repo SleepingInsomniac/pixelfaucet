@@ -1,4 +1,4 @@
-require "../src/game"
+require "../src/pixelfaucet"
 
 class LineIntersect < PF::Game
   include PF2d
@@ -16,7 +16,7 @@ class LineIntersect < PF::Game
     @line_2 = Line[Vec[width - 5, 5].to_f64, Vec[5, height - 5].to_f64]
   end
 
-  def on_mouse_motion(cursor)
+  def on_mouse_motion(cursor, event)
     if point = @selected_point
       point.value = cursor.to_f
     else
@@ -26,37 +26,39 @@ class LineIntersect < PF::Game
     end
   end
 
-  def on_mouse_button(event)
+  def on_mouse_down(cursor, event)
     if event.button == 1
-      if event.pressed?
-        @selected_point = @hover_point
-      else
-        @selected_point = nil
+      @selected_point = @hover_point
+    end
+  end
+
+  def on_mouse_up(cursor, event)
+    @selected_point = nil
+  end
+
+  def update(delta_time)
+  end
+
+  def frame(delta_time)
+    draw do
+      clear
+
+      draw_line(@line_1, PF::Colors::Yellow)
+      draw_line(@line_2, PF::Colors::Yellow)
+      fill_circle(@line_1.p1.to_i, 3, PF::Colors::Red)
+      fill_circle(@line_1.p2.to_i, 3, PF::Colors::Red)
+      fill_circle(@line_2.p1.to_i, 3, PF::Colors::Red)
+      fill_circle(@line_2.p2.to_i, 3, PF::Colors::Red)
+
+      if point = @hover_point
+        draw_circle(point.value.to_i, 5, PF::Colors::Blue)
       end
-    end
-  end
 
-  def update(dt)
-  end
-
-  def draw
-    clear
-
-    draw_line(@line_1, PF::Pixel::Yellow)
-    draw_line(@line_2, PF::Pixel::Yellow)
-    fill_circle(@line_1.p1.to_i, 3, PF::Pixel::Red)
-    fill_circle(@line_1.p2.to_i, 3, PF::Pixel::Red)
-    fill_circle(@line_2.p1.to_i, 3, PF::Pixel::Red)
-    fill_circle(@line_2.p2.to_i, 3, PF::Pixel::Red)
-
-    if point = @hover_point
-      draw_circle(point.value.to_i, 5, PF::Pixel::Blue)
-    end
-
-    if point = @line_1.intersects?(@line_2)
-      fill_circle(point.to_i, 3, PF::Pixel::Green)
+      if point = @line_1.intersects?(@line_2)
+        fill_circle(point.to_i, 3, PF::Colors::Green)
+      end
     end
   end
 end
 
-LineIntersect.new(300, 300, 2).run!
+LineIntersect.new(300, 300, 2, fps_limit: 120.0).run!

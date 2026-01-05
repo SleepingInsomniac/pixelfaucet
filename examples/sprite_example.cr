@@ -1,5 +1,4 @@
-require "../src/game"
-require "../src/sprite"
+require "../src/pixelfaucet"
 
 module PF
   class SpriteExample < Game
@@ -10,12 +9,12 @@ module PF
       @sprite = Sprite.new("./assets/walking.png")
     end
 
-    def update(dt)
+    def update(delta_time)
     end
 
-    def draw
-      clear(255, 255, 255)
-      @sprite.draw_to(screen, (viewport // 2) - @sprite.size // 2)
+    def draw(delta_time)
+      clear(20, 20, 20)
+      draw_sprite(@sprite, @sprite.rect, PF2d::Rect.new(PF2d::Vec[0, 0], @sprite.size))
     end
   end
 end

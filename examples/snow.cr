@@ -1,7 +1,4 @@
-require "../src/game"
-require "../src/controller"
-require "../src/sprite"
-require "../src/pixel"
+require "../src/pixelfaucet"
 
 class Wind
   property width : Int32
@@ -29,9 +26,9 @@ class Wind
   def setup_vectors
     @gusts = [] of Gust
     y = step / 2
-    while y < @height
+    while y <= @height
       x = step / 2
-      while x < @width
+      while x <= @width
         @gusts << Gust.new(PF2d::Vec[x, y])
         x += step
       end
@@ -58,8 +55,8 @@ end
 
 class Snow < PF::Game
   @wind : Wind
-  @last_flake : Float64 = 0.0
   @flakes : Array(Flake) = [] of Flake
+  @snowfall = PF::Interval.new(100.0.milliseconds)
 
   def initialize(*args, **kwargs)
     super
@@ -68,14 +65,12 @@ class Snow < PF::Game
     500.times do
       @flakes << Flake.new(position: PF2d::Vec[rand(0.0..width.to_f64), rand(0.0..height.to_f64)])
     end
-    clear(0, 0, 15)
   end
 
-  def update(dt)
-    @last_flake += dt
+  def update(delta_time)
+    dt = delta_time.total_seconds
 
-    if @last_flake >= 0.025
-      @last_flake = 0.0
+    @snowfall.update(delta_time) do
       @flakes << Flake.new(position: PF2d::Vec[rand(0.0..width.to_f64), 0.0])
     end
 
@@ -92,19 +87,21 @@ class Snow < PF::Game
     end
   end
 
-  def draw
-    clear(0, 0, 15)
+  def frame(delta_time)
+    draw do
+      clear(0, 0, 15)
 
-    @flakes.each do |flake|
-      color = PF::Pixel::White * flake.z_pos
-      if flake.shape == 0
-        draw_point(flake.position.to_i32, color)
-      else
-        fill_circle(flake.position.to_i32, flake.shape, color)
+      @flakes.each do |flake|
+        color = PF::Colors::White * flake.z_pos
+        if flake.shape == 0
+          draw_point(flake.position.to_i32, color)
+        else
+          fill_circle(flake.position.to_i32, flake.shape, color)
+        end
       end
     end
   end
 end
 
-engine = Snow.new(1200, 800, 1, window_flags: SDL::Window::Flags::RESIZABLE | SDL::Window::Flags::SHOWN)
+engine = Snow.new(1200, 800, 1, window_flags: Sdl3::Window::Flags::Resizable)
 engine.run!

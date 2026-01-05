@@ -1,33 +1,32 @@
-require "../src/game"
-require "../src/pixel"
+require "../src/pixelfaucet"
 
 class FillPoly < PF::Game
-  @color = PF::Pixel.random
+  include PF
+  include PF2d
 
-  def initialize(*args, **kwargs)
-    super
-  end
+  @color = RGBA.new(rand(0u32..UInt32::MAX) | 0xFFu8)
+  @color_change = Interval.new(0.3.seconds)
 
-  def update(dt)
-    if elapsed_milliseconds.to_i % 100 == 1
-      @color = PF::Pixel.random
+  def update(delta_time)
+    @color_change.update(delta_time) do
+      @color = RGBA.new(rand(0u32..UInt32::MAX) | 0xFFu8)
     end
   end
 
-  def draw
+  def draw(delta_time)
     clear(0, 0, 100)
-    fill_poly({PF2d::Vec[15, 15], PF2d::Vec[50, 10], PF2d::Vec[60, 55], PF2d::Vec[10, 60]}, @color)
-    fill_poly({PF2d::Vec[100, 10], PF2d::Vec[150, 10], PF2d::Vec[150, 60], PF2d::Vec[100, 60]}, @color)
+    fill_poly({Vec[15, 15], Vec[50, 10], Vec[60, 55], Vec[10, 60]}, @color)
+    fill_poly({Vec[100, 10], Vec[150, 10], Vec[150, 60], Vec[100, 60]}, @color)
     fill_poly({
-      PF2d::Vec[10, 100],
-      PF2d::Vec[20, 110],
-      PF2d::Vec[30, 100],
-      PF2d::Vec[40, 110],
-      PF2d::Vec[50, 100],
-      PF2d::Vec[50, 150],
-      PF2d::Vec[10, 150],
+      Vec[10, 100],
+      Vec[20, 110],
+      Vec[30, 100],
+      Vec[40, 110],
+      Vec[50, 100],
+      Vec[50, 150],
+      Vec[10, 150],
     }, @color)
-    fill_poly({PF2d::Vec[115, 115], PF2d::Vec[150, 120], PF2d::Vec[160, 155], PF2d::Vec[110, 160]}, @color)
+    fill_poly({Vec[115, 115], Vec[150, 120], Vec[160, 155], Vec[110, 160]}, @color)
   end
 end
 

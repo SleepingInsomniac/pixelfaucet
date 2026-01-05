@@ -1,69 +1,74 @@
-require "../src/game"
-require "../src/lehmer32"
+require "../src/pixelfaucet"
 
-module PF
-  class Proceedural < Game
-    @buffer_size : Int32
-    @buffer : Pointer(UInt32)
-    @pan : PF2d::Vec2(Float64) = PF2d::Vec[0.0, 0.0]
-    @seed : UInt32
-    @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
+class Proceedural < PF::Game
+  @screen : PF::Sprite
+  @pan : PF2d::Vec2(Float64) = PF2d::Vec[0.0, 0.0]
+  @seed : UInt32
+  @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
+  @keys : PF::Keymap
 
-    def initialize(*args, **kwargs)
-      super
-      @buffer_size = width * height
-      @buffer = screen.pixel_pointer(0, 0)
-      @random = Lehmer32.new
-      @redraw = true
+  def initialize(*args, **kwargs)
+    super
 
-      @controller = Controller(Keys).new({
-        Keys::LEFT  => "left",
-        Keys::RIGHT => "right",
-        Keys::UP    => "up",
-        Keys::DOWN  => "down",
-      })
-      plug_in @controller
+    @keys = keymap({
+      PF::Scancode::Left  => "left",
+      PF::Scancode::Right => "right",
+      PF::Scancode::Up    => "up",
+      PF::Scancode::Down  => "down",
+    })
 
-      @speed = 100.0
-      @seed = str_to_seed("PixelFaucet")
-    end
+    @screen = PF::Sprite.new(width, height)
+    @random = PF::Lehmer32.new
+    @redraw = true
 
-    def str_to_seed(str : String)
-      str.chars.map { |c| c.ord.to_u32! }.reduce(&.+)
-    end
+    @speed = 100.0
+    @seed = str_to_seed("PixelFaucet")
+  end
 
-    def update(dt)
-      @redraw = true if @controller.any_held?
-      @pan.x += @speed * dt if @controller.held?("right")
-      @pan.x -= @speed * dt if @controller.held?("left")
-      @pan.y -= @speed * dt if @controller.held?("up")
-      @pan.y += @speed * dt if @controller.held?("down")
-    end
+  def str_to_seed(str : String)
+    str.chars.map { |c| c.ord.to_u32! }.reduce(&.+)
+  end
 
-    def draw
-      if @redraw
-        @redraw = false
-        start = elapsed_milliseconds
+  def zigzag(n : Int32)
+    (((n << 1) ^ (n >> 31)).to_u32!) & 0xFFFF_u32
+  end
+
+  def seed(pos)
+    zigzag(pos.x) << 16 | zigzag(pos.y)
+  end
+
+  def update(delta_time)
+    dt = delta_time.total_seconds
+    @redraw = true if @keys.any_held?
+    @pan.x += @speed * dt if @keys.held?("right")
+    @pan.x -= @speed * dt if @keys.held?("left")
+    @pan.y -= @speed * dt if @keys.held?("up")
+    @pan.y += @speed * dt if @keys.held?("down")
+  end
+
+  def frame(delta_time)
+    if @redraw
+      @redraw = false
+      draw do
+        start = elapsed_time.total_milliseconds
         0.upto(height) do |y|
           0.upto(width) do |x|
-            seed = ((@pan.x.to_u32! &+ x).to_u32! & 0xFFFF) << 16 | ((@pan.y.to_u32! &+ y).to_u32! & 0xFFFF)
-            @random.new_seed(seed)
+            @random.new_seed(seed(@pan.to_i32 + PF::Vec[x, y]))
 
-            n = (y * width + x)
-
-            if @random.rand(0..100) > 98
+            if @random.rand(0.0..1.0) > 0.995
               b = @random.rand(0u8..0xFFu8)
-              (@buffer + n).value = Pixel.new(b, b, b).to_u32
+              @screen.draw_point(x, y, PF::RGBA.new(b, b, b))
             else
-              (@buffer + n).value = Pixel::Black.to_u32
+              @screen.draw_point(x, y, PF::Colors::Black)
             end
           end
         end
-        time = elapsed_milliseconds - start
-        draw_string("frame: #{time.round(2)}ms", 5, 5, @font, Pixel::White)
+        time = elapsed_time.total_milliseconds - start
+        draw_sprite(@screen)
+        draw_string("frame: #{time.round(2)}ms", 5, 5, @font, PF::Colors::White)
       end
     end
   end
 end
 
-PF::Proceedural.new(400, 300, 3).run!
+Proceedural.new(400, 300, 3, fps_limit: 120.0).run!

@@ -1,13 +1,13 @@
-require "../src/game"
+require "../src/pixelfaucet"
 
 class CubicBezier < PF::Game
-  FONT_COLOR  = PF::Pixel.new(0xFFFFFFFF)
-  POINT_COLOR = PF::Pixel.new(0xFF0000FF)
-  CTL_COLOR   = PF::Pixel.new(0x505050FF)
-  CURVE_COLOR = PF::Pixel.new(0x0077FFFF)
-  SEL_COLOR   = PF::Pixel.new(0xFFFF00FF)
-  EXT_X_COLOR = PF::Pixel.new(0xFF00FFFF)
-  EXT_Y_COLOR = PF::Pixel.new(0x00FF00FF)
+  FONT_COLOR  = PF::RGBA.new(0xFFFFFFFF)
+  POINT_COLOR = PF::RGBA.new(0xFF0000FF)
+  CTL_COLOR   = PF::RGBA.new(0x505050FF)
+  CURVE_COLOR = PF::RGBA.new(0x0077FFFF)
+  SEL_COLOR   = PF::RGBA.new(0xFFFF00FF)
+  EXT_X_COLOR = PF::RGBA.new(0xFF00FFFF)
+  EXT_Y_COLOR = PF::RGBA.new(0x00FF00FF)
 
   @curve : PF2d::Bezier::Cubic(Float64)
   @qc1 : PF2d::Bezier::Cubic(Float64)
@@ -30,31 +30,35 @@ class CubicBezier < PF::Game
     @qc1, @qc2 = @curve.split(0.5)
   end
 
-  def on_mouse_motion(cursor)
+  def on_mouse_motion(cursor, event)
     if point = @selected_point
       point.value = cursor.to_f
+      point.value.x = 0 if point.value.x < 0
+      point.value.x = width if point.value.x > width
+      point.value.y = 0 if point.value.y < 0
+      point.value.y = height if point.value.y > height
     else
       @hover_point = @curve.point_pointers.find { |p| cursor.distance(p.value) < 4 }
     end
   end
 
-  def on_mouse_button(event)
+  def on_mouse_down(cursor, event)
     if event.button == 1
-      if event.pressed?
-        @selected_point = @hover_point
-      else
-        @selected_point = nil
-      end
+      @selected_point = @hover_point
     end
   end
 
-  def update(dt)
+  def on_mouse_up(cursor, event)
+    @selected_point = nil
   end
 
-  def draw
-    clear
+  def update(delta_time)
+  end
 
-    draw_line(0, height // 2, width, height // 2, PF::Pixel.new(25, 25, 25))
+  def draw(delta_time)
+    clear(0, 0, 0)
+
+    draw_line(0, height // 2, width, height // 2, PF::RGBA.new(25, 25, 25))
 
     draw_line(@curve.p0, @curve.p1, CTL_COLOR)
     draw_line(@curve.p3, @curve.p2, CTL_COLOR)
@@ -63,16 +67,16 @@ class CubicBezier < PF::Game
 
     draw_rect(@curve.rect, CTL_COLOR)
 
-    draw_curve(@qc1, PF::Pixel.new(30, 10, 10))
-    draw_curve(@qc2, PF::Pixel.new(10, 30, 10))
+    draw_curve(@qc1, PF::RGBA.new(30, 10, 10))
+    draw_curve(@qc2, PF::RGBA.new(10, 30, 10))
 
-    @qc1.points.each { |p| draw_circle(p.to_i, 3, PF::Pixel.new(25, 25, 25)) }
-    @qc2.points.each { |p| draw_circle(p.to_i, 3, PF::Pixel.new(25, 25, 25)) }
+    @qc1.points.each { |p| draw_circle(p.to_i, 3, PF::RGBA.new(25, 25, 25)) }
+    @qc2.points.each { |p| draw_circle(p.to_i, 3, PF::RGBA.new(25, 25, 25)) }
 
     draw_curve(@curve, CURVE_COLOR)
 
     @curve.horizontal_intersects(height // 2) do |t|
-      draw_circle(@curve.at(t).to_i, 3, PF::Pixel::Orange)
+      draw_circle(@curve.at(t).to_i, 3, PF::Colors::Orange)
     end
 
     @curve.points.each do |p|
@@ -80,7 +84,7 @@ class CubicBezier < PF::Game
     end
 
     @curve.points.each_with_index do |p, i|
-      draw_string("P#{i} (#{p.x.to_i}, #{p.y.to_i})", p, @font, FONT_COLOR)
+      draw_string("P#{i} (#{p.x.to_i}, #{p.y.to_i})", p.x, p.y, @font, FONT_COLOR)
     end
 
     if point = @hover_point
@@ -93,4 +97,4 @@ class CubicBezier < PF::Game
   end
 end
 
-engine = CubicBezier.new(500, 500, 2).run!
+engine = CubicBezier.new(500, 500, 2, fps_limit: 120.0).run!

@@ -1,37 +1,48 @@
-require "../src/game"
+require "../src/pixelfaucet"
 
 class Life < PF::Game
-  CELL_ON  = PF::Pixel.new(255, 255, 0)
-  CELL_OFF = PF::Pixel.new(0, 0, 100)
+  CELL_ON  = PF::RGBA.new(255, 255, 0)
+  CELL_OFF = PF::RGBA.new(0, 0, 100)
 
-  @last_pos : PF2d::Vec2(Int32)? = nil
+  @last_pos : PF2d::Vec2(Float32)? = nil
   @mouse_down = false
   @simulation = false
-  @sim_speed = 0.1
-  @sub_frame = 0.0
+  @screen : PF::Sprite
+  @sim = PF::Interval.new(100.0.milliseconds)
 
   def initialize(*args, **kwargs)
     super
 
-    @controller = PF::Controller(PF::Keys).new({
-      PF::Keys::SPACE => "Play/Pause",
-      PF::Keys::UP    => "Faster",
-      PF::Keys::DOWN  => "Slower",
+    @screen = PF::Sprite.new(width, height)
+    @screen.clear(CELL_OFF)
+    @keymap = PF::Keymap.new({
+      PF::Scancode::Space => "Play/Pause",
+      PF::Scancode::Up    => "Faster",
+      PF::Scancode::Down  => "Slower",
     })
-    plug_in @controller
-    clear(CELL_OFF)
+    register_keymap @keymap
   end
 
-  def update(dt)
+  def update(delta_time)
+    dt = delta_time.total_seconds
+    if @keymap.pressed?("Play/Pause")
+      @simulation = !@simulation
+    end
+
+    if @keymap.pressed?("Faster")
+      @sim.every /= 2.0
+    end
+
+    if @keymap.pressed?("Slower")
+      @sim.every *= 2.0
+    end
+
     if @simulation
-      @sub_frame += dt
+      @sim.update(delta_time) do
+        changes = Array(Tuple(Int32, Int32, PF::RGBA)).new
 
-      if @sub_frame >= @sim_speed
-        @sub_frame -= @sim_speed
-        changes = Array(Tuple(Int32, Int32, PF::Pixel)).new
-
-        0.upto(height) do |y|
-          0.upto(width) do |x|
+        0.upto(height - 1) do |y|
+          0.upto(width - 1) do |x|
             neighbors_alive = neighbors(x, y).count { |pixel| pixel == CELL_ON }
             cell_alive = @screen.get_point(x, y) == CELL_ON
 
@@ -50,7 +61,7 @@ class Life < PF::Game
         end
 
         changes.each do |(x, y, pixel)|
-          draw_point(x, y, pixel)
+          @screen.draw_point(x, y, pixel)
         end
       end
     end
@@ -62,58 +73,51 @@ class Life < PF::Game
       {-1, 0}, {1, 0},
       {-1, 1}, {0, 1}, {1, 1},
     }.map do |(dx, dy)|
-      @screen.get_point(x + dx, y + dy)
+      nx, ny = x + dx, y + dy
+      if nx >= 0 && nx < width && ny >= 0 && ny < height
+        @screen.get_point(nx, ny)
+      else
+        CELL_OFF
+      end
     end
   end
 
   def toggle_cell(pos)
-    pixel = @screen.get_point(pos)
+    pixel = @screen.get_point(pos.to_i32)
 
     if pixel != CELL_ON
-      draw_point(pos, CELL_ON)
+      @screen.draw_point(pos.to_i32, CELL_ON)
     else
-      draw_point(pos, CELL_OFF)
+      @screen.draw_point(pos.to_i32, CELL_OFF)
     end
   end
 
-  def on_mouse_motion(cursor)
+  def on_mouse_motion(cursor, event)
     if @mouse_down && @last_pos != cursor
       @last_pos = cursor
       toggle_cell(cursor)
     end
   end
 
-  def on_mouse_button(event)
+  def on_mouse_down(cursor, event)
     if event.button == 1 # left click
-      if event.pressed?
-        pos = PF2d::Vec[event.x // @scale.x, event.y // @scale.y]
-        @last_pos = pos
-        toggle_cell(pos)
-      else
-        @last_pos = nil
-      end
-
-      @mouse_down = event.pressed?
+      @last_pos = cursor
+      toggle_cell(cursor)
+      @mouse_down = true
     end
   end
 
-  def on_controller_input(event)
-    if @controller.pressed?("Play/Pause")
-      @simulation = !@simulation
-    end
-
-    if @controller.pressed?("Faster")
-      @sim_speed /= 2.0
-    end
-
-    if @controller.pressed?("Slower")
-      @sim_speed *= 2.0
-    end
+  def on_mouse_up(cursor, event)
+    @last_pos = nil
+    @mouse_down = false
   end
 
-  def draw
+  def frame(delta_time)
+    draw do
+      draw_sprite(@screen, PF2d::Vec[0,0])
+    end
   end
 end
 
-engine = Life.new(50, 50, 10)
+engine = Life.new(50, 50, 10, fps_limit: 60.0)
 engine.run!

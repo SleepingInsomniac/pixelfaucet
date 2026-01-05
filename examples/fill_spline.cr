@@ -1,4 +1,4 @@
-require "../src/game"
+require "../src/pixelfaucet"
 
 class FillSpline < PF::Game
   include PF
@@ -23,10 +23,10 @@ class FillSpline < PF::Game
       Vec[0.8, 0.1],
       Vec[0.9, 0.3],
       Vec[0.5, 0.9],
-    ]) * viewport
+    ]) * Vec[width, height]
   end
 
-  def on_mouse_motion(cursor)
+  def on_mouse_motion(cursor, event)
     if index = @selected_index
       @spline.points[index] = cursor.to_f
     else
@@ -34,33 +34,33 @@ class FillSpline < PF::Game
     end
   end
 
-  def on_mouse_button(event)
+  def on_mouse_down(cursor, event)
     if event.button == 1
-      if event.pressed?
-        @selected_index = @hover_index
-      else
-        @selected_index = nil
-      end
+      @selected_index = @hover_index
     end
   end
 
-  def update(dt)
+  def on_mouse_up(cursor, event)
+    @selected_index = nil
   end
 
-  def draw
+  def update(delta_time)
+  end
+
+  def draw(delta_time)
     clear(0, 25, 5)
 
-    fill_spline(@spline, Pixel::Gray)
+    fill_spline(@spline, Colors::Gray)
 
     @spline.points.each do |point|
-      fill_circle(point, 1, Pixel::Red)
+      fill_circle(point, 1, Colors::Red)
     end
 
     if index = @hover_index
-      draw_circle(@spline.points[index], 5, Pixel::Yellow)
+      draw_circle(@spline.points[index], 5, Colors::Yellow)
     end
   end
 end
 
-engine = FillSpline.new(300, 300, 3)
+engine = FillSpline.new(300, 300, 3, fps_limit: 60.0)
 engine.run!

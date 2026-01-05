@@ -1,7 +1,5 @@
-require "../src/game"
-require "../src/controller"
+require "../src/pixelfaucet"
 require "../src/entity"
-require "../src/pixel"
 require "../src/shape"
 
 class Triangle < PF::Entity
@@ -17,46 +15,53 @@ class Triangle < PF::Entity
   def draw(engine)
     _frame = PF::Shape.rotate(@frame, @rotation)
     _frame = PF::Shape.translate(_frame, @position)
-    engine.fill_triangle(_frame.map(&.to_i32), PF::Pixel::Yellow)
+    engine.fill_triangle(_frame.map(&.to_i32), PF::Colors::Yellow)
   end
 end
 
 class TriangleThing < PF::Game
   @tri : Triangle
   @paused = false
-  @controller : PF::Controller(PF::Keys)
+  @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
+  @fps_string = ""
+  @fps_timer = PF::Interval.new(1.0.seconds)
+  @controls = PF::Keymap.new({
+    PF::Scancode::Right => "Rotate Right",
+    PF::Scancode::Left  => "Rotate Left",
+    PF::Scancode::Space => "Pause",
+  })
 
   def initialize(*args, **kwargs)
     super
 
     @tri = Triangle.new
-    @tri.position = viewport / 2
+    @tri.position = PF2d::Vec[width, height] / 2
     @tri.frame = PF::Shape.circle(3, size = width / 3)
 
-    @controller = PF::Controller(PF::Keys).new({
-      PF::Keys::RIGHT => "Rotate Right",
-      PF::Keys::LEFT  => "Rotate Left",
-      PF::Keys::SPACE => "Pause",
-    })
-    plug_in @controller
+    register_keymap @controls
   end
 
-  def update(dt)
-    @paused = !@paused if @controller.pressed?("Pause")
+  def update(delta_time)
+    @fps_timer.update(delta_time) { @fps_string = "#{fps.round.to_i} FPS" }
+    dt = delta_time.total_seconds
+    @paused = !@paused if @controls.pressed?("Pause")
 
-    @tri.rotation = @tri.rotation + 1.0 * dt if @controller.held?("Rotate Right")
-    @tri.rotation = @tri.rotation - 1.0 * dt if @controller.held?("Rotate Left")
+    @tri.rotation = @tri.rotation + 1.0 * dt if @controls.held?("Rotate Right")
+    @tri.rotation = @tri.rotation - 1.0 * dt if @controls.held?("Rotate Left")
 
-    unless @paused || @controller.any_held?
+    unless @paused || @controls.any_held?
       @tri.rotation = @tri.rotation + 0.5 * dt
     end
 
     @tri.update(dt)
   end
 
-  def draw
-    clear(0, 0, 100)
-    @tri.draw(self)
+  def frame(delta_time)
+    draw do
+      clear(0, 0, 100)
+      @tri.draw(self)
+      draw_string(@fps_string, 0, 0, @font, fore: PF::Colors::White)
+    end
   end
 end
 
