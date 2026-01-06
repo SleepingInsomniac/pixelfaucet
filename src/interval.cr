@@ -8,10 +8,15 @@ module PF
 
     def update(delta : Time::Span, &)
       @interval += delta
+
       if @interval >= @every
         @interval -= @every
         yield
       end
+    end
+
+    def reset
+      @interval = 0u64.milliseconds
     end
   end
 end

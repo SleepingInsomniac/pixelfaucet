@@ -16,8 +16,8 @@ class ThreeDee < PF::Game
   def initialize(*args, **kwargs)
     super
 
-    @projector = PF3d::Projector.new(width, height)
-    @depth_buffer = PF3d::DepthBuffer.new(width, height)
+    @projector = PF3d::Projector.new(window.width, window.height)
+    @depth_buffer = PF3d::DepthBuffer.new(window.width, window.height)
 
     @camera = @projector.camera
 
@@ -43,7 +43,7 @@ class ThreeDee < PF::Game
   end
 
   def update(delta_time)
-    @fps_timer.update(delta_time) { @fps_string = "#{fps.round.to_i} FPS" }
+    @fps_timer.update(delta_time) { @fps_string = "#{window.fps.round.to_i} FPS" }
     dt = delta_time.total_seconds
     @paused = !@paused if @controls.pressed?("Pause")
 
@@ -98,8 +98,8 @@ class ThreeDee < PF::Game
   end
 
   def frame(delta_time)
-    draw do
-      clear(25, 50, 25)
+    window.draw do
+      window.clear(25, 50, 25)
 
       @depth_buffer.clear
       tri_count = 0
@@ -107,7 +107,7 @@ class ThreeDee < PF::Game
       @projector.project(@cube_model.tris).each do |tri|
         tri_count += 1
 
-        paint_triangle(
+        window.paint_triangle(
           tri.p1.to_i, tri.p2.to_i, tri.p3.to_i, # Points
           tri.t1, tri.t2, tri.t3,                # Texture Points
           @cube_model_texture,
@@ -119,7 +119,7 @@ class ThreeDee < PF::Game
       @projector.project(@model.tris).each do |tri|
         tri_count += 1
 
-        paint_triangle(
+        window.paint_triangle(
           tri.p1.to_i, tri.p2.to_i, tri.p3.to_i, # Points
           tri.t1, tri.t2, tri.t3,                # Texture Points
           nil,
@@ -141,7 +141,7 @@ class ThreeDee < PF::Game
         io << "\n" << @fps_string
       end
 
-      draw_string(string, 3, 3, @font, PF::Colors::White)
+      window.draw_string(string, 3, 3, @font, PF::Colors::White)
     end
   end
 end

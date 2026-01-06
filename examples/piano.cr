@@ -18,13 +18,14 @@ class Piano < PF::Game
   @keys : UInt32 = 16
   @white_keys = [] of Tuple(PF2d::Vec2(Int32), PF2d::Vec2(Int32), String)
   @black_keys = [] of Tuple(PF2d::Vec2(Int32), PF2d::Vec2(Int32), String)
+  @keymap : Keymap
 
   @instruments : Array(Instrument) = [RetroVoice.new, SineVoice.new, PianoVoice.new, Flute.new, KickDrum.new, SnareDrum.new, Harmonica.new]
 
   def initialize(*args, **kwargs)
     super
 
-    keymap({
+    @keymap = keymap({
       Scancode::E     => "echo",
       Scancode::Up    => "octave up",
       Scancode::Down  => "octave down",
@@ -73,12 +74,12 @@ class Piano < PF::Game
         echo_effect.apply(value).to_f32
       else
         value.to_f32
-      end
+      end * 0.5
     end
 
-    @key_size = height // 2 - 25
-    @key_width = width // 10
-    @middle = (height // 2) + 25
+    @key_size = window.height // 2 - 25
+    @key_width = window.width // 10
+    @middle = (window.height // 2) + 25
 
     calculate_keys
 
@@ -122,18 +123,18 @@ class Piano < PF::Game
   end
 
   def update(delta_time)
-    @base_note += 12 if pressed?("octave up") && @base_note <= 112
-    @base_note -= 12 if pressed?("octave down") && @base_note >= 21 + 12
+    @base_note += 12 if @keymap.pressed?("octave up") && @base_note <= 112
+    @base_note -= 12 if @keymap.pressed?("octave down") && @base_note >= 21 + 12
 
-    if pressed?("echo")
+    if @keymap.pressed?("echo")
       @echo = !@echo
     end
 
-    if pressed?("next inst")
+    if @keymap.pressed?("next inst")
       @instrument = (@instrument + 1) % @instruments.size
     end
 
-    if pressed?("prev inst")
+    if @keymap.pressed?("prev inst")
       @instrument = @instruments.size.to_u8 if @instrument == 0
       @instrument -= 1
     end
@@ -142,12 +143,12 @@ class Piano < PF::Game
       note = Note.new(n + @base_note)
       name = n > 11 ? note.name + "+" : note.name
 
-      if pressed?(name)
+      if @keymap.pressed?(name)
         note_id = @instruments[@instrument].on(note.hertz, @audio.time)
         @keysdown[name] = {@instruments[@instrument], note_id}
       end
 
-      if released?(name)
+      if @keymap.released?(name)
         if tuple = @keysdown.[name]?
           instrument, note_id = tuple
           instrument.off(note_id, @audio.time)
@@ -158,10 +159,10 @@ class Piano < PF::Game
   end
 
   def frame(delta_time)
-    draw do
-      clear
+    window.draw do
+      window.clear
 
-      draw_string(<<-TEXT, 5, 5, @font, @text_color)
+      window.draw_string(<<-TEXT, 5, 5, @font, @text_color)
         Press up/down to change octave, Bottom row of keyboard plays notes
         #{@instruments.map(&.name).join(", ")}
         Octave: #{@base_note // 12 - 1}, Voice: #{@instruments[@instrument].name}, Echo: #{@echo ? "on" : "off"}
@@ -170,19 +171,19 @@ class Piano < PF::Game
 
       @white_keys.each do |key|
         top_left, bottom_right, name = key
-        fill_rect(top_left, bottom_right, @keysdown[name]? ? @highlight : Colors::White)
-        draw_rect(top_left, bottom_right, RGBA.new(127, 127, 127))
-        draw_string(name, top_left.x + 2, top_left.y + (@key_size * 2) - @font.line_height - 2, @font, @keysdown[name]? ? @text_hl : @text_color)
+        window.fill_rect(top_left, bottom_right, @keysdown[name]? ? @highlight : Colors::White)
+        window.draw_rect(top_left, bottom_right, RGBA.new(127, 127, 127))
+        window.draw_string(name, top_left.x + 2, top_left.y + (@key_size * 2) - @font.line_height - 2, @font, @keysdown[name]? ? @text_hl : @text_color)
       end
 
       @black_keys.each do |key|
         top_left, bottom_right, name = key
-        fill_rect(top_left, bottom_right, @keysdown[name]? ? @highlight : Colors::Black)
-        draw_rect(top_left, bottom_right, RGBA.new(127, 127, 127))
-        draw_string(name, top_left.x + 2, top_left.y + @key_size - @font.line_height - 2, @font, @keysdown[name]? ? @text_hl : @text_color)
+        window.fill_rect(top_left, bottom_right, @keysdown[name]? ? @highlight : Colors::Black)
+        window.draw_rect(top_left, bottom_right, RGBA.new(127, 127, 127))
+        window.draw_string(name, top_left.x + 2, top_left.y + @key_size - @font.line_height - 2, @font, @keysdown[name]? ? @text_hl : @text_color)
       end
 
-      fill_rect(0, @middle - @key_size - 2, width, @middle - @key_size, RGBA.new(200, 20, 20))
+      window.fill_rect(0, @middle - @key_size - 2, window.width, @middle - @key_size, RGBA.new(200, 20, 20))
     end
   end
 end

@@ -61,9 +61,9 @@ class Snow < PF::Game
   def initialize(*args, **kwargs)
     super
 
-    @wind = Wind.new(width, height)
+    @wind = Wind.new(window.width, window.height)
     500.times do
-      @flakes << Flake.new(position: PF2d::Vec[rand(0.0..width.to_f64), rand(0.0..height.to_f64)])
+      @flakes << Flake.new(position: PF2d::Vec[rand(0.0..window.width.to_f64), rand(0.0..window.height.to_f64)])
     end
   end
 
@@ -71,7 +71,7 @@ class Snow < PF::Game
     dt = delta_time.total_seconds
 
     @snowfall.update(delta_time) do
-      @flakes << Flake.new(position: PF2d::Vec[rand(0.0..width.to_f64), 0.0])
+      @flakes << Flake.new(position: PF2d::Vec[rand(0.0..window.width.to_f64), 0.0])
     end
 
     @flakes.reject! do |flake|
@@ -83,20 +83,20 @@ class Snow < PF::Game
       end
 
       flake.update(dt)
-      flake.position.y > height
+      flake.position.y > @window.height
     end
   end
 
   def frame(delta_time)
-    draw do
-      clear(0, 0, 15)
+    window.draw do
+      window.clear(0, 0, 15)
 
       @flakes.each do |flake|
         color = PF::Colors::White * flake.z_pos
         if flake.shape == 0
-          draw_point(flake.position.to_i32, color)
+          window.draw_point(flake.position.to_i32, color)
         else
-          fill_circle(flake.position.to_i32, flake.shape, color)
+          window.fill_circle(flake.position.to_i32, flake.shape, color)
         end
       end
     end

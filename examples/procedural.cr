@@ -1,7 +1,6 @@
 require "../src/pixelfaucet"
 
 class Proceedural < PF::Game
-  @screen : PF::Sprite
   @pan : PF2d::Vec2(Float64) = PF2d::Vec[0.0, 0.0]
   @seed : UInt32
   @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
@@ -17,7 +16,7 @@ class Proceedural < PF::Game
       PF::Scancode::Down  => "down",
     })
 
-    @screen = PF::Sprite.new(width, height)
+    # @screen = PF::Sprite.new(width, height)
     @random = PF::Lehmer32.new
     @redraw = true
 
@@ -49,23 +48,22 @@ class Proceedural < PF::Game
   def frame(delta_time)
     if @redraw
       @redraw = false
-      draw do
+      window.draw do
         start = elapsed_time.total_milliseconds
-        0.upto(height) do |y|
-          0.upto(width) do |x|
+        0.upto(window.height - 1) do |y|
+          0.upto(window.width - 1) do |x|
             @random.new_seed(seed(@pan.to_i32 + PF::Vec[x, y]))
 
             if @random.rand(0.0..1.0) > 0.995
               b = @random.rand(0u8..0xFFu8)
-              @screen.draw_point(x, y, PF::RGBA.new(b, b, b))
+              window.draw_point(x, y, PF::RGBA.new(b, b, b))
             else
-              @screen.draw_point(x, y, PF::Colors::Black)
+              window.draw_point(x, y, PF::Colors::Black)
             end
           end
         end
         time = elapsed_time.total_milliseconds - start
-        draw_sprite(@screen)
-        draw_string("frame: #{time.round(2)}ms", 5, 5, @font, PF::Colors::White)
+        window.draw_string("frame: #{time.round(2)}ms", 5, 5, @font, PF::Colors::White)
       end
     end
   end

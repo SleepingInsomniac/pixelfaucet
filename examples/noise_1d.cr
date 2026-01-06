@@ -18,11 +18,11 @@ class Noise1d < PF::Game
   def initialize(*args, **kwargs)
     super
 
-    @noise_scale = height / 4
-    @noise_zoom = width / 4
+    @noise_scale = window.height / 4
+    @noise_zoom  = window.width / 4
     @xpos = 0.0
 
-    register_keymap @controls
+    keymap @controls
   end
 
   def update(delta_time)
@@ -35,14 +35,14 @@ class Noise1d < PF::Game
   end
 
   def frame(delta_time)
-    draw do
-      clear(50, 127, 200)
-      step = width // 15
-      mid = height // 2
+    window.draw do
+      window.clear(50, 127, 200)
+      step = window.width // 15
+      mid = window.height // 2
 
-      0.upto(width) do |x|
+      0.upto(window.width - 1) do |x|
         y = mid + (@noise.get((x + @xpos) / @noise_zoom) * @noise_scale).to_i
-        draw_point(x, y, Colors::Yellow)
+        window.draw_point(x, y, Colors::Yellow)
       end
     end
   end

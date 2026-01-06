@@ -1,5 +1,6 @@
 require "../src/pixelfaucet"
 
+# Demonstrates snow by rotating the pixels of a sprite
 class Snow < PF::Game
   BG = PF::RGBA.new(0, 0, 0x25)
   @snow : PF::Sprite
@@ -8,7 +9,7 @@ class Snow < PF::Game
   def initialize(*args, **kwargs)
     super
 
-    @snow = PF::Sprite.new(width, height)
+    @snow = PF::Sprite.new(window.width, window.height)
     @snow.clear(BG)
   end
 
@@ -16,13 +17,13 @@ class Snow < PF::Game
   end
 
   def frame(delta_time)
-    draw do
+    window.draw do
       pixels = @snow.to_slice
 
       @shift.update(delta_time) do
-        pixels.rotate!(-width)
+        pixels.rotate!(-@snow.width)
 
-        0.upto(width - 1) do |x|
+        0.upto(@snow.width - 1) do |x|
           if rand(0..250) == 0
             shade = rand(25_u8..255_u8)
             pixels[x] = PF::RGBA.new(shade, shade, shade).to_u32
@@ -32,14 +33,14 @@ class Snow < PF::Game
         end
       end
 
-      0.upto(height - 1) do |y|
+      0.upto(@snow.height - 1) do |y|
         if rand(0..2) == 0
-          row = Slice(UInt32).new(pixels.to_unsafe + (y * width), width)
+          row = Slice(UInt32).new(pixels.to_unsafe + (y * @snow.width), @snow.width)
           row.rotate!(rand(-1..1))
         end
       end
 
-      draw_sprite(@snow, PF::Vec[0, 0])
+      window.draw_sprite(@snow, PF::Vec[0, 0])
     end
   end
 end

@@ -17,12 +17,12 @@ class AnimatedSprite < PF::Game
   end
 
   def frame(delta_time)
-    draw do
-      clear(60, 120, 200)
-      draw_string("Frame: #{@person.frame}", 5, 5, @font, Colors::White)
-      fill_rect(0, 65, width - 1, height - 1, RGBA.new(100, 100, 100))
-      draw_sprite(@person.current_frame, (viewport // 2) - @person.size // 2)
-      draw_sprite(@cat.current_frame, Vec[30, 56])
+    window.draw do
+      window.clear(60, 120, 200)
+      window.draw_string("Frame: #{@person.frame}", 5, 5, @font, Colors::White)
+      window.fill_rect(0, 65, window.width - 1, window.height - 1, RGBA.new(100, 100, 100))
+      window.draw_sprite(@person.current_frame, (window.size // 2) - @person.size // 2)
+      window.draw_sprite(@cat.current_frame, Vec[30, 56])
     end
   end
 end

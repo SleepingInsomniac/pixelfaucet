@@ -12,9 +12,11 @@ module PF
     def update(delta_time)
     end
 
-    def draw(delta_time)
-      clear(20, 20, 20)
-      draw_sprite(@sprite, @sprite.rect, PF2d::Rect.new(PF2d::Vec[0, 0], @sprite.size))
+    def frame(delta_time)
+      window.draw do
+        window.clear(20, 20, 20)
+        window.draw_sprite(@sprite, @sprite.rect, PF2d::Rect.new(PF2d::Vec[0, 0], @sprite.size))
+      end
     end
   end
 end

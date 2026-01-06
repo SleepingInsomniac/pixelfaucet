@@ -9,18 +9,19 @@ class Life < PF::Game
   @simulation = false
   @screen : PF::Sprite
   @sim = PF::Interval.new(100.0.milliseconds)
+  @keymap : PF::Keymap
 
   def initialize(*args, **kwargs)
     super
 
-    @screen = PF::Sprite.new(width, height)
+    # Best to keep our own buffer in order to read a cell
+    @screen = PF::Sprite.new(window.width, window.height)
     @screen.clear(CELL_OFF)
-    @keymap = PF::Keymap.new({
+    @keymap = keymap({
       PF::Scancode::Space => "Play/Pause",
       PF::Scancode::Up    => "Faster",
       PF::Scancode::Down  => "Slower",
     })
-    register_keymap @keymap
   end
 
   def update(delta_time)
@@ -41,8 +42,8 @@ class Life < PF::Game
       @sim.update(delta_time) do
         changes = Array(Tuple(Int32, Int32, PF::RGBA)).new
 
-        0.upto(height - 1) do |y|
-          0.upto(width - 1) do |x|
+        0.upto(@screen.height - 1) do |y|
+          0.upto(@screen.width - 1) do |x|
             neighbors_alive = neighbors(x, y).count { |pixel| pixel == CELL_ON }
             cell_alive = @screen.get_point(x, y) == CELL_ON
 
@@ -74,7 +75,7 @@ class Life < PF::Game
       {-1, 1}, {0, 1}, {1, 1},
     }.map do |(dx, dy)|
       nx, ny = x + dx, y + dy
-      if nx >= 0 && nx < width && ny >= 0 && ny < height
+      if nx >= 0 && nx < @screen.width && ny >= 0 && ny < @screen.height
         @screen.get_point(nx, ny)
       else
         CELL_OFF
@@ -113,8 +114,8 @@ class Life < PF::Game
   end
 
   def frame(delta_time)
-    draw do
-      draw_sprite(@screen, PF2d::Vec[0,0])
+    window.draw do
+      window.draw_sprite(@screen, PF2d::Vec[0,0])
     end
   end
 end

@@ -23,7 +23,7 @@ class FillSpline < PF::Game
       Vec[0.8, 0.1],
       Vec[0.9, 0.3],
       Vec[0.5, 0.9],
-    ]) * Vec[width, height]
+    ]) * Vec[window.width, window.height]
   end
 
   def on_mouse_motion(cursor, event)
@@ -47,17 +47,19 @@ class FillSpline < PF::Game
   def update(delta_time)
   end
 
-  def draw(delta_time)
-    clear(0, 25, 5)
+  def frame(delta_time)
+    window.draw do
+      window.clear(0, 25, 5)
 
-    fill_spline(@spline, Colors::Gray)
+      window.fill_spline(@spline, Colors::Gray)
 
-    @spline.points.each do |point|
-      fill_circle(point, 1, Colors::Red)
-    end
+      @spline.points.each do |point|
+        window.fill_circle(point, 1, Colors::Red)
+      end
 
-    if index = @hover_index
-      draw_circle(@spline.points[index], 5, Colors::Yellow)
+      if index = @hover_index
+        window.draw_circle(@spline.points[index], 5, Colors::Yellow)
+      end
     end
   end
 end

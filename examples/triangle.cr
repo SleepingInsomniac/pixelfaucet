@@ -35,14 +35,14 @@ class TriangleThing < PF::Game
     super
 
     @tri = Triangle.new
-    @tri.position = PF2d::Vec[width, height] / 2
-    @tri.frame = PF::Shape.circle(3, size = width / 3)
+    @tri.position = @window.size / 2
+    @tri.frame = PF::Shape.circle(3, size = window.width / 3)
 
-    register_keymap @controls
+    keymap @controls
   end
 
   def update(delta_time)
-    @fps_timer.update(delta_time) { @fps_string = "#{fps.round.to_i} FPS" }
+    @fps_timer.update(delta_time) { @fps_string = "#{window.fps.round.to_i} FPS" }
     dt = delta_time.total_seconds
     @paused = !@paused if @controls.pressed?("Pause")
 
@@ -57,10 +57,10 @@ class TriangleThing < PF::Game
   end
 
   def frame(delta_time)
-    draw do
-      clear(0, 0, 100)
-      @tri.draw(self)
-      draw_string(@fps_string, 0, 0, @font, fore: PF::Colors::White)
+    window.draw do
+      window.clear(0, 0, 100)
+      @tri.draw(window)
+      # window.draw_string(@fps_string, 0, 0, @font, fore: PF::Colors::White)
     end
   end
 end

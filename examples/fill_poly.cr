@@ -13,20 +13,22 @@ class FillPoly < PF::Game
     end
   end
 
-  def draw(delta_time)
-    clear(0, 0, 100)
-    fill_poly({Vec[15, 15], Vec[50, 10], Vec[60, 55], Vec[10, 60]}, @color)
-    fill_poly({Vec[100, 10], Vec[150, 10], Vec[150, 60], Vec[100, 60]}, @color)
-    fill_poly({
-      Vec[10, 100],
-      Vec[20, 110],
-      Vec[30, 100],
-      Vec[40, 110],
-      Vec[50, 100],
-      Vec[50, 150],
-      Vec[10, 150],
-    }, @color)
-    fill_poly({Vec[115, 115], Vec[150, 120], Vec[160, 155], Vec[110, 160]}, @color)
+  def frame(delta_time)
+    window.draw do
+      window.clear(0, 0, 100)
+      window.fill_poly({Vec[15, 15], Vec[50, 10], Vec[60, 55], Vec[10, 60]}, @color)
+      window.fill_poly({Vec[100, 10], Vec[150, 10], Vec[150, 60], Vec[100, 60]}, @color)
+      window.fill_poly({
+        Vec[10, 100],
+        Vec[20, 110],
+        Vec[30, 100],
+        Vec[40, 110],
+        Vec[50, 100],
+        Vec[50, 150],
+        Vec[10, 150],
+      }, @color)
+      window.fill_poly({Vec[115, 115], Vec[150, 120], Vec[160, 155], Vec[110, 160]}, @color)
+    end
   end
 end
 

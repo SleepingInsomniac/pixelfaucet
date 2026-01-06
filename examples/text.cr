@@ -22,8 +22,8 @@ class TextGame < PF::Game
       @color = PF::RGBA.random
     end
 
-    if @x > width - @font.width_of(@msg)
-      @x = width - @font.width_of(@msg)
+    if @x > window.width - @font.width_of(@msg)
+      @x = window.width - @font.width_of(@msg)
       @dx = -@dx
       @color = PF::RGBA.random
     end
@@ -34,17 +34,17 @@ class TextGame < PF::Game
       @color = PF::RGBA.random
     end
 
-    if @y > height - @font.line_height
-      @y = height - @font.line_height
+    if @y > window.height - @font.line_height
+      @y = window.height - @font.line_height
       @dy = -@dy
       @color = PF::RGBA.random
     end
   end
 
   def frame(delta_time)
-    draw do
-      clear(0, 0, 50)
-      draw_string(@msg, @x.to_i, @y.to_i, @font, @color)
+    window.draw do
+      window.clear(0, 0, 50)
+      window.draw_string(@msg, @x.to_i, @y.to_i, @font, @color)
     end
   end
 end

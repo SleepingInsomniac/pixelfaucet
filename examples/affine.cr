@@ -23,15 +23,15 @@ class Affine < PF::Game
   end
 
   def frame(delta_time)
-    draw do
-      clear(50, 127, 200)
+    window.draw do
+      window.clear(50, 127, 200)
 
       @transform
         .reset
         .translate(-(@bricks.size // 2))
         .rotate(@angle)
         .scale(@size)
-        .translate(viewport // 2)
+        .translate(window.size // 2)
 
       b1, b2 = @transform.bounding_box(@bricks.size.x, @bricks.size.y).map(&.to_i)
 
@@ -41,7 +41,7 @@ class Affine < PF::Game
         b1.x.upto(b2.x) do |x|
           point = @transform.apply(x, y).to_i
           if point >= @top_left && point < @bricks.size
-            draw_point(x.to_i, y.to_i, @bricks.get_point(point))
+            window.draw_point(x.to_i, y.to_i, @bricks.get_point(point))
           end
         end
       end

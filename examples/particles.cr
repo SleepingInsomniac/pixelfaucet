@@ -7,7 +7,7 @@ class Particles < PF::Game
   def initialize(*args, **kwargs)
     super
 
-    @emitter.position = viewport / 2
+    @emitter.position = window.size / 2
   end
 
   def update(delta_time)
@@ -15,9 +15,9 @@ class Particles < PF::Game
   end
 
   def frame(delta_time)
-    draw do
-      clear(0, 0, 0)
-      @emitter.draw(self)
+    window.draw do
+      window.clear(0, 0, 0)
+      @emitter.draw(window)
     end
   end
 end

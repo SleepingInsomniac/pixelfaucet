@@ -109,6 +109,7 @@ module PF
       @surface.blit(other.surface, src_rect, dest_rect)
     end
 
+    # TODO: This should accept a drawable as a target: drow_to ...
     def draw_sprite(sprite : Sprite, src_rect : PF2d::Rect(Number), dst_rect : PF2d::Rect(Number))
       sprite_pixels = Slice(UInt32).new(sprite.surface.pixels.to_unsafe.as(UInt32*), sprite.width * sprite.height)
       pixels = to_slice
