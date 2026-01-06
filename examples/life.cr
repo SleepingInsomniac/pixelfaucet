@@ -94,7 +94,7 @@ class Life < PF::Game
   end
 
   def on_mouse_motion(cursor, event)
-    if @mouse_down && @last_pos != cursor
+    if @mouse_down && @last_pos.try(&.to_i) != cursor.to_i
       @last_pos = cursor
       toggle_cell(cursor)
     end

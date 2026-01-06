@@ -25,24 +25,28 @@ OptionParser.new do |opts|
   end
 end.parse!
 
+Dir.chdir(File.expand_path(File.join(__dir__, "..")))
+
 unless options[:clean]
   cmd = "crystal build"
   flags = []
   flags << "--release" if options[:release]
   flags << "--no-debug" unless options[:debug]
+  flags << "--output \"examples/build\""
+  flags << "--progress"
 
   Dir.chdir File.join(__dir__, '..')
   FileUtils.mkdir_p("examples/build")
+
   unless File.exist?("examples/build/assets")
     FileUtils.ln_s("../../assets", "examples/build/assets")
   end
+
   Dir.glob("examples/*.cr").each do |path|
     full_cmd = %'#{cmd} #{flags.join(" ")} "#{path}"'
     puts full_cmd
     system full_cmd
-    bin_name = File.basename(path, ".cr")
-    FileUtils.mv(bin_name, "examples/build/#{bin_name}")
   end
 else
-  # TODO
+  FileUtils.rm_rf("examples/build")
 end

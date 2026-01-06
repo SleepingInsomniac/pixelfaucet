@@ -1,6 +1,4 @@
 require "../src/pixelfaucet"
-require "../src/audio"
-require "../src/audio/note"
 
 class Audio < PF::Game
   @keys : PF::Keymap

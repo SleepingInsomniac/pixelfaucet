@@ -6,7 +6,7 @@ require "./rgba"
 module PF
   class Window
     include PF2d
-    include Drawable(RGBA)
+    include PF::Drawable
     include Viewable(RGBA)
 
     @sdl_window : Sdl3::Window
@@ -148,7 +148,7 @@ module PF
       raise "drawing must be done within the #draw block" unless locked?
       return unless x >= 0 && x < width && y >= 0 && y < height
 
-      pixel_pointer(x, y).value
+      RGBA.new(pixel_pointer(x, y).value)
     end
 
     # ~~~~
@@ -161,45 +161,6 @@ module PF
     def clear(red : UInt8 = 0u8, green : UInt8 = 0u8, blue : UInt8 = 0u8, alpha : UInt8 = 255u8)
       color = RGBA.new(red, green, blue, alpha)
       clear(color)
-    end
-
-    def draw_string(string : String, x : Number, y : Number, font : Pixelfont::Font, fore = RGBA.new(255, 255, 255, 255), back : RGBA? = nil)
-      font.draw(string) do |px, py, on|
-        if on
-          draw_point(px + x, py + y, fore)
-        else
-          back.try { |b| draw_point(px + x, py + y, b) }
-        end
-      end
-    end
-
-    # TODO: Move this to pf2d?
-    # TODO: faster case for 1:1 scale
-    def draw_sprite(sprite : Sprite, src_rect : PF2d::Rect(Number), dst_rect : PF2d::Rect(Number))
-      sprite_pixels = Slice(UInt32).new(sprite.surface.pixels.to_unsafe.as(UInt32*), sprite.width * sprite.height)
-      pixels = Slice(UInt32).new(@pixels.as(UInt32*), width * height)
-
-      scale = dst_rect.size / src_rect.size
-
-      0.upto(dst_rect.size.y - 1) do |y|
-        sy = ((y * scale.y) + src_rect.top_left.y).to_i32
-        dy = y + dst_rect.top_left.y
-        next if sy >= sprite.height || dy >= height
-        0.upto(dst_rect.size.x - 1) do |x|
-          sx = ((x * scale.x) + src_rect.top_left.x).to_i32
-          dx = x + dst_rect.top_left.x
-          next if sx >= sprite.width || dx >= width
-          source_color = RGBA.new(sprite_pixels[sy * sprite.width + sx])
-          dest_color = RGBA.new(pixels[dy * width + dx])
-          draw_point(dx, dy, source_color.blend(dest_color))
-        end
-      end
-    end
-
-    def draw_sprite(sprite  : Sprite, pos : PF2d::Vec = PF2d::Vec[0, 0])
-      draw_sprite(sprite,
-                  PF2d::Rect.new(PF2d::Vec[0,0], sprite.size),
-                  PF2d::Rect.new(pos, sprite.size))
     end
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
