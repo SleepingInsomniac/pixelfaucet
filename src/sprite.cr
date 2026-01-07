@@ -3,6 +3,9 @@ require "sdl3/image"
 
 module PF
   class Sprite
+    include PF2d::Canvas(RGBA)
+    include Drawable
+
     def self.load_tiles(path, tile_width, tile_height)
       sheet = Sprite.new(path)
       sprites = [] of Sprite
@@ -22,9 +25,6 @@ module PF
 
       sprites
     end
-
-    include Drawable
-    include PF2d::Viewable(RGBA)
 
     property surface : Sdl3::Surface
     @texture : Sdl3::Texture? = nil
@@ -70,9 +70,8 @@ module PF
       Slice(UInt32).new(@surface.pixels.to_unsafe.as(UInt32*), width * height)
     end
 
-    def get_point(x : Number, y : Number) : RGBA
-      raise IndexError.new("x:#{x} out of bounds") if x < 0 || x >= width
-      raise IndexError.new("y:#{y} out of bounds") if y < 0 || y >= height
+    def get_point?(x : Number, y : Number) : RGBA?
+      return nil if x < 0 || x >= width || y < 0 || y >= height
       RGBA.new(to_slice[i = (y * width + x).to_i])
     end
 
@@ -81,6 +80,11 @@ module PF
       if x >= 0 && x < width && y >= 0 && y < height
         to_slice[(y * width + x).to_i] = value.to_u32
       end
+    end
+
+    # PF2d::Canvas(RGBA)
+    def blend(src, dst) : RGBA
+      dst.blend(src)
     end
   end
 end

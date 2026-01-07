@@ -6,8 +6,8 @@ require "./rgba"
 module PF
   class Window
     include PF2d
+    include PF2d::Canvas(RGBA)
     include PF::Drawable
-    include Viewable(RGBA)
 
     @sdl_window : Sdl3::Window
     getter width : Int32
@@ -138,17 +138,22 @@ module PF
     # PF2d::Drawable(RGBA)
     def draw_point(x, y, value : RGBA)
       raise "drawing must be done within the #draw block" unless locked?
-      return unless x >= 0 && x < width && y >= 0 && y < height
+      return unless in_bounds?(x, y)
 
       pixel_pointer(x, y).value = value.value
     end
 
     # PF2d::Viewable(RGBA)
-    def get_point(x, y)
+    def get_point?(x, y) : RGBA?
       raise "drawing must be done within the #draw block" unless locked?
-      return unless x >= 0 && x < width && y >= 0 && y < height
+      return nil unless in_bounds?(x, y)
 
       RGBA.new(pixel_pointer(x, y).value)
+    end
+
+    # PF2d::Canvas(RGBA)
+    def blend(src, dst) : RGBA
+      dst.blend(src)
     end
 
     # ~~~~
