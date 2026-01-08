@@ -2,20 +2,20 @@ require "../src/pixelfaucet"
 
 class Stretch < PF::Game
   @sprite : PF2d::Clip(PF::RGBA)
-  @stretch : PF2d::Rect(Int32) = PF2d::Rect[0, 0, 32, 64]
+  @stretch : PF2d::Rect(Float64) = PF2d::Rect[0.0, 0.0, 32.0, 64.0]
   @vel : PF2d::Vec2(Float64) = PF2d::Vec[0.25, 0.25]
 
   def initialize(*args, **kwargs)
     super
     # Clip the animation sheet
-    @sprite = PF2d::Clip.new(@stretch, PF::Sprite.new("./assets/walking.png"))
+    @sprite = PF2d::Clip.new(@stretch.to(Int32), PF::Sprite.new("./assets/walking.png"))
   end
 
   def update(delta_time)
     @vel.x = -@vel.x if @stretch.size.x >= window.size.x || @stretch.size.x <= 0
     @vel.y = -@vel.y if @stretch.size.y >= window.size.y || @stretch.size.y <= 0
 
-    @stretch.size = @stretch.size + (@vel * delta_time.total_milliseconds).to(Int32)
+    @stretch.size = @stretch.size + (@vel * delta_time.total_milliseconds)
   end
 
   def frame(delta_time)
