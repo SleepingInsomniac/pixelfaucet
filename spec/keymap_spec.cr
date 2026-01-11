@@ -2,5 +2,6 @@ require "./spec_helper"
 
 include PF
 
-describe PF::Game do
+describe Keymap do
+  # ... TODO
 end
