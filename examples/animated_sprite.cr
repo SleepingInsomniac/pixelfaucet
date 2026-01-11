@@ -21,8 +21,8 @@ class AnimatedSprite < PF::Game
       window.clear(60, 120, 200)
       window.draw_string("Frame: #{@person.frame}", 5, 5, @font, Colors::White)
       window.fill_rect(0, 65, window.width - 1, window.height - 1, RGBA.new(100, 100, 100))
-      window.draw(@person.current_frame, (window.size // 2) - @person.size // 2)
-      window.draw(@cat.current_frame, Vec[30, 56])
+      window.draw(@person.current_frame, (window.size // 2) - @person.size // 2) { |s, d| s.blend(d) }
+      window.draw(@cat.current_frame, Vec[30, 56]) { |s, d| s.blend(d) }
     end
   end
 end

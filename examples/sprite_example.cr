@@ -15,7 +15,7 @@ module PF
     def frame(delta_time)
       window.draw do
         window.clear(20, 20, 20)
-        window.draw_sprite(@sprite, @sprite.rect, PF2d::Rect.new(PF2d::Vec[0, 0], @sprite.size))
+        window.draw(@sprite, @sprite.rect, PF2d::Rect.new(PF2d::Vec[0, 0], @sprite.size)) { |d, s| s.blend(d) }
       end
     end
   end

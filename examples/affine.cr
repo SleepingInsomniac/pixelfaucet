@@ -20,18 +20,18 @@ class Affine < PF::Game
     @angle += 1.0 * dt
     @zoom, @size = -@zoom, @size.clamp(0.5..2.0) if @size > 2.0 || @size < 0.5
     @size = @size + @zoom * dt
+
+    @transform
+      .reset
+      .translate(-(@bricks.size // 2))
+      .rotate(@angle)
+      .scale(@size)
+      .translate(window.size // 2)
   end
 
   def frame(delta_time)
     window.draw do
       window.clear(50, 127, 200)
-
-      @transform
-        .reset
-        .translate(-(@bricks.size // 2))
-        .rotate(@angle)
-        .scale(@size)
-        .translate(window.size // 2)
 
       b1, b2 = @transform.bounding_box(@bricks.size.x, @bricks.size.y).map(&.to_i)
 

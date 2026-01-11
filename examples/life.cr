@@ -115,7 +115,7 @@ class Life < PF::Game
 
   def frame(delta_time)
     window.draw do
-      window.draw_sprite(@screen, PF2d::Vec[0,0])
+      window.draw(@screen, PF2d::Vec[0,0])
     end
   end
 end

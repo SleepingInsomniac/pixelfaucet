@@ -40,7 +40,7 @@ class Snow < PF::Game
         end
       end
 
-      window.draw_sprite(@snow, PF::Vec[0, 0])
+      window.draw(@snow, PF::Vec[0, 0])
     end
   end
 end
