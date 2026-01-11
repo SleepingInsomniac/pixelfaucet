@@ -17,10 +17,11 @@ PixelFaucet requires the [crystal](https://crystal-lang.org) compiler which can 
 brew install crystal
 ```
 
-- Install sdl2
+- Install sdl3
 
 ```sh
-brew install sdl2
+brew install sdl3
+brew install sdl3_image
 ```
 
 - Create a new project:
@@ -35,6 +36,7 @@ crystal init app my_game
 dependencies:
   pixelfaucet:
     github: sleepinginsomniac/pixelfaucet
+    version: 0.2.0
 ```
 
 - Run the shards command:
