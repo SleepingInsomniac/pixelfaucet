@@ -46,18 +46,16 @@ shards install
 ## Usage
 
 ```crystal
-require "pixelfaucet/game"
+require "pixelfaucet"
 
-class Example < PF::Game
-  def update(dt)
+class Static < PF::Game
+  def update(delta_time : Time::Span)
   end
 
-  def draw
-    clear
-    0.upto(width) do |x|
-      0.upto(height) do |y|
-        draw_point(x, y, PF::Pixel.random)
-      end
+  def frame(delta_time)
+    window.draw do
+      window.clear
+      window.each_point { |p| window.draw_point(p, PF::RGBA.random) }
     end
   end
 end
