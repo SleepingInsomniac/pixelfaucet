@@ -1,5 +1,9 @@
 module PF
   struct RGBA
+    macro [](*args)
+      {{@type}}.new({{args.splat}})
+    end
+
     property value : UInt32
 
     def self.random : RGBA
@@ -83,7 +87,11 @@ module PF
 
     {% for op in %w[* / // + -] %}
       def {{op.id}}(n : Number)
-        RGBA.new(*rgb.map { |c| (c {{op.id}} n).to_u8 }, alpha)
+        RGBA.new(*rgb.map { |c| (c {{op.id}} n).clamp(0, UInt8::MAX).to_u8 }, alpha)
+      end
+
+      def {{op.id}}(other : RGBA)
+        RGBA.new(red {{op.id}} other.red, green {{op.id}} other.green, blue {{op.id}} other.blue, alpha)
       end
     {% end %}
 
@@ -100,7 +108,7 @@ module PF
       )
     end
 
-    # Alpha blending
+    # Alpha blending: source (self) over dest
     def blend(dest : RGBA) : RGBA
       sc = channels.map(&.to_f32)
       dc = dest.channels.map(&.to_f32)
@@ -134,6 +142,14 @@ module PF
         (green * (other.green / 255)).to_u8,
         (blue * (other.blue / 255)).to_u8
       )
+    end
+
+    def lighten(amount : Float)
+      self + (PF::Colors::White - self) * amount
+    end
+
+    def darken(amount : Float)
+      self * (1.0 - amount)
     end
   end
 end
