@@ -82,6 +82,9 @@ module PF
     def on_mouse_motion(cursor : PF2d::Vec, event : Sdl3::Event)
     end
 
+    def on_mouse_wheel(cursor : PF2d::Vec, direction : PF2d::Vec, inverted : Bool, window_id, event : Sdl3::Event)
+    end
+
     # Called when the mouse is clicked
     # override in your subclass to hook into this behavior
     def on_mouse_down(cursor : Vec, event : Sdl3::Event)
@@ -157,6 +160,12 @@ module PF
       when Sdl3::Event::MouseMotion
         location = Vec[event.x, event.y] / @window.scale
         on_mouse_motion(location, event)
+      when Sdl3::Event::MouseWheel
+        cursor = Vec[event.mouse_x, event.mouse_y] / @window.scale
+        direction = Vec[event.x, event.y]
+        inverted = event.direction == Sdl3::Mouse::WheelDirection::Flipped
+        window_id = event.window_id
+        on_mouse_wheel(cursor, direction, inverted, window_id, event)
       when Sdl3::Event::MouseButton
         dispatch_mouse_event(event)
       when Sdl3::Event::Keyboard
