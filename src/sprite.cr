@@ -6,6 +6,7 @@ module PF
     include PF2d::Canvas(RGBA)
     include Drawable
 
+    # Loads sprites based on a sprite sheet defined by a grid of tiles *tile_width* and *tile_height*
     def self.load_tiles(path, tile_width, tile_height)
       sheet = Sprite.new(path)
       sprites = [] of Sprite
@@ -18,7 +19,10 @@ module PF
           sx = tx * tile_width
           sy = ty * tile_height
           sprite = Sprite.new(tile_width, tile_height)
-          sprite.draw_sprite(sheet, PF2d::Rect.new(PF2d::Vec[sx, sy], PF2d::Vec[tile_width, tile_height]), PF2d::Rect.new(0,0, tile_width, tile_height))
+          sprite.draw(sheet,
+                      PF2d::Rect.new(PF2d::Vec[sx, sy], PF2d::Vec[tile_width, tile_height]),
+                      PF2d::Rect.new(0,0, tile_width, tile_height)
+          )# { |d, s| s }
           sprites << sprite
         end
       end
@@ -80,11 +84,6 @@ module PF
       if x >= 0 && x < width && y >= 0 && y < height
         to_slice[(y * width + x).to_i] = value.to_u32
       end
-    end
-
-    # PF2d::Canvas(RGBA)
-    def blend(src, dst) : RGBA
-      dst.blend(src)
     end
   end
 end
