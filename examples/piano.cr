@@ -56,7 +56,7 @@ class Piano < PF::Game
     @keysdown = {} of String => Tuple(Instrument, UInt32)
     @echo = false
 
-    echo_effect = EchoEffect.new(44100 // 3)
+    echo_effect = EchoEffect.new(Audio::DEFAULT_SPEC.freq // 3)
 
     # Initialize an audio handler
     # - the given Proc will be called at the sample rate/freq param (44.1Khz is standard)

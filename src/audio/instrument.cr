@@ -12,9 +12,9 @@ module PF
     def initialize(@envelope, @wave)
     end
 
-    def on(hertz : Float64, time : Float64)
+    def on(hertz : Float, time : Float)
       @note_id += 1_u32
-      sound = Sound.new(hertz, @envelope, time, @volume, @wave)
+      sound = Sound.new(hertz.to_f32, @envelope, time.to_f64, @volume, @wave)
       @notes[@note_id] = sound
       @sounds << sound
       @note_id
@@ -81,9 +81,9 @@ module PF
         {0.25, 0.0},
       ]
 
-      @wave = ->(time : Float64, hertz : Float64) do
+      @wave = ->(time : Float32, hertz : Float32) do
         # https://www.desmos.com/calculator/mnxargxllk
-        y = 0.0
+        y = 0.0f32
 
         harmonics.each do |amplitude, phase|
           av = 2 * Math::PI * (hertz / 2.0) * time + phase
@@ -120,12 +120,13 @@ module PF
         sustain: Envelope::Stage.new(0.0, 0.0, 0.0),
         release: Envelope::Stage.new(0.3, 1.0, 0.0)
       )
-      @wave = ->(time : Float64, hertz : Float64) do
+      @wave = ->(time : Float32, hertz : Float32) do
         hertz = 180.31
         av = 2 * Math::PI * (hertz / 2.0) * time
         drop_time = 10.0
         drop = (drop_time - time) / drop_time
-        Math.cos(av * drop - 1.0) * 3.0
+        amp = Math.cos(av * drop - 1.0) * 3.0
+        amp.to_f32
       end
     end
   end
@@ -139,11 +140,12 @@ module PF
         sustain: Envelope::Stage.new(0.0, 0.0, 0.0),
         release: Envelope::Stage.new(0.3, 1.0, 0.0)
       )
-      @wave = ->(time : Float64, hertz : Float64) do
+      @wave = ->(time : Float32, hertz : Float32) do
         av = 2 * Math::PI * (hertz / 2.0) * time
         drop_time = 10.0
         drop = (drop_time - time) / drop_time
-        Math.cos(av * drop - 1.0) * 3.0 + rand(-0.2..0.2)
+        amp = Math.cos(av * drop - 1.0) * 3.0 + rand(-0.2..0.2)
+        amp.to_f32
       end
     end
   end
@@ -159,10 +161,10 @@ module PF
       )
       @volume = 0.5
       wave = Sound.square_wave
-      @wave = ->(time : Float64, hertz : Float64) do
-        0.5 * wave.call(time + 0.1, hertz * 2) +
-        wave.call(time, hertz) +
-        rand(-0.05..0.05)
+      @wave = ->(time : Float32, hertz : Float32) do
+        0.5f32 * wave.call(time + 0.1, hertz * 2) +
+          wave.call(time, hertz) +
+          rand(-0.05..0.05)
       end
     end
   end
