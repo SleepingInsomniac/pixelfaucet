@@ -66,7 +66,7 @@ class Piano < PF::Game
 
       @instruments.each do |instrument|
         instrument.sounds.each do |sound|
-          value += sound.sample(time)
+          value += sound.sample(time.to_f)
         end
       end
 

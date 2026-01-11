@@ -34,9 +34,9 @@ class CubicBezier < PF::Game
     if point = @selected_point
       point.value = cursor.to_f
       point.value.x = 0 if point.value.x < 0
-      point.value.x = window.width if point.value.x > window.width
+      point.value.x = window.width.to_f if point.value.x > window.width
       point.value.y = 0 if point.value.y < 0
-      point.value.y = window.height if point.value.y > window.height
+      point.value.y = window.height.to_f if point.value.y > window.height
     else
       @hover_point = @curve.point_pointers.find { |p| cursor.distance(p.value) < 4 }
     end

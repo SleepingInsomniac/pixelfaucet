@@ -41,7 +41,7 @@ class DrawLine < PF::Game
       end
 
       if v.pos.x > window.width
-        v.pos.x = window.width
+        v.pos.x = window.width.to_f
         v.vel.x = -v.vel.x
       end
 
@@ -51,7 +51,7 @@ class DrawLine < PF::Game
       end
 
       if v.pos.y > window.height
-        v.pos.y = window.height
+        v.pos.y = window.height.to_f
         v.vel.y = -v.vel.y
       end
     end
