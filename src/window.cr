@@ -121,7 +121,12 @@ module PF
     # Drawing ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # All pixel drawing must be done within this method
-    def draw(& : ->)
+    def draw(&block : ->)
+      lock(&block)
+    end
+
+    # All pixel drawing must be done within this method
+    def lock(& : ->)
       return false if closed?
       @texture.unsafe_lock do |pixels|
         @locked = true

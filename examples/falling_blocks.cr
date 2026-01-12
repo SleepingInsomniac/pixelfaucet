@@ -1,6 +1,5 @@
 require "../src/pixelfaucet"
 
-
 SCALE = 16
 WIDTH = 12
 HEIGHT = 25
