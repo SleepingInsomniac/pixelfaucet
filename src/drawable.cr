@@ -1,17 +1,26 @@
 module PF
   module Drawable
-    def draw_string(string : String, x : Number, y : Number, font : Pixelfont::Font, fore = RGBA.new(255, 255, 255, 255), back : RGBA? = nil)
-      font.draw(string) do |px, py, on|
-        if on
-          draw_point(px + x, py + y, fore)
-        else
-          back.try { |b| draw_point(px + x, py + y, b) }
-        end
+    def blend_point(at : Vec, color : RGBA)
+      if dest = self[at]?
+        draw_point(at, color.blend(dest))
+      else
+        draw_point(at, color)
       end
     end
 
-    def draw_string(string : String, pos : PF2d::Vec, font : Pixelfont::Font, pixel)
-      draw_string(string, pos.x, pos.y, font, pixel)
+    def draw_string(string : String, x : Number, y : Number, font : Pixelfont::Font, fore = RGBA.new(255, 255, 255, 255), back : RGBA? = nil)
+      draw_string(string, Vec[x, y], font, fore, back)
+    end
+
+    def draw_string(string : String, pos : PF2d::Vec, font : Pixelfont::Font, fore = RGBA.new(255, 255, 255, 255), back : RGBA? = nil)
+      font.draw(string) do |px, py, on|
+        dest = Vec[px, py] + pos
+        if on
+          blend_point(dest, fore)
+        else
+          back.try { |b| blend_point(dest, b) }
+        end
+      end
     end
 
     # Sdl3 method for PF2d#draw
