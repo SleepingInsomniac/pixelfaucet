@@ -1,32 +1,17 @@
 require "../src/pixelfaucet"
 
 class Proceedural < PF::Game
+  def self.str_to_seed(str : String) : UInt32
+    str.chars.map { |c| c.ord.to_u32! }.reduce(&.+)
+  end
+
   @pan : PF2d::Vec2(Float64) = PF2d::Vec[0.0, 0.0]
   @seed : UInt32
   @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
-  @keys : PF::Keymap
-
-  def initialize(*args, **kwargs)
-    super
-
-    @keys = keymap({
-      PF::Scancode::Left  => "left",
-      PF::Scancode::Right => "right",
-      PF::Scancode::Up    => "up",
-      PF::Scancode::Down  => "down",
-    })
-
-    # @screen = PF::Sprite.new(width, height)
-    @random = PF::Lehmer32.new
-    @redraw = true
-
-    @speed = 100.0
-    @seed = str_to_seed("PixelFaucet")
-  end
-
-  def str_to_seed(str : String)
-    str.chars.map { |c| c.ord.to_u32! }.reduce(&.+)
-  end
+  @random = PF::Lehmer32.new
+  @redraw = true
+  @speed = 100.0
+  @seed : UInt32 = str_to_seed("PixelFaucet")
 
   def zigzag(n : Int32)
     (((n << 1) ^ (n >> 31)).to_u32!) & 0xFFFF_u32
@@ -39,10 +24,10 @@ class Proceedural < PF::Game
   def update(delta_time)
     dt = delta_time.total_seconds
     @redraw = true if @keys.any_held?
-    @pan.x += @speed * dt if @keys.held?("right")
-    @pan.x -= @speed * dt if @keys.held?("left")
-    @pan.y -= @speed * dt if @keys.held?("up")
-    @pan.y += @speed * dt if @keys.held?("down")
+    @pan.x += @speed * dt if keys[:right].held?
+    @pan.x -= @speed * dt if keys[:left].held?
+    @pan.y -= @speed * dt if keys[:up].held?
+    @pan.y += @speed * dt if keys[:down].held?
   end
 
   def frame(delta_time)
@@ -69,4 +54,4 @@ class Proceedural < PF::Game
   end
 end
 
-Proceedural.new(400, 300, 3, fps_limit: 120.0).run!
+Proceedural.new(400, 300, 3).run!

@@ -1,18 +1,10 @@
 require "../src/pixelfaucet"
 
 class Audio < PF::Game
-  @keys : PF::Keymap
-
   def initialize(*args, **kwargs)
     super(*args, **kwargs)
 
     @note = PF::Note.new(60)
-
-    @keys = keymap({
-      PF::Scancode::Up => "up",
-      PF::Scancode::Down => "down"
-    })
-
     @audio = PF::Audio.new do |time, channel|
       volume = 0.4
       Math.sin(2 * Math::PI * @note.hertz * time).to_f32 * volume
@@ -22,11 +14,11 @@ class Audio < PF::Game
   end
 
   def update(delta_time)
-    if @keys.pressed?("up")
+    if keys[:up].pressed?
       @note = PF::Note.new(@note.number + 1)
     end
 
-    if @keys.pressed?("down")
+    if keys[:down].pressed?
       @note = PF::Note.new(@note.number - 1)
     end
   end

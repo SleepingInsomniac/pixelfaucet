@@ -19,6 +19,8 @@ module PF
     getter started_at : Float64 = Time.monotonic.total_milliseconds
     getter last_updated = 0.0.milliseconds
     getter window : Window
+    getter keys : Keyboard = Keyboard.instance
+    # TODO: Remove when keymaps are removed
     @keymaps = [] of Keymap
 
     def initialize(width : Number, height : Number, scale : Number = 1, title = self.class.name,
@@ -71,37 +73,41 @@ module PF
     def on_key_down(event : Sdl3::Event)
     end
 
-    def on_key_repeat(event : Sdl3::Event)
+    def on_key_down(event : Event)
     end
 
-    def on_key_up(event : Sdl3::Event)
+    def on_key_repeat(event : Event)
+    end
+
+    def on_key_up(event : Event)
     end
 
     # Called when the mouse is moved
     # override in your subclass to hook into this behavior
-    def on_mouse_motion(cursor : PF2d::Vec, event : Sdl3::Event)
+    def on_mouse_motion(cursor : Vec, event : Event)
     end
 
-    def on_mouse_wheel(cursor : PF2d::Vec, direction : PF2d::Vec, inverted : Bool, window_id, event : Sdl3::Event)
+    def on_mouse_wheel(cursor : Vec, direction : Vec, inverted : Bool, window_id, event : Event)
     end
 
     # Called when the mouse is clicked
     # override in your subclass to hook into this behavior
-    def on_mouse_down(cursor : Vec, event : Sdl3::Event)
+    def on_mouse_down(cursor : Vec, event : Event)
     end
 
-    def on_mouse_up(cursor : Vec, event : Sdl3::Event)
+    # Called when the mouse button is released
+    def on_mouse_up(cursor : Vec, event : Event)
     end
 
     # Called for all other events
     # override in your subclass to hook into this behavior
-    def on_event(event : Sdl3::Event)
+    def on_event(event : Event)
     end
 
-    def on_window_event(event : Sdl3::Event::Window)
+    def on_window_event(event : Event::Window)
     end
 
-    # Called just before a frame is presented, but after the texture is locked
+    # Called just before a frame is presented, but after the window texture is locked
     def before_present(delta_time : Time::Span)
     end
 
@@ -112,17 +118,14 @@ module PF
     # Other
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    # Stops the run loop, and gracefully exits
-    def quit!
-      @running = false
-    end
-
+    @[Deprecated("Prefer PF::Game#keys.map(). #keymap will be removed")]
     def keymap(map : Hash(Scancode, String)) : Keymap
       Keymap.new(map).tap do |km|
         @keymaps << km
       end
     end
 
+    @[Deprecated("Prefer PF::Game#keys.map(). #keymap will be removed")]
     def keymap(map : Keymap)
       map.tap { @keymaps << map }
     end
@@ -151,27 +154,29 @@ module PF
 
     # :nodoc:
     private def engine_poll_events
-      event = Sdl3::Events.poll
-      case event
-      when Sdl3::Event::Quit
-        quit!
-      when Sdl3::Event::Window
-        on_window_event(event)
-      when Sdl3::Event::MouseMotion
-        location = Vec[event.x, event.y] / @window.scale
-        on_mouse_motion(location, event)
-      when Sdl3::Event::MouseWheel
-        cursor = Vec[event.mouse_x, event.mouse_y] / @window.scale
-        direction = Vec[event.x, event.y]
-        inverted = event.direction == Sdl3::Mouse::WheelDirection::Flipped
-        window_id = event.window_id
-        on_mouse_wheel(cursor, direction, inverted, window_id, event)
-      when Sdl3::Event::MouseButton
-        dispatch_mouse_event(event)
-      when Sdl3::Event::Keyboard
-        dispatch_keyboard_event(event)
-      else
-        on_event(event)
+      while event = Sdl3::Events.poll
+        case event
+        when Sdl3::Event::Quit
+          quit!
+        when Sdl3::Event::Window
+          on_window_event(event)
+        when Sdl3::Event::MouseMotion
+          location = Vec[event.x, event.y] / @window.scale
+          on_mouse_motion(location, event)
+        when Sdl3::Event::MouseWheel
+          cursor = Vec[event.mouse_x, event.mouse_y] / @window.scale
+          direction = Vec[event.x, event.y]
+          inverted = event.direction == Sdl3::Mouse::WheelDirection::Flipped
+          window_id = event.window_id
+          on_mouse_wheel(cursor, direction, inverted, window_id, event)
+        when Sdl3::Event::MouseButton
+          dispatch_mouse_event(event)
+        when Sdl3::Event::Keyboard
+          Keyboard.instance.register(event)
+          dispatch_keyboard_event(event)
+        else
+          on_event(event)
+        end
       end
     end
 
@@ -181,10 +186,12 @@ module PF
         if event.repeat?
           on_key_repeat(event)
         else
+          # TODO Remove when #keymap is removed
           @keymaps.each { |k| k.press(event.scancode) }
           on_key_down(event)
         end
       else
+        # TODO Remove when #keymap is removed
         @keymaps.each { |k| k.release(event.scancode) }
         on_key_up(event)
       end

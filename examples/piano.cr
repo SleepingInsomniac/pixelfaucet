@@ -15,40 +15,39 @@ class Piano < PF::Game
   @key_size : Int32
   @key_width : Int32
   @middle : Int32
-  @keys : UInt32 = 16
+  @key_count : UInt32 = 16
   @white_keys = [] of Tuple(PF2d::Vec2(Int32), PF2d::Vec2(Int32), String)
   @black_keys = [] of Tuple(PF2d::Vec2(Int32), PF2d::Vec2(Int32), String)
-  @keymap : Keymap
 
   @instruments : Array(Instrument) = [RetroVoice.new, SineVoice.new, PianoVoice.new, Flute.new, KickDrum.new, SnareDrum.new, Harmonica.new]
 
   def initialize(*args, **kwargs)
     super
 
-    @keymap = keymap({
-      Scancode::E     => "echo",
-      Scancode::Up    => "octave up",
-      Scancode::Down  => "octave down",
-      Scancode::Left  => "prev inst",
-      Scancode::Right => "next inst",
+    keys.map({
+      Key::Code::E     => "echo",
+      Key::Code::Up    => "octave up",
+      Key::Code::Down  => "octave down",
+      Key::Code::Left  => "prev inst",
+      Key::Code::Right => "next inst",
 
-      Scancode::Z          => "A",
-      Scancode::S          => "A#/Bb",
-      Scancode::X          => "B",
-      Scancode::C          => "C",
-      Scancode::F          => "C#/Db",
-      Scancode::V          => "D",
-      Scancode::G          => "D#/Eb",
-      Scancode::B          => "E",
-      Scancode::N          => "F",
-      Scancode::J          => "F#/Gb",
-      Scancode::M          => "G",
-      Scancode::K          => "G#/Ab",
-      Scancode::Comma      => "A+",
-      Scancode::L          => "A#/Bb+",
-      Scancode::Period     => "B+",
-      Scancode::Slash      => "C+",
-      Scancode::Apostrophe => "C#/Db+",
+      Key::Code::Z          => "A",
+      Key::Code::S          => "A#/Bb",
+      Key::Code::X          => "B",
+      Key::Code::C          => "C",
+      Key::Code::F          => "C#/Db",
+      Key::Code::V          => "D",
+      Key::Code::G          => "D#/Eb",
+      Key::Code::B          => "E",
+      Key::Code::N          => "F",
+      Key::Code::J          => "F#/Gb",
+      Key::Code::M          => "G",
+      Key::Code::K          => "G#/Ab",
+      Key::Code::Comma      => "A+",
+      Key::Code::L          => "A#/Bb+",
+      Key::Code::Period     => "B+",
+      Key::Code::Slash      => "C+",
+      Key::Code::Apostrophe => "C#/Db+",
     })
 
     @text_color = RGBA.new(127, 127, 127)
@@ -98,7 +97,7 @@ class Piano < PF::Game
       @black_keys.pop
     end
 
-    0.upto(@keys) do |n|
+    0.upto(@key_count) do |n|
       note = Note.new(@base_note + n)
       name = n > 11 ? note.name + "+" : note.name
 
@@ -123,32 +122,32 @@ class Piano < PF::Game
   end
 
   def update(delta_time)
-    @base_note += 12 if @keymap.pressed?("octave up") && @base_note <= 112
-    @base_note -= 12 if @keymap.pressed?("octave down") && @base_note >= 21 + 12
+    @base_note += 12 if keys["octave up"].pressed? && @base_note <= 112
+    @base_note -= 12 if keys["octave down"].pressed? && @base_note >= 21 + 12
 
-    if @keymap.pressed?("echo")
+    if keys["echo"].pressed?
       @echo = !@echo
     end
 
-    if @keymap.pressed?("next inst")
+    if keys["next inst"].pressed?
       @instrument = (@instrument + 1) % @instruments.size
     end
 
-    if @keymap.pressed?("prev inst")
+    if keys["prev inst"].pressed?
       @instrument = @instruments.size.to_u8 if @instrument == 0
       @instrument -= 1
     end
 
-    0.upto(@keys) do |n|
+    0.upto(@key_count) do |n|
       note = Note.new(n + @base_note)
       name = n > 11 ? note.name + "+" : note.name
 
-      if @keymap.pressed?(name)
+      if keys[name].pressed?
         note_id = @instruments[@instrument].on(note.hertz, @audio.time)
         @keysdown[name] = {@instruments[@instrument], note_id}
       end
 
-      if @keymap.released?(name)
+      if keys[name].released?
         if tuple = @keysdown.[name]?
           instrument, note_id = tuple
           instrument.off(note_id, @audio.time)

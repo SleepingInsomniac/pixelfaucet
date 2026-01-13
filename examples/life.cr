@@ -9,7 +9,6 @@ class Life < PF::Game
   @simulation = false
   @screen : PF::Sprite
   @sim = PF::Interval.new(100.0.milliseconds)
-  @keymap : PF::Keymap
 
   def initialize(*args, **kwargs)
     super
@@ -17,7 +16,7 @@ class Life < PF::Game
     # Best to keep our own buffer in order to read a cell
     @screen = PF::Sprite.new(window.width, window.height)
     @screen.clear(CELL_OFF)
-    @keymap = keymap({
+    keys.map({
       PF::Scancode::Space => "Play/Pause",
       PF::Scancode::Up    => "Faster",
       PF::Scancode::Down  => "Slower",
@@ -26,15 +25,15 @@ class Life < PF::Game
 
   def update(delta_time)
     dt = delta_time.total_seconds
-    if @keymap.pressed?("Play/Pause")
+    if keys["Play/Pause"].pressed?
       @simulation = !@simulation
     end
 
-    if @keymap.pressed?("Faster")
+    if keys["Faster"].pressed?
       @sim.every /= 2.0
     end
 
-    if @keymap.pressed?("Slower")
+    if keys["Slower"].pressed?
       @sim.every *= 2.0
     end
 
@@ -84,6 +83,7 @@ class Life < PF::Game
   end
 
   def toggle_cell(pos)
+    return unless @screen.in_bounds?(pos)
     pixel = @screen.get_point(pos.to_i32)
 
     if pixel != CELL_ON

@@ -8,13 +8,6 @@ class Noise1d < PF::Game
   @noise_scale : Float64
   @noise_zoom : Float64
 
-  @controls = Keymap.new({
-    Scancode::Up    => "scale up",
-    Scancode::Down  => "scale down",
-    Scancode::Right => "zoom up",
-    Scancode::Left  => "zoom down",
-  })
-
   def initialize(*args, **kwargs)
     super
 
@@ -22,15 +15,20 @@ class Noise1d < PF::Game
     @noise_zoom  = window.width / 4
     @xpos = 0.0
 
-    keymap @controls
+    keys.map({
+      Scancode::Up    => "scale up",
+      Scancode::Down  => "scale down",
+      Scancode::Right => "zoom up",
+      Scancode::Left  => "zoom down",
+    })
   end
 
   def update(delta_time)
     dt = delta_time.total_seconds
-    @noise_scale += (@noise_scale * 0.8) * dt if @controls.held?("scale up")
-    @noise_scale -= (@noise_scale * 0.8) * dt if @controls.held?("scale down")
-    @noise_zoom  += (@noise_zoom  * 0.8) * dt if @controls.held?("zoom up")
-    @noise_zoom  -= (@noise_zoom  * 0.8) * dt if @controls.held?("zoom down")
+    @noise_scale += (@noise_scale * 0.8) * dt if keys["scale up"].held?
+    @noise_scale -= (@noise_scale * 0.8) * dt if keys["scale down"].held?
+    @noise_zoom  += (@noise_zoom  * 0.8) * dt if keys["zoom up"].held?
+    @noise_zoom  -= (@noise_zoom  * 0.8) * dt if keys["zoom down"].held?
     @xpos += 20.0 * dt
   end
 

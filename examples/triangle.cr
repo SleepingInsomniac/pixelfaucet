@@ -25,11 +25,6 @@ class TriangleThing < PF::Game
   @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
   @fps_string = ""
   @fps_timer = PF::Interval.new(1.0.seconds)
-  @controls = PF::Keymap.new({
-    PF::Scancode::Right => "Rotate Right",
-    PF::Scancode::Left  => "Rotate Left",
-    PF::Scancode::Space => "Pause",
-  })
 
   def initialize(*args, **kwargs)
     super
@@ -38,18 +33,23 @@ class TriangleThing < PF::Game
     @tri.position = @window.size / 2
     @tri.frame = PF::Shape.circle(3, size = window.width / 3)
 
-    keymap @controls
+    keys.map({
+      PF::Key::Code::Right => "Rotate Right",
+      PF::Key::Code::Left  => "Rotate Left",
+      PF::Key::Code::Space => "Pause",
+    })
   end
 
   def update(delta_time)
     @fps_timer.update(delta_time) { @fps_string = "#{window.fps.round.to_i} FPS" }
     dt = delta_time.total_seconds
-    @paused = !@paused if @controls.pressed?("Pause")
 
-    @tri.rotation = @tri.rotation + 1.0 * dt if @controls.held?("Rotate Right")
-    @tri.rotation = @tri.rotation - 1.0 * dt if @controls.held?("Rotate Left")
+    @paused = !@paused if keys["Pause"].pressed?
 
-    unless @paused || @controls.any_held?
+    @tri.rotation = @tri.rotation + 1.0 * dt if keys["Rotate Right"].held?
+    @tri.rotation = @tri.rotation - 1.0 * dt if keys["Rotate Left"].held?
+
+    unless @paused || keys.any_held?
       @tri.rotation = @tri.rotation + 0.5 * dt
     end
 

@@ -7,7 +7,6 @@ class ThreeDee < PF::Game
   @camera : PF3d::Camera
   @paused = false
   @speed = 10.0
-  @controls : PF::Keymap
   @depth_buffer : PF3d::DepthBuffer
   @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
   @fps_string = ""
@@ -29,67 +28,67 @@ class ThreeDee < PF::Game
     @cube_model_texture = PF::Sprite.new("./assets/bricks.png")
     @cube_model.position.z = @cube_model.position.z + 2.5
 
-    @controls = keymap({
-      PF::Scancode::Right => "Rotate Right",
-      PF::Scancode::Left  => "Rotate Left",
-      PF::Scancode::Up    => "Up",
-      PF::Scancode::Down  => "Down",
-      PF::Scancode::A     => "Left",
-      PF::Scancode::D     => "Right",
-      PF::Scancode::W     => "Forward",
-      PF::Scancode::S     => "Backward",
-      PF::Scancode::Space => "Pause",
+    keys.map({
+      PF::Key::Code::Right => "Rotate Right",
+      PF::Key::Code::Left  => "Rotate Left",
+      PF::Key::Code::Up    => "Up",
+      PF::Key::Code::Down  => "Down",
+      PF::Key::Code::A     => "Left",
+      PF::Key::Code::D     => "Right",
+      PF::Key::Code::W     => "Forward",
+      PF::Key::Code::S     => "Backward",
+      PF::Key::Code::Space => "Pause",
     })
   end
 
   def update(delta_time)
     @fps_timer.update(delta_time) { @fps_string = "#{window.fps.round.to_i} FPS" }
     dt = delta_time.total_seconds
-    @paused = !@paused if @controls.pressed?("Pause")
+    @paused = !@paused if keys["Pause"].pressed?
 
     forward = @camera.forward_vector
     strafe = @camera.strafe_vector
 
-    if @controls.held?("Right")
+    if keys["Right"].held?
       @camera.position = @camera.position + (strafe * @speed * dt)
     end
 
-    if @controls.held?("Left")
+    if keys["Left"].held?
       @camera.position = @camera.position - (strafe * @speed * dt)
     end
 
-    if @controls.held?("Up")
+    if keys["Up"].held?
       @camera.position.y = @camera.position.y + @speed * dt
     end
 
-    if @controls.held?("Down")
+    if keys["Down"].held?
       @camera.position.y = @camera.position.y - @speed * dt
     end
 
     # Control the camera pitch instead of elevation
     # TODO: this needs to account for where the camera is pointing
 
-    # if @controls.held?("Up")
+    # if keys["Up"].held?
     #   @camera.pitch = @camera.pitch + (@speed / 5) * dt
     # end
     #
-    # if @controls.held?("Down")
+    # if keys["Down"].held?
     #   @camera.pitch = @camera.pitch - (@speed / 5) * dt
     # end
 
-    if @controls.held?("Rotate Left")
+    if keys["Rotate Left"].held?
       @camera.yaw = @camera.yaw - (@speed / 3) * dt
     end
 
-    if @controls.held?("Rotate Right")
+    if keys["Rotate Right"].held?
       @camera.yaw = @camera.yaw + (@speed / 3) * dt
     end
 
-    if @controls.held?("Forward")
+    if keys["Forward"].held?
       @camera.position = @camera.position + (forward * @speed * dt)
     end
 
-    if @controls.held?("Backward")
+    if keys["Backward"].held?
       @camera.position = @camera.position - (forward * @speed * dt)
     end
 

@@ -128,17 +128,6 @@ class FallingBlocks < PF::Game
   @field = PF2d::Grid(UInt8).new(WIDTH, HEIGHT) do |p, s|
     p.x == 0 || p.x == s.x - 1 || p.y == s.y - 1 ? 8u8 : 0u8
   end
-  @keys = Keymap.new({
-    Scancode::Right  => "right",
-    Scancode::Left   => "left",
-    Scancode::Down   => "down",
-    Scancode::Up     => "rotate_right",
-    Scancode::Z      => "rotate_left",
-    Scancode::X      => "rotate_right",
-    Scancode::Space  => "drop",
-    Scancode::B      => "down",
-    Scancode::Escape => "reset",
-  })
   @move_target : Vec2(Int32) = Vec[0,0]
   @fall_speed = 1.0 # Blocks per second
   @move = Interval.new(0.2.seconds)
@@ -155,7 +144,17 @@ class FallingBlocks < PF::Game
     @falling = Shape.random
     @next = Array(Shape).new(3) { Shape.random }
     @move.pause
-    keymap @keys
+
+    keys.map({
+      Key::Code::Right  => "right",
+      Key::Code::Left   => "left",
+      Key::Code::Down   => "soft drop",
+      Key::Code::Up     => "rotate right",
+      Key::Code::Z      => "rotate left",
+      Key::Code::X      => "rotate right",
+      Key::Code::Space  => "hard drop",
+      Key::Code::Escape => "reset",
+    })
 
     new_drop
   end
@@ -230,7 +229,7 @@ class FallingBlocks < PF::Game
   def update(delta_time)
     ds = delta_time.total_seconds
 
-    if @keys.pressed?("reset")
+    if keys["reset"].pressed?
       @cleared = 0
       @field = PF2d::Grid(UInt8).new(WIDTH, HEIGHT) do |p, s|
         p.x == 0 || p.x == s.x - 1 || p.y == s.y - 1 ? 8u8 : 0u8
@@ -241,34 +240,34 @@ class FallingBlocks < PF::Game
 
     case @state
     when GameState::Normal
-      if @keys.pressed?("right")
+      if keys["right"].pressed?
         if !collides_right?
           @falling.pos.x = @falling.pos.x + 1
         end
       end
 
-      if @keys.pressed?("left") && !collides_left?
+      if keys["left"].pressed? && !collides_left?
         @falling.pos.x = @falling.pos.x - 1
       end
 
-      if @keys.pressed?("rotate_right")
+      if keys["rotate right"].pressed?
         @falling.rotate_right
         @falling.rotate_left if collides? && !kick?
       end
 
-      if @keys.pressed?("rotate_left")
+      if keys["rotate left"].pressed?
         @falling.rotate_left
         @falling.rotate_right if collides? && !kick?
       end
 
-      if @keys.pressed?("drop")
+      if keys["hard drop"].pressed?
         @falling.pos.y = @falling.pos.y.to_i.to_f
 
         until collides_down?
           @falling.pos += Vec[0, 1]
         end
         @settle = 0.seconds
-      elsif @keys.held?("down")
+      elsif keys["soft drop"].held?
         @falling.pos += Vec[0.0, {20.0, @fall_speed}.max] * ds
       end
 

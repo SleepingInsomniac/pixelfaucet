@@ -22,14 +22,13 @@ class Balls < PF::Game
   @adder = Interval.new(0.1.seconds)
   @balls : Array(Ball) = [] of Ball
   @font = Pixelfont::Font.new("#{__DIR__}/../lib/pixelfont/fonts/pixel-5x7.txt")
-  @keys : PF::Keymap
 
   def initialize(*args, **kwargs)
     super
     3.times { add_ball }
-    @keys = keymap({
-      PF::Scancode::Up => "add",
-      PF::Scancode::Down => "remove",
+    keys.map({
+      PF::Key::Code::Up   => "add",
+      PF::Key::Code::Down => "remove",
     })
   end
 
@@ -46,22 +45,22 @@ class Balls < PF::Game
   end
 
   def update(delta_time)
-    if @keys.pressed?("add")
+    if keys["add"].pressed?
       add_ball
       @adder.reset
     end
 
-    if @keys.pressed?("remove")
+    if keys["remove"].pressed?
       remove_ball
       @adder.reset
     end
 
     @adder.update(delta_time) do
-      if @keys.held?("add")
+      if keys["add"].held?
         add_ball
       end
 
-      if @keys.held?("remove")
+      if keys["remove"].held?
         remove_ball
       end
     end
@@ -96,7 +95,10 @@ class Balls < PF::Game
       @balls.each do |ball|
         window.fill_poly(Shape.translate(ball.frame, translation: ball.position).map(&.to_i32), ball.color)
       end
-      window.draw_string("Balls: #{@balls.size}", 5, 5, @font, Colors::White)
+      window.draw_string(<<-TEXT, 5, 5, @font, RGBA.new(0xFF_FF_CC_55_u32))
+      Press [up] to add balls, [dn] to remove
+      Balls: #{@balls.size}
+      TEXT
     end
   end
 end
