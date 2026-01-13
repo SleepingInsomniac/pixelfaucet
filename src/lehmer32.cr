@@ -12,7 +12,7 @@ module PF
       self
     end
 
-    # Generate the next number in the squence
+    # Generate the next number in the sequence
     def next_u
       @state &+= 0xe120fc15
       tmp : UInt64 = @state.to_u64! &* 0x4a39b70d

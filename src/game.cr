@@ -1,4 +1,5 @@
 require "./window"
+require "./keyboard"
 
 module PF
   alias Event = Sdl3::Event
@@ -31,6 +32,7 @@ module PF
     )
       Sdl3.init(init_flags)
       @window = Window.new(width, height, scale, title, window_flags, logical_presentation, fps_limit)
+      after_initialize
     end
 
     # User implementation requirements
@@ -70,7 +72,7 @@ module PF
     # Hooks
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    def on_key_down(event : Sdl3::Event)
+    def after_initialize
     end
 
     def on_key_down(event : Event)
@@ -130,8 +132,14 @@ module PF
       map.tap { @keymaps << map }
     end
 
+    # Returns the width and height as a Vec
     def viewport
-      PF2d::Vec[width, height]
+      Vec[width, height]
+    end
+
+    # Stops the run loop, and gracefully exits
+    def quit!
+      @running = false
     end
 
     # Private
