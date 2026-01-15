@@ -4,6 +4,26 @@ require "./game"
 require "./rgba"
 
 module PF
+  module Windows
+    @@windows = {} of Sdl3::Window::ID => Window
+
+    def self.all
+      @@windows
+    end
+
+    def self.[]?(id : Sdl3::Window::ID)
+      @@windows[id]?
+    end
+
+    def self.[]=(id : Sdl3::Window::ID, window : Window)
+      @@windows[id] = window
+    end
+
+    def self.delete(id)
+      @@windows.delete(id)
+    end
+  end
+
   class Window
     include PF2d
     include PF2d::Canvas(RGBA)
@@ -52,6 +72,7 @@ module PF
 
       @texture = Sdl3::Texture.new(@renderer, Game::PIXEL_FORMAT, Sdl3::Texture::Access::Streaming, @width, @height)
       @texture.scale_mode = Game::DEFAULT_SCALE_MODE
+      Windows[@sdl_window.id] = self
     end
 
     def id
@@ -107,11 +128,13 @@ module PF
 
       @texture = Sdl3::Texture.new(@renderer, Game::PIXEL_FORMAT, Sdl3::Texture::Access::Streaming, @width, @height)
       @texture.scale_mode = Game::DEFAULT_SCALE_MODE
+      Windows[@sdl_window.id] = self
     end
 
     def close
       return false if closed?
 
+      Windows.delete(@sdl_window.id)
       @closed = true
       @texture.sdl_finalize
       @renderer.sdl_finalize
@@ -142,7 +165,7 @@ module PF
 
     # PF2d::Drawable(RGBA)
     def draw_point(x, y, value : RGBA)
-      raise "drawing must be done within the #draw block" unless locked?
+      raise "drawing must be done within the #lock block" unless locked?
       return unless in_bounds?(x, y)
 
       pixel_pointer(x, y).value = value.value
@@ -150,7 +173,7 @@ module PF
 
     # PF2d::Viewable(RGBA)
     def get_point?(x, y) : RGBA?
-      raise "drawing must be done within the #draw block" unless locked?
+      raise "#get_point may only be called within the #lock block" unless locked?
       return nil unless in_bounds?(x, y)
 
       RGBA.new(pixel_pointer(x, y).value)
