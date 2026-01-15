@@ -22,12 +22,30 @@ module PF
           sprite.draw(sheet,
                       PF2d::Rect.new(PF2d::Vec[sx, sy], PF2d::Vec[tile_width, tile_height]),
                       PF2d::Rect.new(0,0, tile_width, tile_height)
-          )# { |d, s| s }
+          )
           sprites << sprite
         end
       end
 
       sprites
+    end
+
+    def self.load_text(sprite_text : String, colors : Array(RGBA))
+      lines = sprite_text.lines
+      width = lines[0].size
+      height = lines.size
+
+      sprite = PF::Sprite.new(width, height)
+      lines.each_with_index do |row, y|
+        row.chars.each_with_index do |char, x|
+          if i = char.to_i?
+            if c = colors[i]?
+              sprite.draw_point(x, y, c)
+            end
+          end
+        end
+      end
+      sprite
     end
 
     property surface : Sdl3::Surface
@@ -44,20 +62,17 @@ module PF
       @surface = Sdl3::Surface.new(width.to_i32, height.to_i32, Sdl3::PixelFormat::Rgba8888)
     end
 
+    # TODO
+    # def freeze
+    #   GPUSprite.new()
+    # end
+
     def width
       @surface.width
     end
 
     def height
       @surface.height
-    end
-
-    def rect
-      PF2d::Rect.new(PF2d::Vec[0, 0], size.to_i32)
-    end
-
-    def size : PF2d::Vec2
-      PF2d::Vec[width, height]
     end
 
     # Fill a sprite with a color
