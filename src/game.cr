@@ -9,6 +9,7 @@ module PF
   abstract class Game
     include Canvas(RGBA)
     include Drawable
+    include BirthTime
 
     PIXEL_FORMAT = Sdl3::PixelFormat::Rgba8888
     DEFAULT_INIT_FLAGS = Sdl3::InitFlags::Video | Sdl3::InitFlags::Audio
@@ -17,7 +18,6 @@ module PF
     DEFAULT_FPS_LIMIT = Float64::INFINITY
     DEFAULT_SCALE_MODE = Sdl3::ScaleMode::Nearest
 
-    getter started_at : Float64 = Time.monotonic.total_milliseconds
     getter last_updated = 0.0.milliseconds
     getter window : Window
     getter keys : Keyboard = Keyboard.instance
@@ -59,7 +59,7 @@ module PF
 
     # This starts the application loop and runs a loop until a condition causes the app to close.
     def run!
-      @started_at = Time.monotonic.total_milliseconds
+      reset_birthtime
       @window.open
       @window.show
       @running = true
@@ -72,11 +72,6 @@ module PF
     ensure
       on_exit
       Sdl3.quit
-    end
-
-    # Return the total milliseconds since the app started
-    def elapsed_time
-      (Time.monotonic.total_milliseconds - @started_at).milliseconds
     end
 
     # Hooks

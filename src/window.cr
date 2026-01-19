@@ -23,6 +23,7 @@ module PF
     include PF2d
     include PF2d::Canvas(RGBA)
     include PF::Drawable
+    include BirthTime
 
     @sdl_window : Sdl3::Window
     getter width : Int32
@@ -39,7 +40,6 @@ module PF
     @pixels = Pointer(UInt32).null
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    property started_at : Float64 = Time.monotonic.total_milliseconds
     getter fps : Float64 = 60f64
     property fps_limit : Float64
     getter last_drawn = 0.0.milliseconds
@@ -52,7 +52,6 @@ module PF
       @fps_limit = Float64::INFINITY
     )
       @width, @height, @scale = width.to_i32, height.to_i32, scale.to_f32
-      @started_at = Time.monotonic.total_milliseconds
       @last_drawn = elapsed_time
       @sdl_window = Sdl3::Window.new(@title, (width * @scale).round.to_i, (height * @scale).round.to_i, @window_flags)
 
@@ -90,10 +89,6 @@ module PF
       @renderer.scale = { @scale, @scale }
     end
 
-    def elapsed_time
-      (Time.monotonic.total_milliseconds - @started_at).milliseconds
-    end
-
     # Lifecycle ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     # Override
@@ -104,7 +99,7 @@ module PF
       return false unless closed?
       @closed = false
 
-      @started_at = Time.monotonic.total_milliseconds
+      reset_birthtime
       @last_drawn = elapsed_time
       @sdl_window = Sdl3::Window.new(@title, (width * @scale).round.to_i, (height * @scale).round.to_i, @window_flags)
 
