@@ -1,0 +1,19 @@
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download source
+        uses: actions/checkout@v4
+      - name: Install Crystal
+        uses: crystal-lang/install-crystal@v1
+      - name: Update shards
+        run: shards update
+      - name: Install Sdl3
+        run: sudo apt update && sudo apt install -qy libsdl3-dev libsdl3-image-dev
+      - name: Run tests
+        run: crystal spec
