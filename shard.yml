@@ -14,7 +14,7 @@ dependencies:
     version: ~> 0.2.1
   pf2d:
     github: SleepingInsomniac/pf2d
-    version: ~> 0.4.4
+    version: ~> 0.4.5
   pf3d:
     github: SleepingInsomniac/pf3d
     version: ~> 0.1.3
