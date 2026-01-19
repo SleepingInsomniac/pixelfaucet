@@ -95,10 +95,6 @@ module PF
       @renderer.scale = { @scale, @scale }
     end
 
-    def size : Vec2(Int32)
-      Vec[@width, @height]
-    end
-
     def elapsed_time
       (Time.monotonic.total_milliseconds - @started_at).milliseconds
     end
@@ -177,11 +173,6 @@ module PF
       return nil unless in_bounds?(x, y)
 
       RGBA.new(pixel_pointer(x, y).value)
-    end
-
-    # PF2d::Canvas(RGBA)
-    def blend(src, dst) : RGBA
-      dst.blend(src)
     end
 
     # ~~~~
