@@ -22,7 +22,7 @@ module PF
           sprite.draw(sheet,
                       PF2d::Rect.new(PF2d::Vec[sx, sy], PF2d::Vec[tile_width, tile_height]),
                       PF2d::Rect.new(0,0, tile_width, tile_height)
-          )
+          ) { |src, dst| dst.blend(src) }
           sprites << sprite
         end
       end
