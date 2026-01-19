@@ -1,0 +1,34 @@
+name: crystal spec
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  spec:
+    runs-on: ubuntu-latest
+
+  container:
+    image: crystallang/crystal:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache shards
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/shards
+            lib
+          key: ${{ runner.os }}-crystal-${{ hashFiles('shard.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-crystal-
+
+      - name: Install deps
+        run: shards install --without-development --ignore-crystal-version
+
+      - name: Run specs
+        run: crystal spec --error-trace
