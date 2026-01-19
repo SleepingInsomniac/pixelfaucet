@@ -10,6 +10,9 @@ module PF
   # - #frame(delta_time : Time::Span) # Frame rendering, and drawing
   #
   abstract class Game
+    include Canvas(RGBA)
+    include Drawable
+
     PIXEL_FORMAT = Sdl3::PixelFormat::Rgba8888
     DEFAULT_INIT_FLAGS = Sdl3::InitFlags::Video | Sdl3::InitFlags::Audio
     DEFAULT_WINDOW_FLAGS = Sdl3::Window::Flags::None
@@ -33,6 +36,16 @@ module PF
       Sdl3.init(init_flags)
       @window = Window.new(width, height, scale, title, window_flags, logical_presentation, fps_limit)
       after_initialize
+    end
+
+    delegate lock, width, height, clear, to: @window
+
+    def draw_point(x, y, value : RGBA)
+      window.draw_point(x, y, value)
+    end
+
+    def get_point?(x, y) : RGBA?
+      window.get_point?(x, y)
     end
 
     # User implementation requirements
