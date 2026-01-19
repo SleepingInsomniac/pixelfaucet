@@ -7,13 +7,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: libsdl-org/setup-sdl@main
+        id: sdl
+        with:
+          install-linux-dependencies: true
+          version: 3-latest
+          version-sdl-image: 3-latest
       - name: Download source
         uses: actions/checkout@v4
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
       - name: Update shards
         run: shards update
-      - name: Install Sdl3
-        run: sudo apt update && sudo apt install -qy libsdl3-dev libsdl3-image-dev
       - name: Run tests
         run: crystal spec
