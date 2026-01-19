@@ -62,6 +62,10 @@ module PF
       @surface = Sdl3::Surface.new(width.to_i32, height.to_i32, Sdl3::PixelFormat::Rgba8888)
     end
 
+    def save(path : String)
+      @surface.save_png(path)
+    end
+
     # TODO
     # def freeze
     #   GPUSprite.new()
@@ -90,8 +94,9 @@ module PF
     end
 
     def get_point?(x : Number, y : Number) : RGBA?
-      return nil if x < 0 || x >= width || y < 0 || y >= height
-      RGBA.new(to_slice[i = (y * width + x).to_i])
+      return nil unless in_bounds?(x, y)
+      # return nil unless rect.covers?(x, y)
+      RGBA.new(to_slice[(y.to_i * width + x.to_i)])
     end
 
     # Implements PF2d::Drawable(T)

@@ -1,5 +1,3 @@
-require "./key"
-
 module PF
   class Keyboard
     macro [](*args)

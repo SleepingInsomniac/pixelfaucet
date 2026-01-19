@@ -16,23 +16,23 @@ class LineIntersect < PF::Game
     @line_2 = Line[Vec[window.width - 5, 5].to_f32, Vec[5, window.height - 5].to_f32]
   end
 
-  def on_mouse_motion(cursor, event)
+  def on_mouse_motion(direction : PF::Vec, event : PF::Event)
     if point = @selected_point
-      point.value = cursor.to_f32
+      point.value = PF::Mouse.pos.to_f32
     else
       @hover_point = {*@line_1.point_pointers, *@line_2.point_pointers}.find do |point|
-        point.value.distance(cursor) < 3
+        point.value.distance(PF::Mouse.pos) < 3
       end
     end
   end
 
-  def on_mouse_down(cursor, event)
+  def on_mouse_down(event)
     if event.button == 1
       @selected_point = @hover_point
     end
   end
 
-  def on_mouse_up(cursor, event)
+  def on_mouse_up(event)
     @selected_point = nil
   end
 
@@ -54,7 +54,7 @@ class LineIntersect < PF::Game
         window.draw_circle(point.value.to_i, 5, PF::Colors::Blue)
       end
 
-      if point = @line_1.intersects?(@line_2)
+      if point = @line_1.intersect?(@line_2)
         window.fill_circle(point.to_i, 3, PF::Colors::Green)
       end
     end

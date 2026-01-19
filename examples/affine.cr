@@ -22,14 +22,14 @@ class Affine < PF::Game
 
     @transform
       .reset
-      .translate(-(@bricks.size // 2))
+      .translate(-(@bricks.size / 2))
       .rotate(@angle)
       .scale(@size)
-      .translate(window.size // 2)
+      .translate(window.size / 2)
   end
 
   def frame(delta_time)
-    window.draw do
+    lock do
       window.clear(50, 127, 200)
 
       b1, b2 = @transform.bounding_box(@bricks.size.x, @bricks.size.y).map(&.to_i)
@@ -38,9 +38,10 @@ class Affine < PF::Game
 
       b1.y.upto(b2.y) do |y|
         b1.x.upto(b2.x) do |x|
-          point = @transform.apply(x, y).to_i
-          if point >= Vec[0, 0] && (sample = @bricks[point]?)
-            window.draw_point(x.to_i, y.to_i, sample)
+          point = @transform.apply(x.to_f, y.to_f)
+
+          if sample = @bricks[point]?
+            draw_point(x, y, sample)
           end
         end
       end

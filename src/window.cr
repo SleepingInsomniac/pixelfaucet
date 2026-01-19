@@ -1,8 +1,3 @@
-require "sdl3"
-require "pf2d"
-require "./game"
-require "./rgba"
-
 module PF
   module Windows
     @@windows = {} of Sdl3::Window::ID => Window

@@ -1,6 +1,3 @@
-require "./window"
-require "./keyboard"
-
 module PF
   alias Event = Sdl3::Event
   include PF2d
@@ -88,38 +85,42 @@ module PF
     def after_initialize
     end
 
-    def on_key_down(event : Event)
+    # Called when a key is pressed. Use `keys[ScanCode].pressed?` to check keys.
+    def on_key_down(event : PF::Event)
     end
 
-    def on_key_repeat(event : Event)
+    # Called when a key is repeated. Use `keys[ScanCode].repeat?` to check keys.
+    def on_key_repeat(event : PF::Event)
     end
 
-    def on_key_up(event : Event)
+    # Called when a key is pressed. Use `keys[ScanCode].released?` to check keys.
+    def on_key_up(event : PF::Event)
     end
 
     # Called when the mouse is moved
-    # override in your subclass to hook into this behavior
-    def on_mouse_motion(cursor : Vec, event : Event)
+    # *direction* is the delta vector in position.
+    def on_mouse_motion(direction : PF2d::Vec, event : PF::Event)
     end
 
-    def on_mouse_wheel(cursor : Vec, direction : Vec, inverted : Bool, window_id, event : Event)
+    # *direction* is the delta vector in position.
+    def on_mouse_wheel(direction : PF2d::Vec, inverted : Bool, window_id, event : PF::Event)
     end
 
     # Called when the mouse is clicked
     # override in your subclass to hook into this behavior
-    def on_mouse_down(cursor : Vec, event : Event)
+    def on_mouse_down(event : PF::Event)
     end
 
     # Called when the mouse button is released
-    def on_mouse_up(cursor : Vec, event : Event)
+    def on_mouse_up(event : PF::Event)
     end
 
     # Called for all other events
     # override in your subclass to hook into this behavior
-    def on_event(event : Event)
+    def on_event(event : PF::Event)
     end
 
-    def on_window_event(event : Event::Window)
+    def on_window_event(event : PF::Event::Window)
     end
 
     # Called just before a frame is presented, but after the window texture is locked
@@ -182,15 +183,16 @@ module PF
         when Sdl3::Event::Window
           on_window_event(event)
         when Sdl3::Event::MouseMotion
-          location = Vec[event.x, event.y] / @window.scale
-          on_mouse_motion(location, event)
+          engine_update_mouse
+          relative_pos = Vec[event.xrel, event.yrel] / @window.scale
+          on_mouse_motion(relative_pos, event)
         when Sdl3::Event::MouseWheel
-          cursor = Vec[event.mouse_x, event.mouse_y] / @window.scale
-          direction = Vec[event.x, event.y]
+          direction = Vec[event.x, event.y].to_f64
           inverted = event.direction == Sdl3::Mouse::WheelDirection::Flipped
           window_id = event.window_id
-          on_mouse_wheel(cursor, direction, inverted, window_id, event)
+          on_mouse_wheel(direction, inverted, window_id, event)
         when Sdl3::Event::MouseButton
+          engine_update_mouse
           dispatch_mouse_event(event)
         when Sdl3::Event::Keyboard
           Keyboard.instance.register(event)
@@ -199,6 +201,12 @@ module PF
           on_event(event)
         end
       end
+    end
+
+    private def engine_update_mouse
+      state = Sdl3::Mouse.state
+      cursor = Vec[state[:x], state[:y]] / @window.scale
+      Mouse.instance.update_state(cursor.to_f64, state[:button_flags])
     end
 
     # :nodoc:
@@ -220,11 +228,10 @@ module PF
 
     # :nodoc:
     private def dispatch_mouse_event(event : Sdl3::Event::MouseButton)
-      location = Vec[event.x, event.y] / @window.scale
       if event.down?
-        on_mouse_down(location, event)
+        on_mouse_down(event)
       else
-        on_mouse_up(location, event)
+        on_mouse_up(event)
       end
     end
   end

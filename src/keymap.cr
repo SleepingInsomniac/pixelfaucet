@@ -3,6 +3,7 @@ module PF
   alias KeyCode = Sdl3::Keycode
 
   # Handle button to action mapping in a dynamic way
+  # @[Deprecated("Prefer PF::Keyboard#map")]
   class Keymap
     @[Flags]
     enum State : UInt8

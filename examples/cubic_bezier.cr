@@ -30,25 +30,23 @@ class CubicBezier < PF::Game
     @qc1, @qc2 = @curve.split(0.5)
   end
 
-  def on_mouse_motion(cursor, event)
+  def on_mouse_motion(direction, event)
     if point = @selected_point
-      point.value = cursor.to_f
+      point.value = PF::Mouse.pos
       point.value.x = 0 if point.value.x < 0
       point.value.x = window.width.to_f if point.value.x > window.width
       point.value.y = 0 if point.value.y < 0
       point.value.y = window.height.to_f if point.value.y > window.height
     else
-      @hover_point = @curve.point_pointers.find { |p| cursor.distance(p.value) < 4 }
+      @hover_point = @curve.point_pointers.find { |p| PF::Mouse.pos.distance(p.value) < 4 }
     end
   end
 
-  def on_mouse_down(cursor, event)
-    if event.button == 1
-      @selected_point = @hover_point
-    end
+  def on_mouse_down(event)
+    @selected_point = @hover_point
   end
 
-  def on_mouse_up(cursor, event)
+  def on_mouse_up(event)
     @selected_point = nil
   end
 
