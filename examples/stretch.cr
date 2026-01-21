@@ -12,10 +12,15 @@ class Stretch < PF::Game
   end
 
   def update(delta_time)
-    @vel.x = -@vel.x if @stretch.size.x >= window.size.x || @stretch.size.x <= 0
-    @vel.y = -@vel.y if @stretch.size.y >= window.size.y || @stretch.size.y <= 0
-
     @stretch.size = @stretch.size + (@vel * delta_time.total_milliseconds)
+
+    @vel.x = -@vel.x if @stretch.size.x >= window.size.x - 1 || @stretch.size.x < 0
+    @vel.y = -@vel.y if @stretch.size.y >= window.size.y - 1 || @stretch.size.y < 0
+
+    @stretch.size.x = window.size.x - 1 if @stretch.size.x >= window.size.x
+    @stretch.size.y = window.size.y - 1 if @stretch.size.y >= window.size.y
+    @stretch.size.x = 1f64 if @stretch.size.x < 1
+    @stretch.size.y = 1f64 if @stretch.size.y < 1
   end
 
   def frame(delta_time)
