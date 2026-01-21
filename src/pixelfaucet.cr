@@ -6,6 +6,7 @@ require "sdl3"
 require "pf2d"
 require "pixelfont"
 
+require "./birth_time"
 require "./rgba"
 require "./drawable"
 require "./colors"
