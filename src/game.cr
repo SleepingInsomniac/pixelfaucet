@@ -35,7 +35,15 @@ module PF
       after_initialize
     end
 
-    delegate lock, width, height, clear, to: @window
+    delegate lock, width, height, to: @window
+
+    def clear(color : RGBA)
+      window.clear(color)
+    end
+
+    def clear(red : UInt8 = 0u8, green : UInt8 = 0u8, blue : UInt8 = 0u8, alpha : UInt8 = 255u8)
+      window.clear(red, green, blue, alpha)
+    end
 
     def draw_point(x, y, value : RGBA)
       window.draw_point(x, y, value)
