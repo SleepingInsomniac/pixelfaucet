@@ -71,7 +71,7 @@ e = Example.new(100, 60, 5)
 e.run!
 ```
 
-Drawing methods come from [PF2d](https://github.com/SleepingInsomniac/pf2d). `PF::Window`` and `PF::Sprite` implement the `PF2d::Canvas(PF:RGBA)` module which provides methods for drawing points, lines, rects, circles, bezier curves, triangles, and more.
+Drawing methods come from [PF2d](https://github.com/SleepingInsomniac/pf2d). `PF::Window` and `PF::Sprite` implement the `PF2d::Canvas(PF:RGBA)` module which provides methods for drawing points, lines, rects, circles, bezier curves, triangles, and more.
 
 ## Documentation
 
