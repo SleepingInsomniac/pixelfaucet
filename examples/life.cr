@@ -93,22 +93,22 @@ class Life < PF::Game
     end
   end
 
-  def on_mouse_motion(cursor, event)
-    if @mouse_down && @last_pos.try(&.to_i) != cursor.to_i
-      @last_pos = cursor
-      toggle_cell(cursor)
+  def on_mouse_motion(direction, event)
+    if @mouse_down && @last_pos.try(&.to_i) != PF::Mouse.pos.to_i
+      @last_pos = PF::Mouse.pos.to_f32
+      toggle_cell(PF::Mouse.pos)
     end
   end
 
-  def on_mouse_down(cursor, event)
+  def on_mouse_down(event)
     if event.button == 1 # left click
-      @last_pos = cursor
-      toggle_cell(cursor)
+      @last_pos = PF::Mouse.pos.to_f32
+      toggle_cell(PF::Mouse.pos)
       @mouse_down = true
     end
   end
 
-  def on_mouse_up(cursor, event)
+  def on_mouse_up(event)
     @last_pos = nil
     @mouse_down = false
   end
