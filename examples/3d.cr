@@ -26,7 +26,9 @@ class ThreeDee < PF::Game
 
     @cube_model = PF3d::Mesh.load_obj("./assets/cube.obj")
     @cube_model_texture = PF::Sprite.new("./assets/bricks.png")
-    @cube_model.position.z = @cube_model.position.z + 2.5
+    @cube_model.origin = PF2d::Vec[-0.5, -0.5, -0.5]
+    @cube_model.position.z = @cube_model.position.z + 2.0
+    @cube_model.position.x = @cube_model.position.x - 2.5
 
     keys.map({
       PF::Key::Code::Right => "Rotate Right",
@@ -92,8 +94,10 @@ class ThreeDee < PF::Game
       @camera.position = @camera.position - (forward * @speed * dt)
     end
 
-    # @model.rotation.x = @model.rotation.x + 1.0 * dt
     @cube_model.rotation.x = @cube_model.rotation.x + 1.0 * dt
+    # @cube_model.rotation.y = @cube_model.rotation.y - 0.66 * dt
+    # @cube_model.rotation.z = @cube_model.rotation.z + 0.33 * dt
+    # @model.rotation.x = @model.rotation.x + 2.0 * dt
   end
 
   def frame(delta_time)
@@ -140,10 +144,10 @@ class ThreeDee < PF::Game
         io << "\n" << @fps_string
       end
 
-      window.draw_string(string, 3, 3, @font, PF::Colors::White)
+      window.draw_string(string, 3, 3, @font, PF::RGBA[0xFFFFFF55])
     end
   end
 end
 
-engine = ThreeDee.new(640 // 2, 480 // 2, 2)
+engine = ThreeDee.new(320, 240, 2)
 engine.run!
