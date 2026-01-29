@@ -32,12 +32,12 @@ class Affine < PF::Game
     lock do
       window.clear(50, 127, 200)
 
-      b1, b2 = @transform.bounding_box(@bricks.size.x, @bricks.size.y).map(&.to_i)
+      tl, br = @transform.bounding_box(@bricks.size.x, @bricks.size.y).map(&.to_i)
 
       @transform.invert
 
-      b1.y.upto(b2.y) do |y|
-        b1.x.upto(b2.x) do |x|
+      tl.y.upto(br.y) do |y|
+        tl.x.upto(br.x) do |x|
           point = @transform.apply(x.to_f, y.to_f)
 
           if sample = @bricks[point]?
