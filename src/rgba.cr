@@ -110,22 +110,28 @@ module PF
 
     # Alpha blending: source (self) over dest
     def blend(dest : RGBA) : RGBA
-      sc = channels.map(&.to_f32)
-      dc = dest.channels.map(&.to_f32)
-      a_s, a_d = sc[3] / 255, dc[3] / 255
+      a_s = (@value & 0xFFu32)
+      return dest if a_s == 0u32
 
-      a_b = a_s + a_d * (1.0 - a_s)
+      a_d = (dest.value & 0xFFu32)
+      inv = 255u32 - a_s
 
-      return RGBA.new(0u8, 0u8, 0u8, 0u8) if a_b <= 0.0
+      out_a = a_s + (a_d * inv) // 255u32
+      return RGBA.new(0u32) if out_a == 0u32
 
-      blend = -> (s : Float32, d : Float32) {
-        ((s * a_s + d * a_d * (1.0 - a_s)) / a_b).clamp(0.0, 255.0).round.to_u8
-      }
-      blended = sc[0..2].map_with_index { |s, i| blend.call(s, dc[i]) }
+      r_s = (@value >> 24) & 0xFFu32
+      g_s = (@value >> 16) & 0xFFu32
+      b_s = (@value >>  8) & 0xFFu32
 
-      a = (a_b * 255.0).clamp(0.0, 255.0).round.to_u8
+      r_d = (dest.value >> 24) & 0xFFu32
+      g_d = (dest.value >> 16) & 0xFFu32
+      b_d = (dest.value >>  8) & 0xFFu32
 
-      RGBA.new(*blended, a)
+      r = (r_s * a_s + (r_d * a_d * inv) // 255u32) // out_a
+      g = (g_s * a_s + (g_d * a_d * inv) // 255u32) // out_a
+      b = (b_s * a_s + (b_d * a_d * inv) // 255u32) // out_a
+
+      RGBA.new((r << 24) | (g << 16) | (b << 8) | out_a)
     end
 
     def add(other : RGBA)
