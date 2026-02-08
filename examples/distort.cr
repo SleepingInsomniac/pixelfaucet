@@ -8,7 +8,7 @@ class Distort < PF::Game
   include PF
 
   @sprite = PF::Sprite.new("assets/checkers.png")
-  @quad : Quad(Float64)
+  @quad : Quad(Vec2(Float64))
   @hover : Vec2(Float64)*? = nil
   @selected : Vec2(Float64)*? = nil
   @transform = Transform.new
@@ -34,6 +34,12 @@ class Distort < PF::Game
 
     if s = @selected
       s.value = Mouse.pos
+    else
+      if Mouse["left"].held?
+        @quad.point_pointers.each do |p|
+          p.value += direction
+        end
+      end
     end
   end
 
@@ -46,9 +52,9 @@ class Distort < PF::Game
 
       @transform
         .reset
-        .distort(Quad[*@quad.points.map(&.floor)], @sprite.quad)
+        .distort(@quad, @sprite.quad)
 
-      @quad.bounding_box.each do |screen_point|
+      @quad.bounding_rect.each do |screen_point|
         sprite_point = @transform.apply(screen_point)
 
         if sample = @sprite[sprite_point]?
