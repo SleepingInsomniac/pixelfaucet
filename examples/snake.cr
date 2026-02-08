@@ -3,7 +3,7 @@ require "../src/pixelfaucet"
 class Worm
   include Indexable::Mutable(PF::Vec2(Float64))
 
-  @vel : PF::Vec2(Float64)
+  property vel : PF::Vec2(Float64)
   @segments : Array(PF::Vec2(Float64))
   @seg_len = 2.0
   @ring : Int32 = 0
@@ -114,6 +114,8 @@ class Snake < PF::Game
       return
     end
 
+    @worm.vel = @worm.vel * 2.0 if keys[:up].pressed?
+    @worm.vel = @worm.vel / 2.0 if keys[:up].released?
     @worm.update(delta_time)
     @worm.rotate(TURN_RAD * delta_time.total_seconds) if keys[:right].held?
     @worm.rotate(-TURN_RAD * delta_time.total_seconds) if keys[:left].held?
