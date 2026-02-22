@@ -8,7 +8,7 @@ class AffineSkew < PF::Game
   include PF
 
   @sprite = PF::Sprite.new("assets/checkers.png")
-  @quad : Quad(Float64)
+  @quad : Quad(Vec2(Float64))
   @hover : Vec2(Float64)*? = nil
   @selected : Vec2(Float64)*? = nil
 

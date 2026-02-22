@@ -26,22 +26,24 @@ class FillSpline < PF::Game
     ]) * Vec[window.width, window.height]
   end
 
-  def on_mouse_motion(cursor, event)
+  def on_mouse_motion(direction, event)
     if index = @selected_index
-      @spline.points[index] = cursor.to_f
+      @spline.points[index] = Mouse.pos.to_f
     else
-      @hover_index = @spline.points.index { |p| cursor.distance(p) < 4 }
+      @hover_index = @spline.points.index { |p| Mouse.pos.distance(p) < 4 }
     end
   end
 
-  def on_mouse_down(cursor, event)
+  def on_mouse_down(event)
     if event.button == 1
       @selected_index = @hover_index
     end
   end
 
-  def on_mouse_up(cursor, event)
-    @selected_index = nil
+  def on_mouse_up(event)
+    if event.button == 1
+      @selected_index = nil
+    end
   end
 
   def update(delta_time)

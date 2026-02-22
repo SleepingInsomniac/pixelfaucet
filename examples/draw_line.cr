@@ -58,10 +58,10 @@ class DrawLine < PF::Game
   end
 
   def frame(delta_time)
-    window.draw do
-      window.clear(0, 0, 100)
+    lock do
+      clear(0, 0, 100)
       @verticies.each_cons(2) do |(v1, v2)|
-        window.draw_line(v1.pos, v2.pos, @color)
+        draw_line(v1.pos, v2.pos, @color)
       end
     end
   end

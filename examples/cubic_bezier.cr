@@ -59,8 +59,8 @@ class CubicBezier < PF::Game
 
       window.draw_line(0, window.height // 2, window.width, window.height // 2, PF::RGBA.new(25, 25, 25))
 
-      window.draw_line(@curve.p0, @curve.p1, CTL_COLOR)
-      window.draw_line(@curve.p3, @curve.p2, CTL_COLOR)
+      window.draw_line(@curve.p1, @curve.p2, CTL_COLOR)
+      window.draw_line(@curve.p4, @curve.p3, CTL_COLOR)
 
       window.draw_string("Length: " + @curve.length.round(2).to_s, 5, 5, @font, FONT_COLOR)
 
@@ -82,7 +82,7 @@ class CubicBezier < PF::Game
         window.fill_circle(p.to_i, 2, POINT_COLOR)
       end
 
-      @curve.points.each_with_index do |p, i|
+      @curve.points.each_with_index(1) do |p, i|
         window.draw_string("P#{i} (#{p.x.to_i}, #{p.y.to_i})", p.x, p.y, @font, FONT_COLOR)
       end
 
